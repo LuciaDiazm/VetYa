@@ -21,7 +21,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
 import { VideoMascotas } from '../components/VideoMascotas'
 import { agruparHorarios } from '../lib/horarios'
-import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
+import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 import type { CategoriaServicio, DosisPlan } from '../types'
 
 // Cada categoría de servicios con su foto y su estilo de tarjeta.
@@ -67,7 +67,6 @@ export function Inicio() {
   if (!datos) return <p className="cargando">Cargando…</p>
 
   const { clinica, servicios, equipo, opiniones, formasPago, planes, promociones, preguntas } = datos
-  const whatsappTurno = enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO)
   const promo = promociones[0]
   const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`
 
@@ -90,10 +89,10 @@ export function Inicio() {
           <h1 id="titulo-portada">Clínica veterinaria en Goya</h1>
           <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
           <div className="portada-acciones">
-            <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-grande">
-              <MessageCircle size={22} aria-hidden="true" />
+            <Link to="/turno" className="boton boton-grande">
+              <CalendarCheck size={22} aria-hidden="true" />
               Pedir turno
-            </a>
+            </Link>
             <a href="#servicios" className="boton boton-grande boton-contorno">
               Ver servicios
             </a>
@@ -139,15 +138,15 @@ export function Inicio() {
           ¿Qué necesitás?
         </h2>
         <div className="accesos">
-          <a href={whatsappTurno} target="_blank" rel="noreferrer" className="acceso-rapido">
+          <Link to="/turno" className="acceso-rapido">
             <span className="acceso-icono">
               <CalendarCheck size={34} aria-hidden="true" />
             </span>
             <span className="acceso-textos">
               <strong>Pedir un turno</strong>
-              <span>Por WhatsApp, sin llamar</span>
+              <span>Online, sin llamar ni crear cuenta</span>
             </span>
-          </a>
+          </Link>
           <Link to="/urgencias" className="acceso-rapido acceso-urgencia">
             <span className="acceso-icono">
               <Siren size={34} aria-hidden="true" />
@@ -227,9 +226,9 @@ export function Inicio() {
                       <li key={s.id}>{s.nombre}</li>
                     ))}
                   </ul>
-                  <a href={whatsappTurno} target="_blank" rel="noreferrer" className="mosaico-enlace">
+                  <Link to="/turno" className="mosaico-enlace">
                     Pedir turno <ArrowRight size={18} aria-hidden="true" />
-                  </a>
+                  </Link>
                 </div>
                 <img src={c.foto} alt="" loading="lazy" />
               </article>
@@ -411,10 +410,10 @@ export function Inicio() {
               </div>
             )}
             <div className="contacto-botones">
-              <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-secundario">
-                <MessageCircle size={20} aria-hidden="true" />
+              <Link to="/turno" className="boton boton-secundario">
+                <CalendarCheck size={20} aria-hidden="true" />
                 Pedir turno
-              </a>
+              </Link>
               <a href={`tel:+${clinica.whatsapp}`} className="boton boton-claro">
                 <Phone size={20} aria-hidden="true" />
                 Llamar

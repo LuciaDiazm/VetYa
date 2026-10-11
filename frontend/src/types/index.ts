@@ -229,3 +229,21 @@ export interface FichaMascota extends Mascota {
   aplicaciones: AplicacionSanitaria[]
   turnos: TurnoResumen[]
 }
+
+// ---------- Turnos ----------
+
+export type EstadoTurno = 'PENDIENTE' | 'CONFIRMADO' | 'ATENDIDO' | 'AUSENTE' | 'CANCELADO'
+export type OrigenTurno = 'ONLINE' | 'TELEFONO' | 'MOSTRADOR'
+
+export interface Turno {
+  id: number
+  fechaHoraInicio: string
+  fechaHoraFin: string
+  estado: EstadoTurno
+  origen: OrigenTurno
+  observaciones: string | null
+  mascota: Mascota & { cliente: { id: number; nombre: string; apellido: string; telefono: string } }
+  servicio: { id: number; nombre: string; duracionMin: number; categoria: CategoriaServicio }
+  veterinario: { id: number; nombre: string; apellido: string } | null
+  consulta: { id: number } | null
+}

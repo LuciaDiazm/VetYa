@@ -19,6 +19,9 @@ import { ClienteDetalle } from './pages/panel/ClienteDetalle'
 import { Clientes } from './pages/panel/Clientes'
 import { MascotaDetalle } from './pages/panel/MascotaDetalle'
 import { NuevoCliente } from './pages/panel/NuevoCliente'
+import { Agenda } from './pages/panel/Agenda'
+import { NuevoTurno } from './pages/panel/NuevoTurno'
+import { SacarTurno } from './pages/SacarTurno'
 
 // Páginas públicas y de dueños: llevan la barra de arriba.
 function DisenoPublico() {
@@ -41,6 +44,7 @@ function App() {
             <Route path="/ingresar" element={<Ingresar />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/urgencias" element={<Urgencias />} />
+            <Route path="/turno" element={<SacarTurno />} />
             <Route path="/adopcion" element={<Adopcion />} />
             <Route path="/adopcion/:id" element={<AnimalAdopcion />} />
             <Route
@@ -62,7 +66,8 @@ function App() {
             }
           >
             <Route index element={<Panel />} />
-            <Route path="agenda" element={<EnConstruccion titulo="Agenda" />} />
+            <Route path="agenda" element={<Agenda />} />
+            <Route path="agenda/nuevo" element={<NuevoTurno />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="clientes/nuevo" element={<NuevoCliente />} />
             <Route path="clientes/:id" element={<ClienteDetalle />} />

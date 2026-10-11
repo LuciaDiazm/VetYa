@@ -2,7 +2,6 @@ import { Menu, Siren, X } from 'lucide-react'
 import { startTransition, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
-import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import { Logo } from './Logo'
 
 const SECCIONES = [
@@ -17,11 +16,8 @@ const SECCIONES = [
 // lo más buscado (pedir turno y urgencias) siempre queda a la vista.
 export function BarraNavegacion() {
   const { usuario, cargando, salir } = useAuth()
-  const { datos } = useSitio()
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
-  const clinica = datos?.clinica
-  const turno = clinica ? enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO) : undefined
 
   function cerrarSesion() {
     // React Router navega dentro de una transición. Si la sesión se borrara por fuera de ella,
@@ -71,11 +67,9 @@ export function BarraNavegacion() {
             <Siren size={20} aria-hidden="true" />
             <span>Urgencias</span>
           </Link>
-          {turno && (
-            <a href={turno} target="_blank" rel="noreferrer" className="boton boton-secundario boton-turno">
-              Pedir turno
-            </a>
-          )}
+          <Link to="/turno" className="boton boton-secundario boton-turno">
+            Pedir turno
+          </Link>
           <button
             type="button"
             className="boton-menu"
@@ -96,6 +90,9 @@ export function BarraNavegacion() {
               {s.nombre}
             </Link>
           ))}
+          <Link to="/turno" className="barra-enlace" onClick={cerrarMenu}>
+            Pedir turno
+          </Link>
           <Link to="/urgencias" className="barra-enlace" onClick={cerrarMenu}>
             Urgencias
           </Link>

@@ -161,6 +161,11 @@ export function MascotaDetalle() {
             <h2>
               <CalendarDays size={22} aria-hidden="true" /> Próximos turnos
             </h2>
+            {mascota.activo && (
+              <Link to={`/panel/agenda/nuevo?mascota=${mascota.id}`} className="boton boton-secundario">
+                Dar turno
+              </Link>
+            )}
           </div>
           {mascota.turnos.length === 0 ? (
             <p className="vacio">No tiene turnos pendientes.</p>

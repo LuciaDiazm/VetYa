@@ -5,6 +5,7 @@ import { adopcionesPublicoRouter, adopcionesRouter, erroresDeSubida } from "./ro
 import { authRouter } from "./routes/auth";
 import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { publicoRouter } from "./routes/publico";
+import { turnosPublicoRouter, turnosRouter } from "./routes/turnos";
 import { usuariosRouter } from "./routes/usuarios";
 
 export const app = express();
@@ -21,12 +22,14 @@ app.get("/api/salud", (_req, res) => {
 });
 
 app.use("/api/publico/adopciones", adopcionesPublicoRouter);
+app.use("/api/publico/turnos", turnosPublicoRouter);
 app.use("/api/publico", publicoRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/usuarios", usuariosRouter);
 app.use("/api/adopciones", adopcionesRouter);
 app.use("/api/clientes", clientesRouter);
 app.use("/api/mascotas", mascotasRouter);
+app.use("/api/turnos", turnosRouter);
 
 app.use(erroresDeSubida);
 
