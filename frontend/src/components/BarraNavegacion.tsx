@@ -7,6 +7,7 @@ import { Logo } from './Logo'
 
 const SECCIONES = [
   { ruta: '/#servicios', nombre: 'Servicios' },
+  { ruta: '/adopcion', nombre: 'Adopción' },
   { ruta: '/#equipo', nombre: 'Equipo' },
   { ruta: '/#preguntas', nombre: 'Preguntas' },
   { ruta: '/#contacto', nombre: 'Contacto' },

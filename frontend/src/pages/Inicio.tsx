@@ -5,6 +5,7 @@ import {
   Clock,
   CreditCard,
   FileHeart,
+  HeartHandshake,
   HeartPulse,
   MapPin,
   MessageCircle,
@@ -265,6 +266,22 @@ export function Inicio() {
           </div>
         </section>
       )}
+
+      {/* ---------- Adopción ---------- */}
+      <section className="contenedor seccion" aria-labelledby="titulo-adopcion">
+        <div className="adopcion-invitacion">
+          <img src="/fotos/labrador-asomado.jpg" alt="" loading="lazy" />
+          <div>
+            <p className="pastilla pastilla-izquierda">Adopción</p>
+            <h2 id="titulo-adopcion">Perros y gatos de Goya buscan familia</h2>
+            <p>Son rescatados, están sanos y la adopción es gratuita. Elegí por tamaño, edad o cómo son.</p>
+            <Link to="/adopcion" className="boton boton-grande boton-secundario">
+              <HeartHandshake size={22} aria-hidden="true" />
+              Conocelos
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ---------- Equipo ---------- */}
       {equipo.length > 0 && (

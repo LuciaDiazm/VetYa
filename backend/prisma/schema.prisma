@@ -90,6 +90,7 @@ model Clinica {
   opiniones        Opinion[]
   formasPago       FormaPago[]
   planesSanitarios PlanSanitario[]
+  animalesAdopcion AnimalAdopcion[]
 
   @@map("clinica")
 }
@@ -402,4 +403,101 @@ model CuestionarioPrevio {
   turno Turno @relation(fields: [turnoId], references: [id], onDelete: Cascade)
 
   @@map("cuestionario_previo")
+}
+
+// ---------- Adopciones ----------
+
+enum EdadAproximada {
+  CACHORRO // menos de 1 año
+  JOVEN // 1 a 3 años
+  ADULTO // 3 a 8 años
+  MAYOR // más de 8 años
+}
+
+enum Tamano {
+  CHICO
+  MEDIANO
+  GRANDE
+}
+
+enum EstadoAdopcion {
+  DISPONIBLE
+  RESERVADO
+  ADOPTADO
+}
+
+enum EstadoSolicitud {
+  NUEVA
+  CONTACTADA
+  APROBADA
+  RECHAZADA
+}
+
+enum Vivienda {
+  CASA_CON_PATIO
+  CASA_SIN_PATIO
+  DEPARTAMENTO
+}
+
+// Animal que la clínica publica para adopción. La adopción es siempre gratuita.
+model AnimalAdopcion {
+  id               Int            @id @default(autoincrement()) @map("id_animal")
+  clinicaId        Int            @map("id_clinica")
+  nombre           String
+  especie          Especie
+  sexo             Sexo
+  edad             EdadAproximada
+  tamano           Tamano
+  color            String // Ej.: "Negro", "Atigrado", "Blanco con manchas"
+  historia         String?        @db.Text // Breve: cómo llegó, cómo es
+  // Comportamiento: se tildan, no hace falta escribir
+  tranquilo        Boolean        @default(false)
+  jugueton         Boolean        @default(false)
+  buenoConChicos   Boolean        @default(false) @map("bueno_con_chicos")
+  conviveConPerros Boolean        @default(false) @map("convive_con_perros")
+  conviveConGatos  Boolean        @default(false) @map("convive_con_gatos")
+  // Salud
+  vacunado         Boolean        @default(false)
+  desparasitado    Boolean        @default(false)
+  castrado         Boolean        @default(false)
+  estado           EstadoAdopcion @default(DISPONIBLE)
+  publicadoEn      DateTime       @default(now()) @map("publicado_en")
+  adoptadoEn       DateTime?      @map("adoptado_en")
+
+  clinica     Clinica             @relation(fields: [clinicaId], references: [id])
+  fotos       FotoAdopcion[]
+  solicitudes SolicitudAdopcion[]
+
+  @@index([clinicaId, estado])
+  @@map("animal_adopcion")
+}
+
+model FotoAdopcion {
+  id       Int    @id @default(autoincrement()) @map("id_foto")
+  animalId Int    @map("id_animal")
+  url      String
+  orden    Int    @default(0)
+
+  animal AnimalAdopcion @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@map("foto_adopcion")
+}
+
+// Pedido de una persona que quiere adoptar. No es automático: la clínica la contacta y decide.
+model SolicitudAdopcion {
+  id               Int             @id @default(autoincrement()) @map("id_solicitud")
+  animalId         Int             @map("id_animal")
+  nombre           String
+  telefono         String
+  vivienda         Vivienda
+  otrosAnimales    Boolean         @map("otros_animales")
+  aceptaCompromiso Boolean         @map("acepta_compromiso")
+  mensaje          String?         @db.Text
+  estado           EstadoSolicitud @default(NUEVA)
+  creadaEn         DateTime        @default(now()) @map("creada_en")
+
+  animal AnimalAdopcion @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([estado])
+  @@map("solicitud_adopcion")
 }

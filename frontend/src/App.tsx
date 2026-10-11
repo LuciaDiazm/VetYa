@@ -11,6 +11,10 @@ import { MiCuenta } from './pages/MiCuenta'
 import { Panel } from './pages/Panel'
 import { Registro } from './pages/Registro'
 import { Urgencias } from './pages/Urgencias'
+import { Adopcion } from './pages/Adopcion'
+import { AnimalAdopcion } from './pages/AnimalAdopcion'
+import { Adopciones } from './pages/panel/Adopciones'
+import { FormularioAnimal } from './pages/panel/FormularioAnimal'
 
 // Páginas públicas y de dueños: llevan la barra de arriba.
 function DisenoPublico() {
@@ -33,6 +37,8 @@ function App() {
             <Route path="/ingresar" element={<Ingresar />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/urgencias" element={<Urgencias />} />
+            <Route path="/adopcion" element={<Adopcion />} />
+            <Route path="/adopcion/:id" element={<AnimalAdopcion />} />
             <Route
               path="/mi-cuenta"
               element={
@@ -55,6 +61,9 @@ function App() {
             <Route path="agenda" element={<EnConstruccion titulo="Agenda" />} />
             <Route path="clientes" element={<EnConstruccion titulo="Clientes y mascotas" />} />
             <Route path="recordatorios" element={<EnConstruccion titulo="Recordatorios" />} />
+            <Route path="adopciones" element={<Adopciones />} />
+            <Route path="adopciones/nuevo" element={<FormularioAnimal />} />
+            <Route path="adopciones/:id" element={<FormularioAnimal />} />
             <Route path="configuracion" element={<EnConstruccion titulo="Configuración" />} />
           </Route>
 

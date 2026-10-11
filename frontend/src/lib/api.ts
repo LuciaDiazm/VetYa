@@ -38,7 +38,7 @@ async function apiFetch<T>(ruta: string, opciones: RequestInit = {}): Promise<T>
       ...opciones.headers,
     },
   })
-  const cuerpo = await respuesta.json().catch(() => null)
+  const cuerpo = respuesta.status === 204 ? null : await respuesta.json().catch(() => null)
   if (!respuesta.ok) {
     throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
   }
@@ -55,4 +55,25 @@ export function apiPost<T>(ruta: string, datos: unknown): Promise<T> {
 
 export function apiPatch<T>(ruta: string, datos: unknown): Promise<T> {
   return apiFetch<T>(ruta, { method: 'PATCH', body: JSON.stringify(datos) })
+}
+
+export function apiPut<T>(ruta: string, datos: unknown): Promise<T> {
+  return apiFetch<T>(ruta, { method: 'PUT', body: JSON.stringify(datos) })
+}
+
+export function apiDelete<T>(ruta: string): Promise<T> {
+  return apiFetch<T>(ruta, { method: 'DELETE' })
+}
+
+// Envía archivos (por ejemplo, fotos). No se fija el Content-Type: el navegador lo arma con el FormData.
+export async function apiSubir<T>(ruta: string, formulario: FormData): Promise<T> {
+  const token = leerToken()
+  const respuesta = await fetch(`/api${ruta}`, {
+    method: 'POST',
+    body: formulario,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  const cuerpo = await respuesta.json().catch(() => null)
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
+  return cuerpo as T
 }

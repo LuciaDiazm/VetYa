@@ -218,6 +218,57 @@ async function main() {
     });
   }
 
+  // ---------- Animales en adopción (ficticios; la clínica sube sus propias fotos) ----------
+  if ((await prisma.animalAdopcion.count({ where: { clinicaId } })) === 0) {
+    const animales = [
+      {
+        nombre: "Canela", especie: "PERRO", sexo: "HEMBRA", edad: "JOVEN", tamano: "MEDIANO", color: "Dorado / caramelo",
+        historia: "La encontraron sola cerca del puerto. Es muy cariñosa y le encanta que le rasquen las orejas.",
+        tranquilo: true, buenoConChicos: true, conviveConPerros: true, vacunado: true, desparasitado: true, castrado: true,
+        fotos: ["/fotos/labrador-asomado.jpg"],
+      },
+      {
+        nombre: "Tito", especie: "PERRO", sexo: "MACHO", edad: "ADULTO", tamano: "CHICO", color: "Blanco y marrón",
+        historia: "Lo trajeron de la calle con una patita lastimada. Ya está sano y tiene muchísima energía.",
+        jugueton: true, buenoConChicos: true, vacunado: true, desparasitado: true, castrado: true,
+        fotos: ["/fotos/jack-russell.jpg"],
+      },
+      {
+        nombre: "Copito", especie: "PERRO", sexo: "MACHO", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
+        historia: "Tiene unos 3 meses. Es curioso, juguetón y aprende rápido.",
+        jugueton: true, buenoConChicos: true, conviveConPerros: true, conviveConGatos: true, vacunado: true, desparasitado: true,
+        fotos: ["/fotos/caniche-cachorro.jpg"],
+      },
+      {
+        nombre: "Michi", especie: "GATO", sexo: "MACHO", edad: "JOVEN", tamano: "CHICO", color: "Atigrado",
+        historia: "Un gato tranquilo y dormilón. Ideal para departamento.",
+        tranquilo: true, conviveConGatos: true, vacunado: true, desparasitado: true, castrado: true,
+        fotos: ["/fotos/gato-lengua.jpg"],
+      },
+      {
+        nombre: "Nieve", especie: "GATO", sexo: "HEMBRA", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
+        historia: "Una gatita de 2 meses, muy mimosa. Busca una familia paciente.",
+        tranquilo: true, buenoConChicos: true, conviveConGatos: true, desparasitado: true,
+        fotos: ["/fotos/gatito-blanco.jpg"],
+      },
+    ] as const;
+
+    for (const { fotos, ...datos } of animales) {
+      await prisma.animalAdopcion.create({
+        data: { clinicaId, ...datos, fotos: { create: fotos.map((url, orden) => ({ url, orden })) } },
+      });
+    }
+
+    await prisma.animalAdopcion.create({
+      data: {
+        clinicaId, nombre: "Luna", especie: "GATO", sexo: "HEMBRA", edad: "ADULTO", tamano: "CHICO", color: "Crema",
+        historia: "Ya encontró una familia.", tranquilo: true, vacunado: true, desparasitado: true, castrado: true,
+        estado: "ADOPTADO", adoptadoEn: new Date("2026-09-28"),
+        fotos: { create: [{ url: "/fotos/siames.jpg", orden: 0 }] },
+      },
+    });
+  }
+
   // ---------- Cliente sin cuenta con una vacuna por vencer (para probar recordatorios) ----------
   if ((await prisma.cliente.count({ where: { clinicaId } })) === 0) {
     const cliente = await prisma.cliente.create({
