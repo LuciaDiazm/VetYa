@@ -1,37 +1,41 @@
 import {
+  ArrowRight,
   BadgePercent,
   CalendarCheck,
-  CalendarHeart,
-  Check,
   Clock,
   CreditCard,
   FileHeart,
+  HeartPulse,
   MapPin,
   MessageCircle,
+  PawPrint,
   Phone,
+  Siren,
   Star,
+  Stethoscope,
+  Syringe,
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
-import { VideoPortada } from '../components/VideoPortada'
+import { VideoMascotas } from '../components/VideoMascotas'
 import { agruparHorarios } from '../lib/horarios'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import type { CategoriaServicio, DosisPlan } from '../types'
 
-const NOMBRE_CATEGORIA: Record<CategoriaServicio, string> = {
-  CLINICA: 'Clínica',
-  DIAGNOSTICO: 'Diagnóstico',
-  CIRUGIA: 'Cirugía',
-  ESTETICA: 'Estética',
-}
+// Cada categoría de servicios con su foto y su estilo de tarjeta.
+const CATEGORIAS: { clave: CategoriaServicio; nombre: string; foto: string; oscura: boolean }[] = [
+  { clave: 'CLINICA', nombre: 'Consultas y vacunas', foto: '/fotos/caniche-cachorro.jpg', oscura: false },
+  { clave: 'DIAGNOSTICO', nombre: 'Análisis y ecografías', foto: '/fotos/gatito-blanco.jpg', oscura: true },
+  { clave: 'CIRUGIA', nombre: 'Cirugías', foto: '/fotos/jack-russell.jpg', oscura: true },
+  { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/pug-buzo.jpg', oscura: false },
+]
 
-// 6 semanas → "6 semanas"; 16 semanas → "16 semanas (4 meses)"
+// 6 semanas → "6 semanas"; 16 semanas → "4 meses"
 function edadDosis(dosis: DosisPlan) {
-  const semanas = `${dosis.edadSemanas} semanas`
   return dosis.edadSemanas >= 12 && dosis.edadSemanas % 4 === 0
-    ? `${semanas} (${dosis.edadSemanas / 4} meses)`
-    : semanas
+    ? `${dosis.edadSemanas / 4} meses`
+    : `${dosis.edadSemanas} semanas`
 }
 
 function iniciales(nombre: string, apellido: string) {
@@ -64,325 +68,390 @@ export function Inicio() {
   const { clinica, servicios, equipo, opiniones, formasPago, planes, promociones, preguntas } = datos
   const whatsappTurno = enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO)
   const promo = promociones[0]
+  const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`
 
   return (
-    <main>
+    <main className="fondo-huellas">
       {promo && (
         <div className="franja-promo">
           <div className="contenedor franja-promo-interior">
             <BadgePercent size={20} aria-hidden="true" />
             <p>
-              <strong>{promo.titulo}.</strong> {promo.descripcion} Válido hasta el{' '}
-              {FECHA_PROMO.format(new Date(promo.vigenteHasta))}.
+              <strong>{promo.titulo}.</strong> Válido hasta el {FECHA_PROMO.format(new Date(promo.vigenteHasta))}.
             </p>
           </div>
         </div>
       )}
 
-      {/* ---------- Portada con video ---------- */}
-      <section className="portada-video" aria-labelledby="titulo-portada">
-        <VideoPortada />
-        <div className="portada-video-texto">
-          <p className="portada-video-bajada">Clínica veterinaria en Goya, Corrientes</p>
-          <h1 id="titulo-portada">{clinica.nombre}</h1>
-          <p className="portada-video-frase">Cuidamos a tu mascota como parte de tu familia.</p>
+      {/* ---------- Portada ---------- */}
+      <section className="contenedor portada" aria-labelledby="titulo-portada">
+        <div className="portada-texto">
+          <h1 id="titulo-portada">Clínica veterinaria en Goya</h1>
+          <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
           <div className="portada-acciones">
-            <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-secundario">
-              <MessageCircle size={20} aria-hidden="true" />
+            <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-grande">
+              <MessageCircle size={22} aria-hidden="true" />
               Pedir turno
             </a>
-            <a href="#servicios" className="boton boton-claro">
+            <a href="#servicios" className="boton boton-grande boton-contorno">
               Ver servicios
             </a>
           </div>
         </div>
-      </section>
 
-      {/* ---------- Presentación ---------- */}
-      <section className="contenedor presentacion">
-        <div className="presentacion-texto">
-          <h2>Atención completa para perros y gatos</h2>
-          <p>
-            Consultas, vacunas, análisis, ecografías, cirugías y peluquería, todo en el mismo lugar. Sacá turno sin
-            llamar y te avisamos por WhatsApp cuando le toque la próxima vacuna o desparasitación.
-          </p>
-          <ul className="portada-ventajas">
-            <li>
-              <Check size={18} aria-hidden="true" /> Turnos sin necesidad de llamar
-            </li>
-            <li>
-              <Check size={18} aria-hidden="true" /> Recordatorios de vacunas por WhatsApp
-            </li>
-            <li>
-              <Check size={18} aria-hidden="true" /> Historia clínica y carnet en tu celular
-            </li>
-          </ul>
+        <div className="portada-foto">
+          <img src="/fotos/perro-doctor.jpg" alt="Un perrito con guardapolvo y estetoscopio" />
         </div>
 
-        <div className="portada-imagen">
-          <img src="/fotos/consulta.jpg" alt="Un veterinario revisa a un perro salchicha en la camilla" />
-          <div className="aviso-whatsapp" aria-hidden="true">
-            <span className="aviso-whatsapp-icono">
-              <MessageCircle size={18} />
+        <ul className="portada-ventajas">
+          <li>
+            <PawPrint size={22} aria-hidden="true" /> Turnos por WhatsApp
+          </li>
+          <li>
+            <PawPrint size={22} aria-hidden="true" /> Te avisamos las vacunas
+          </li>
+          <li>
+            <PawPrint size={22} aria-hidden="true" /> Historia clínica online
+          </li>
+          <li>
+            <PawPrint size={22} aria-hidden="true" /> Atendemos urgencias
+          </li>
+        </ul>
+      </section>
+
+      {/* ---------- Cinta en movimiento ---------- */}
+      <div className="cinta" aria-hidden="true">
+        <div className="cinta-pista">
+          {Array.from({ length: 2 }, (_, i) => (
+            <span key={i} className="cinta-grupo">
+              <strong>VetYa</strong> Clínica veterinaria en Goya <PawPrint size={18} />
+              <strong>VetYa</strong> Turnos por WhatsApp <PawPrint size={18} />
+              <strong>VetYa</strong> Perros y gatos <PawPrint size={18} />
             </span>
-            <div>
-              <strong>{clinica.nombre}</strong>
-              <p>Hola Juan, a Firulais le toca la antirrábica el jueves. ¿Te reservamos un turno?</p>
-            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ---------- ¿Qué necesitás? ---------- */}
+      <section className="contenedor seccion" aria-labelledby="titulo-necesitas">
+        <h2 id="titulo-necesitas" className="titulo-centrado">
+          ¿Qué necesitás?
+        </h2>
+        <div className="accesos">
+          <a href={whatsappTurno} target="_blank" rel="noreferrer" className="acceso-rapido">
+            <span className="acceso-icono">
+              <CalendarCheck size={34} aria-hidden="true" />
+            </span>
+            <span className="acceso-textos">
+              <strong>Pedir un turno</strong>
+              <span>Por WhatsApp, sin llamar</span>
+            </span>
+          </a>
+          <Link to="/urgencias" className="acceso-rapido acceso-urgencia">
+            <span className="acceso-icono">
+              <Siren size={34} aria-hidden="true" />
+            </span>
+            <span className="acceso-textos">
+              <strong>Es una urgencia</strong>
+              <span>Qué hacer y a quién llamar</span>
+            </span>
+          </Link>
+          <a href="#contacto" className="acceso-rapido">
+            <span className="acceso-icono">
+              <MapPin size={34} aria-hidden="true" />
+            </span>
+            <span className="acceso-textos">
+              <strong>Horarios y dirección</strong>
+              <span>Cuándo abrimos y cómo llegar</span>
+            </span>
+          </a>
+          <Link to="/ingresar" className="acceso-rapido">
+            <span className="acceso-icono">
+              <FileHeart size={34} aria-hidden="true" />
+            </span>
+            <span className="acceso-textos">
+              <strong>Ver a mi mascota</strong>
+              <span>Vacunas y consultas</span>
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------- Sobre nosotros ---------- */}
+      <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
+        <p className="pastilla">Sobre nosotros</p>
+        <h2 id="titulo-sobre" className="sobre-frase">
+          Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}
+          <strong>sin vueltas</strong>.
+        </h2>
+        <div className="sobre-tarjetas">
+          <div className="tarjeta-dato tarjeta-oscura">
+            <Stethoscope size={30} aria-hidden="true" />
+            <h3>Veterinarios con experiencia</h3>
+          </div>
+          <div className="tarjeta-dato">
+            <Syringe size={30} aria-hidden="true" />
+            <h3>Te avisamos cada vacuna</h3>
+          </div>
+          <div className="tarjeta-dato">
+            <HeartPulse size={30} aria-hidden="true" />
+            <h3>Su historia clínica, siempre a mano</h3>
           </div>
         </div>
       </section>
 
-      {/* ---------- Equipo ---------- */}
-      {equipo.length > 0 && (
-        <section id="equipo" className="seccion seccion-celeste" aria-labelledby="titulo-equipo">
-          <div className="contenedor">
-            <div className="seccion-encabezado">
-              <h2 id="titulo-equipo">Nuestro equipo</h2>
-              <p>Las personas que van a atender a tu mascota.</p>
-            </div>
-            <ul className="grilla-equipo">
-              {equipo.map((m) => (
-                <li key={m.id} className="tarjeta miembro">
-                  {m.fotoUrl ? (
-                    <img src={m.fotoUrl} alt="" className="miembro-avatar" />
-                  ) : (
-                    <span className="miembro-avatar" aria-hidden="true">
-                      {iniciales(m.nombre, m.apellido)}
-                    </span>
-                  )}
-                  <div>
-                    <h3>
-                      {m.nombre} {m.apellido}
-                    </h3>
-                    <p className="miembro-datos">
-                      {[m.especialidad, m.matricula].filter(Boolean).join(', ')}
-                    </p>
-                    {m.presentacion && <p>{m.presentacion}</p>}
-                  </div>
-                </li>
-              ))}
-            </ul>
+      {/* ---------- Video ---------- */}
+      <section className="contenedor" aria-label="Video de mascotas descansando">
+        <div className="video-marco">
+          <VideoMascotas />
+        </div>
+      </section>
+
+      {/* ---------- Servicios ---------- */}
+      <section id="servicios" className="contenedor seccion" aria-labelledby="titulo-servicios">
+        <p className="pastilla">Servicios</p>
+        <h2 id="titulo-servicios" className="titulo-centrado">
+          Todo lo que tu mascota necesita
+        </h2>
+        <div className="mosaico">
+          {CATEGORIAS.map((c) => {
+            const lista = servicios.filter((s) => s.categoria === c.clave)
+            if (lista.length === 0) return null
+            return (
+              <article key={c.clave} className={`mosaico-tarjeta${c.oscura ? ' tarjeta-oscura' : ''}`}>
+                <div className="mosaico-texto">
+                  <h3>{c.nombre}</h3>
+                  <ul>
+                    {lista.map((s) => (
+                      <li key={s.id}>{s.nombre}</li>
+                    ))}
+                  </ul>
+                  <a href={whatsappTurno} target="_blank" rel="noreferrer" className="mosaico-enlace">
+                    Pedir turno <ArrowRight size={18} aria-hidden="true" />
+                  </a>
+                </div>
+                <img src={c.foto} alt="" loading="lazy" />
+              </article>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ---------- Planes ---------- */}
+      {planes.length > 0 && (
+        <section id="planes" className="contenedor seccion" aria-labelledby="titulo-planes">
+          <p className="pastilla">Cachorros y gatitos</p>
+          <h2 id="titulo-planes" className="titulo-centrado">
+            Sus vacunas del primer año
+          </h2>
+          <p className="texto-centrado">Te avisamos por WhatsApp antes de cada una.</p>
+          <div className="grilla-planes">
+            {planes.map((plan) => (
+              <article key={plan.id} className="plan">
+                {plan.fotoUrl && <img src={plan.fotoUrl} alt="" loading="lazy" className="plan-foto" />}
+                <div className="plan-cuerpo">
+                  <h3>{plan.nombre}</h3>
+                  <ol className="linea-tiempo">
+                    {plan.dosis.map((d) => (
+                      <li key={d.id}>
+                        <span className="linea-tiempo-edad">{edadDosis(d)}</span>
+                        <span>{d.producto}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}
 
-      {/* ---------- Servicios ---------- */}
-      <section id="servicios" className="seccion" aria-labelledby="titulo-servicios">
-        <div className="contenedor">
-          <div className="seccion-encabezado">
-            <h2 id="titulo-servicios">Servicios</h2>
-            <p>Desde el control de rutina hasta la peluquería, todo en la misma clínica.</p>
-          </div>
-          <ul className="grilla-servicios">
-            {servicios.map((s) => (
-              <li key={s.id} className="servicio">
-                {s.fotoUrl && <img src={s.fotoUrl} alt="" loading="lazy" className="servicio-foto" />}
-                <div className="servicio-cuerpo">
-                  <span className={`etiqueta etiqueta-${s.categoria}`}>{NOMBRE_CATEGORIA[s.categoria]}</span>
-                  <h3>{s.nombre}</h3>
-                  {s.descripcion && <p>{s.descripcion}</p>}
-                  <span className="servicio-duracion">
-                    {s.reservableOnline ? (
-                      <>
-                        <Clock size={16} aria-hidden="true" /> Duración aproximada: {s.duracionMin} min
-                      </>
-                    ) : (
-                      <>
-                        <CalendarHeart size={16} aria-hidden="true" /> Se coordina con la clínica
-                      </>
-                    )}
+      {/* ---------- Equipo ---------- */}
+      {equipo.length > 0 && (
+        <section id="equipo" className="contenedor seccion" aria-labelledby="titulo-equipo">
+          <p className="pastilla">Nuestro equipo</p>
+          <h2 id="titulo-equipo" className="titulo-centrado">
+            Quiénes atienden a tu mascota
+          </h2>
+          <ul className="grilla-equipo">
+            {equipo.map((m) => (
+              <li key={m.id} className="miembro">
+                {m.fotoUrl ? (
+                  <img src={m.fotoUrl} alt="" className="miembro-avatar" />
+                ) : (
+                  <span className="miembro-avatar" aria-hidden="true">
+                    {iniciales(m.nombre, m.apellido)}
                   </span>
-                </div>
+                )}
+                <h3>
+                  {m.nombre} {m.apellido}
+                </h3>
+                {m.especialidad && <p className="miembro-datos">{m.especialidad}</p>}
+                {m.matricula && <p className="miembro-matricula">{m.matricula}</p>}
+                <a
+                  href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="boton boton-secundario"
+                >
+                  Pedir turno con {m.nombre}
+                </a>
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* ---------- Planes sanitarios ---------- */}
-      {planes.length > 0 && (
-        <section id="planes" className="seccion" aria-labelledby="titulo-planes">
-          <div className="contenedor">
-            <div className="seccion-encabezado">
-              <h2 id="titulo-planes">Planes para el primer año</h2>
-              <p>
-                El calendario de vacunas y desparasitaciones según la edad. Es orientativo: en la primera consulta lo
-                adaptamos a tu mascota y te avisamos antes de cada dosis.
-              </p>
-            </div>
-            <div className="grilla-planes">
-              {planes.map((plan) => (
-                <article key={plan.id} className="plan">
-                  {plan.fotoUrl && <img src={plan.fotoUrl} alt="" loading="lazy" className="plan-foto" />}
-                  <div className="plan-cuerpo">
-                    <h3>{plan.nombre}</h3>
-                    <p>{plan.descripcion}</p>
-                    <ol className="linea-tiempo">
-                      {plan.dosis.map((d) => (
-                        <li key={d.id}>
-                          <span className="linea-tiempo-edad">{edadDosis(d)}</span>
-                          <span>
-                            {d.producto}
-                            {d.nota && <span className="linea-tiempo-nota"> {d.nota}</span>}
-                          </span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
         </section>
       )}
 
       {/* ---------- Opiniones ---------- */}
       {opiniones.length > 0 && (
-        <section className="seccion seccion-amarilla" aria-labelledby="titulo-opiniones">
-          <div className="contenedor">
-            <div className="seccion-encabezado">
-              <h2 id="titulo-opiniones">Lo que dicen las familias</h2>
-            </div>
-            <ul className="grilla-opiniones">
-              {opiniones.map((o) => (
-                <li key={o.id} className="opinion">
-                  <span className="estrellas" aria-label={`${o.puntaje} de 5 estrellas`}>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <Star key={i} size={18} aria-hidden="true" fill={i < o.puntaje ? 'currentColor' : 'none'} />
-                    ))}
-                  </span>
-                  <blockquote>{o.texto}</blockquote>
-                  <p className="opinion-autor">
-                    {o.autor}
-                    {o.mascota && <span>, con {o.mascota}</span>}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <section className="contenedor seccion" aria-labelledby="titulo-opiniones">
+          <p className="pastilla">Opiniones</p>
+          <h2 id="titulo-opiniones" className="titulo-centrado">
+            Lo que dicen las familias
+          </h2>
+          <ul className="grilla-opiniones">
+            {opiniones.map((o) => (
+              <li key={o.id} className="opinion">
+                <span className="estrellas" aria-label={`${o.puntaje} de 5 estrellas`}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Star key={i} size={20} aria-hidden="true" fill={i < o.puntaje ? 'currentColor' : 'none'} />
+                  ))}
+                </span>
+                <blockquote>{o.texto}</blockquote>
+                <p className="opinion-autor">
+                  {o.autor}
+                  {o.mascota && <span>, con {o.mascota}</span>}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
-      {/* ---------- Banda de turno ---------- */}
-      <section className="banda-turno" aria-labelledby="titulo-banda">
-        <div className="contenedor banda-turno-interior">
+      {/* ---------- Preguntas frecuentes ---------- */}
+      {preguntas.length > 0 && (
+        <section id="preguntas" className="contenedor seccion preguntas-seccion" aria-labelledby="titulo-preguntas">
           <div>
-            <h2 id="titulo-banda">Pedí tu turno</h2>
-            <p>Escribinos por WhatsApp y te respondemos con los horarios disponibles. También podés llamarnos al {clinica.telefono}.</p>
+            <h2 id="titulo-preguntas">Preguntas frecuentes</h2>
+            <div className="preguntas">
+              {preguntas.map((p) => (
+                <details key={p.id}>
+                  <summary>{p.pregunta}</summary>
+                  <p>{p.respuesta}</p>
+                </details>
+              ))}
+            </div>
           </div>
-          <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-secundario">
-            <MessageCircle size={20} aria-hidden="true" />
-            Pedir turno por WhatsApp
-          </a>
-        </div>
-      </section>
+          <img src="/fotos/gato-lengua.jpg" alt="" className="preguntas-foto" loading="lazy" />
+        </section>
+      )}
 
-      {/* ---------- Formas de pago y preguntas frecuentes ---------- */}
-      <section className="seccion" aria-label="Formas de pago y preguntas frecuentes">
-        <div className="contenedor grilla-dos">
-          {formasPago.length > 0 && (
-            <div>
-              <h2>Formas de pago</h2>
-              <ul className="lista-pagos">
-                {formasPago.map((f) => (
-                  <li key={f.id}>
-                    <span className="icono-circulo">
-                      <CreditCard size={20} aria-hidden="true" />
-                    </span>
-                    <div>
-                      <strong>{f.nombre}</strong>
-                      {f.detalle && <p>{f.detalle}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {preguntas.length > 0 && (
-            <div>
-              <h2>Preguntas frecuentes</h2>
-              <div className="preguntas">
-                {preguntas.map((p) => (
-                  <details key={p.id}>
-                    <summary>{p.pregunta}</summary>
-                    <p>{p.respuesta}</p>
-                  </details>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      {/* ---------- ¿Te quedaron dudas? ---------- */}
+      <section className="contenedor seccion" aria-labelledby="titulo-dudas">
+        <Dudas whatsapp={clinica.whatsapp} />
       </section>
 
       {/* ---------- Contacto ---------- */}
-      <section id="contacto" className="seccion seccion-celeste" aria-labelledby="titulo-contacto">
-        <div className="contenedor">
-          <div className="seccion-encabezado">
-            <h2 id="titulo-contacto">Cómo llegar</h2>
-          </div>
-          <div className="contacto">
-            <Mapa
-              latitud={Number(clinica.latitud)}
-              longitud={Number(clinica.longitud)}
-              nombre={clinica.nombre}
-              direccion={clinica.direccion}
-            />
-            <div className="contacto-datos">
+      <section id="contacto" className="contenedor seccion" aria-labelledby="titulo-contacto">
+        <p className="pastilla">Contacto</p>
+        <h2 id="titulo-contacto" className="titulo-centrado">
+          Dónde estamos
+        </h2>
+        <div className="contacto">
+          <div className="contacto-tarjeta">
+            <div className="dato-contacto">
+              <MapPin size={24} aria-hidden="true" />
+              <div>
+                <h3>Dirección</h3>
+                <p>{clinica.direccion}</p>
+              </div>
+            </div>
+            <div className="dato-contacto">
+              <Clock size={24} aria-hidden="true" />
+              <div>
+                <h3>Horarios</h3>
+                {agruparHorarios(clinica.horarios).map((r) => (
+                  <p key={r.dias}>
+                    {r.dias}: {r.horas}
+                  </p>
+                ))}
+              </div>
+            </div>
+            <div className="dato-contacto">
+              <Phone size={24} aria-hidden="true" />
+              <div>
+                <h3>Teléfono</h3>
+                <p className="sin-corte">{clinica.telefono}</p>
+              </div>
+            </div>
+            {formasPago.length > 0 && (
               <div className="dato-contacto">
-                <span className="icono-circulo">
-                  <MapPin size={22} aria-hidden="true" />
-                </span>
+                <CreditCard size={24} aria-hidden="true" />
                 <div>
-                  <h3>Dirección</h3>
-                  <p>{clinica.direccion}</p>
+                  <h3>Formas de pago</h3>
+                  <p>{formasPago.map((f) => f.nombre).join(', ')}.</p>
                 </div>
               </div>
-              <div className="dato-contacto">
-                <span className="icono-circulo">
-                  <Clock size={22} aria-hidden="true" />
-                </span>
-                <div>
-                  <h3>Horarios</h3>
-                  {agruparHorarios(clinica.horarios).map((r) => (
-                    <p key={r.dias}>
-                      <strong>{r.dias}:</strong> {r.horas}
-                    </p>
-                  ))}
-                </div>
-              </div>
-              <div className="dato-contacto">
-                <span className="icono-circulo">
-                  <Phone size={22} aria-hidden="true" />
-                </span>
-                <div>
-                  <h3>Teléfono</h3>
-                  <p className="sin-corte">{clinica.telefono}</p>
-                </div>
-              </div>
-              <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-whatsapp">
+            )}
+            <div className="contacto-botones">
+              <a href={whatsappTurno} target="_blank" rel="noreferrer" className="boton boton-secundario">
                 <MessageCircle size={20} aria-hidden="true" />
-                Pedir turno por WhatsApp
+                Pedir turno
+              </a>
+              <a href={`tel:+${clinica.whatsapp}`} className="boton boton-claro">
+                <Phone size={20} aria-hidden="true" />
+                Llamar
+              </a>
+              <a href={mapaGoogle} target="_blank" rel="noreferrer" className="boton boton-claro">
+                <MapPin size={20} aria-hidden="true" />
+                Cómo llegar
               </a>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ---------- Cierre ---------- */}
-      <section className="contenedor cierre">
-        <div className="cierre-panel">
-          <FileHeart size={40} aria-hidden="true" />
-          <div>
-            <h2>Toda la salud de tu mascota en tu celular</h2>
-            <p>Creá tu cuenta y mirá sus vacunas, sus consultas y tus próximos turnos cuando quieras.</p>
-          </div>
-          <Link to="/registro" className="boton boton-secundario">
-            <CalendarCheck size={20} aria-hidden="true" />
-            Crear mi cuenta
-          </Link>
+          <Mapa
+            latitud={Number(clinica.latitud)}
+            longitud={Number(clinica.longitud)}
+            nombre={clinica.nombre}
+            direccion={clinica.direccion}
+          />
         </div>
       </section>
     </main>
+  )
+}
+
+// Formulario corto que arma un mensaje de WhatsApp con la consulta: no hace falta cuenta ni email.
+function Dudas({ whatsapp }: { whatsapp: string }) {
+  const [nombre, setNombre] = useState('')
+  const [pregunta, setPregunta] = useState('')
+
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    const mensaje = `Hola, soy ${nombre.trim()}. Tengo una consulta: ${pregunta.trim()}`
+    window.open(enlaceWhatsapp(whatsapp, mensaje), '_blank', 'noreferrer')
+  }
+
+  return (
+    <div className="dudas">
+      <div className="dudas-texto">
+        <h2 id="titulo-dudas">¿Te quedaron dudas?</h2>
+        <p>Escribí tu pregunta y te respondemos por WhatsApp.</p>
+        <form className="formulario" onSubmit={enviar}>
+          <label className="campo">
+            Tu nombre
+            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required autoComplete="given-name" />
+          </label>
+          <label className="campo">
+            Tu pregunta
+            <textarea value={pregunta} onChange={(e) => setPregunta(e.target.value)} required rows={3} />
+          </label>
+          <button type="submit" className="boton boton-grande">
+            <MessageCircle size={22} aria-hidden="true" />
+            Enviar por WhatsApp
+          </button>
+        </form>
+      </div>
+      <img src="/fotos/siames.jpg" alt="" className="dudas-foto" loading="lazy" />
+    </div>
   )
 }

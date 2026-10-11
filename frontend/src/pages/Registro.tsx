@@ -32,7 +32,9 @@ export function Registro() {
   }
 
   return (
-    <DisenoAcceso frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
+    <DisenoAcceso
+      foto="/fotos/gatito.jpg"
+      frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
       <h1>Crear cuenta</h1>
       <p className="ayuda">
         Con tu cuenta ves la historia clínica de tus mascotas, tus turnos y el carnet de vacunas.

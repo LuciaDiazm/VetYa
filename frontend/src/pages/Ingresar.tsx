@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { DisenoAcceso } from '../components/DisenoAcceso'
 import { rutaInicial, useAuth } from '../context/AuthContext'
+import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 
 export function Ingresar() {
   const { ingresar } = useAuth()
+  const { datos } = useSitio()
   const navegar = useNavigate()
   const ubicacion = useLocation()
   const [email, setEmail] = useState('')
@@ -29,7 +31,7 @@ export function Ingresar() {
   }
 
   return (
-    <DisenoAcceso frase="Sus vacunas, sus consultas y sus turnos, siempre a mano.">
+    <DisenoAcceso foto="/fotos/labrador-asomado.jpg" frase="Sus vacunas, sus consultas y sus turnos, siempre a mano.">
       <h1>Ingresar</h1>
       <p className="ayuda">Para dueños de mascotas y para el equipo de la clínica.</p>
       <form onSubmit={enviar} className="formulario">
@@ -59,6 +61,21 @@ export function Ingresar() {
       <p>
         ¿Todavía no tenés cuenta? <Link to="/registro">Creá una</Link>
       </p>
+      {datos && (
+        <div className="aviso-sin-cuenta">
+          <p>
+            <strong>¿Solo querés pedir un turno?</strong> No necesitás cuenta.
+          </p>
+          <a
+            href={enlaceWhatsapp(datos.clinica.whatsapp, MENSAJE_TURNO)}
+            target="_blank"
+            rel="noreferrer"
+            className="boton boton-secundario"
+          >
+            Pedir turno por WhatsApp
+          </a>
+        </div>
+      )}
     </DisenoAcceso>
   )
 }

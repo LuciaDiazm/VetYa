@@ -14,6 +14,21 @@ Todas las fotos son de [Unsplash](https://unsplash.com) y se usan bajo la [Licen
 | gato-consulta.jpg | Sueda Güzeldere | https://unsplash.com/photos/BATIVPqWwqw |
 | peluqueria.jpg | Buddy AN | https://unsplash.com/photos/LpK2xddrElI |
 | cachorro.jpg | Alvan Nee | https://unsplash.com/photos/eoqnr8ikwFE |
+| caniche-cachorro.jpg | NordWood Themes | https://unsplash.com/photos/Z1-yorzKan8 |
+| jack-russell.jpg | Marios Gkortsilas | https://unsplash.com/photos/HIVW73Fn2dY |
+| labrador-asomado.jpg | Victoria Fischer | https://unsplash.com/photos/6Y2XixiqncM |
+| pug-buzo.jpg | FLOUFFY | https://unsplash.com/photos/GVaRGYa_cmk |
+| gatito-blanco.jpg | ac dc | https://unsplash.com/photos/OHaIa8qM2zA |
+| gato-lengua.jpg | Slavy Darozhkin | https://unsplash.com/photos/O_UbPKaz6no |
+| siames.jpg | Pedro Miguel Aires | https://unsplash.com/photos/VCZPnPDPCzE |
+
+## Fotos de Pexels
+
+Se usan bajo la [Licencia de Pexels](https://www.pexels.com/license/).
+
+| Archivo | Fotógrafo/a | Original |
+|---|---|---|
+| perro-doctor.jpg | Sam Lion | https://www.pexels.com/photo/little-dog-in-medical-uniform-in-light-studio-5732461/ |
 
 ## Video de la portada
 

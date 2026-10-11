@@ -1,17 +1,26 @@
-import { Mail, Menu, MessageCircle, Phone, Siren, X } from 'lucide-react'
+import { Menu, Siren, X } from 'lucide-react'
 import { startTransition, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
-import { LogoMarca } from './Logo'
+import { Logo } from './Logo'
 
-// Encabezado de la parte pública: franja de contacto y menú con el logo en el centro.
+const SECCIONES = [
+  { ruta: '/#servicios', nombre: 'Servicios' },
+  { ruta: '/#equipo', nombre: 'Equipo' },
+  { ruta: '/#preguntas', nombre: 'Preguntas' },
+  { ruta: '/#contacto', nombre: 'Contacto' },
+]
+
+// Encabezado de la parte pública. Pocas opciones y bien grandes:
+// lo más buscado (pedir turno y urgencias) siempre queda a la vista.
 export function BarraNavegacion() {
   const { usuario, cargando, salir } = useAuth()
   const { datos } = useSitio()
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const clinica = datos?.clinica
+  const turno = clinica ? enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO) : undefined
 
   function cerrarSesion() {
     // React Router navega dentro de una transición. Si la sesión se borrara por fuera de ella,
@@ -24,134 +33,74 @@ export function BarraNavegacion() {
   }
 
   const cerrarMenu = () => setMenuAbierto(false)
-  const turno = clinica ? enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO) : undefined
+
+  const enlacesCuenta = cargando ? null : usuario ? (
+    <>
+      <Link to={rutaInicial(usuario)} className="barra-enlace" onClick={cerrarMenu}>
+        {usuario.rol === 'DUENIO' ? 'Mi cuenta' : 'Panel'}
+      </Link>
+      <button type="button" className="barra-enlace boton-texto" onClick={cerrarSesion}>
+        Salir
+      </button>
+    </>
+  ) : (
+    <Link to="/ingresar" className="barra-enlace" onClick={cerrarMenu}>
+      Ingresar
+    </Link>
+  )
 
   return (
     <header className="encabezado">
-      <div className="franja-contacto">
-        <div className="contenedor franja-interior">
-          {clinica && (
-            <>
-              <a href={`tel:+${clinica.whatsapp}`}>
-                <Phone size={15} aria-hidden="true" />
-                <span className="sin-corte">{clinica.telefono}</span>
-              </a>
-              {clinica.email && (
-                <a href={`mailto:${clinica.email}`} className="franja-email">
-                  <Mail size={15} aria-hidden="true" />
-                  {clinica.email}
-                </a>
-              )}
-              <a href={turno} target="_blank" rel="noreferrer">
-                <MessageCircle size={15} aria-hidden="true" />
-                WhatsApp
-              </a>
-            </>
+      <div className="contenedor barra-interior">
+        <Link to="/" className="enlace-logo" aria-label="VetYa, ir al inicio" onClick={cerrarMenu}>
+          <Logo />
+        </Link>
+
+        <nav className="menu-principal" aria-label="Secciones del sitio">
+          {SECCIONES.map((s) => (
+            <Link key={s.ruta} to={s.ruta} className="barra-enlace">
+              {s.nombre}
+            </Link>
+          ))}
+          {enlacesCuenta}
+        </nav>
+
+        <div className="barra-acciones">
+          <Link to="/urgencias" className="enlace-urgencias">
+            <Siren size={20} aria-hidden="true" />
+            <span>Urgencias</span>
+          </Link>
+          {turno && (
+            <a href={turno} target="_blank" rel="noreferrer" className="boton boton-secundario boton-turno">
+              Pedir turno
+            </a>
           )}
-          <Link to="/urgencias" className="franja-urgencias">
-            <Siren size={15} aria-hidden="true" />
-            Urgencias
-          </Link>
-        </div>
-      </div>
-
-      <div className="barra">
-        <div className="contenedor barra-interior">
-          <nav className="menu-lado menu-izquierdo" aria-label="Secciones del sitio">
-            <Link to="/#servicios" className="barra-enlace">
-              Servicios
-            </Link>
-            <Link to="/#planes" className="barra-enlace">
-              Planes
-            </Link>
-            <Link to="/#equipo" className="barra-enlace">
-              Equipo
-            </Link>
-          </nav>
-
-          <Link to="/" className="logo-central" aria-label="VetYa, ir al inicio" onClick={cerrarMenu}>
-            <LogoMarca tamano={52} />
-            <span className="logo-central-texto">VetYa</span>
-            <span className="logo-central-bajada">Clínica veterinaria</span>
-          </Link>
-
-          <nav className="menu-lado menu-derecho" aria-label="Contacto y cuenta">
-            <Link to="/#contacto" className="barra-enlace">
-              Contacto
-            </Link>
-            {!cargando &&
-              (usuario ? (
-                <>
-                  <Link to={rutaInicial(usuario)} className="barra-enlace">
-                    {usuario.rol === 'DUENIO' ? 'Mi cuenta' : 'Panel'}
-                  </Link>
-                  <button type="button" className="barra-enlace boton-texto" onClick={cerrarSesion}>
-                    Salir
-                  </button>
-                </>
-              ) : (
-                <Link to="/ingresar" className="barra-enlace">
-                  Ingresar
-                </Link>
-              ))}
-            {turno && (
-              <a href={turno} target="_blank" rel="noreferrer" className="boton boton-secundario">
-                Pedir turno
-              </a>
-            )}
-          </nav>
-
           <button
             type="button"
             className="boton-menu"
             aria-expanded={menuAbierto}
             aria-controls="menu-movil"
-            aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
             onClick={() => setMenuAbierto((a) => !a)}
           >
-            {menuAbierto ? <X size={26} /> : <Menu size={26} />}
+            {menuAbierto ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
+            <span>{menuAbierto ? 'Cerrar' : 'Menú'}</span>
           </button>
         </div>
-
-        {/* Menú del celular */}
-        {menuAbierto && (
-          <nav id="menu-movil" className="menu-movil" aria-label="Menú">
-            {[
-              ['/#servicios', 'Servicios'],
-              ['/#planes', 'Planes'],
-              ['/#equipo', 'Equipo'],
-              ['/#contacto', 'Contacto'],
-            ].map(([ruta, nombre]) => (
-              <Link key={ruta} to={ruta} className="barra-enlace" onClick={cerrarMenu}>
-                {nombre}
-              </Link>
-            ))}
-            <NavLink to="/urgencias" className="barra-enlace" onClick={cerrarMenu}>
-              Urgencias
-            </NavLink>
-            {!cargando &&
-              (usuario ? (
-                <>
-                  <Link to={rutaInicial(usuario)} className="barra-enlace" onClick={cerrarMenu}>
-                    {usuario.rol === 'DUENIO' ? 'Mi cuenta' : 'Panel'}
-                  </Link>
-                  <button type="button" className="barra-enlace boton-texto" onClick={cerrarSesion}>
-                    Salir
-                  </button>
-                </>
-              ) : (
-                <Link to="/ingresar" className="barra-enlace" onClick={cerrarMenu}>
-                  Ingresar
-                </Link>
-              ))}
-            {turno && (
-              <a href={turno} target="_blank" rel="noreferrer" className="boton boton-secundario" onClick={cerrarMenu}>
-                Pedir turno por WhatsApp
-              </a>
-            )}
-          </nav>
-        )}
       </div>
+
+      {menuAbierto && (
+        <nav id="menu-movil" className="menu-movil" aria-label="Menú">
+          {SECCIONES.map((s) => (
+            <Link key={s.ruta} to={s.ruta} className="barra-enlace" onClick={cerrarMenu}>
+              {s.nombre}
+            </Link>
+          ))}
+          <Link to="/urgencias" className="barra-enlace" onClick={cerrarMenu}>
+            Urgencias
+          </Link>
+          {enlacesCuenta}
+        </nav>
+      )}
     </header>
   )
 }

@@ -1,19 +1,19 @@
 import { useState } from 'react'
 
-// Video de fondo de la portada. Mientras carga, o si el archivo no está, se ve la foto (poster).
-// Si la persona pidió reducir el movimiento en su dispositivo, no se reproduce y queda la foto.
-export function VideoPortada() {
+// Video de mascotas descansando. Mientras carga se ve una imagen del mismo video.
+// Si la persona pidió reducir el movimiento en su dispositivo, queda solo la imagen.
+export function VideoMascotas() {
   const [reducirMovimiento] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
 
   if (reducirMovimiento) {
-    return <img className="portada-video-fondo" src="/videos/portada-poster.jpg" alt="" />
+    return <img className="video-mascotas" src="/videos/portada-poster.jpg" alt="" />
   }
 
   return (
     <video
-      className="portada-video-fondo"
+      className="video-mascotas"
       autoPlay
       muted
       loop
