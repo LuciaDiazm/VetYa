@@ -1,9 +1,58 @@
 // Funciones para comunicarse con el backend.
 
-export async function apiGet<T>(ruta: string): Promise<T> {
-  const respuesta = await fetch(`/api${ruta}`)
-  if (!respuesta.ok) {
-    throw new Error(`Error ${respuesta.status} al consultar ${ruta}`)
+const CLAVE_TOKEN = 'vetya_token'
+
+export function guardarToken(token: string | null) {
+  try {
+    if (token) localStorage.setItem(CLAVE_TOKEN, token)
+    else localStorage.removeItem(CLAVE_TOKEN)
+  } catch {
+    // Si el navegador bloquea el almacenamiento, la sesión dura hasta recargar la página.
   }
-  return respuesta.json() as Promise<T>
+}
+
+export function leerToken(): string | null {
+  try {
+    return localStorage.getItem(CLAVE_TOKEN)
+  } catch {
+    return null
+  }
+}
+
+// Error con el mensaje que devuelve el backend, para mostrarlo en pantalla.
+export class ErrorApi extends Error {
+  status: number
+  constructor(status: number, mensaje: string) {
+    super(mensaje)
+    this.status = status
+  }
+}
+
+async function apiFetch<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
+  const token = leerToken()
+  const respuesta = await fetch(`/api${ruta}`, {
+    ...opciones,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...opciones.headers,
+    },
+  })
+  const cuerpo = await respuesta.json().catch(() => null)
+  if (!respuesta.ok) {
+    throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
+  }
+  return cuerpo as T
+}
+
+export function apiGet<T>(ruta: string): Promise<T> {
+  return apiFetch<T>(ruta)
+}
+
+export function apiPost<T>(ruta: string, datos: unknown): Promise<T> {
+  return apiFetch<T>(ruta, { method: 'POST', body: JSON.stringify(datos) })
+}
+
+export function apiPatch<T>(ruta: string, datos: unknown): Promise<T> {
+  return apiFetch<T>(ruta, { method: 'PATCH', body: JSON.stringify(datos) })
 }

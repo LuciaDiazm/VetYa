@@ -31,6 +31,22 @@ export interface Servicio {
   reservableOnline: boolean
 }
 
+export type Rol = 'DUENIO' | 'VETERINARIO' | 'ADMIN'
+
+export interface Usuario {
+  id: number
+  nombre: string
+  apellido: string
+  email: string
+  telefono: string | null
+  rol: Rol
+}
+
+export interface RespuestaSesion {
+  token: string
+  usuario: Usuario
+}
+
 export interface PreguntaFrecuente {
   id: number
   pregunta: string

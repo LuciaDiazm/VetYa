@@ -1,6 +1,8 @@
 import cors from "cors";
 import express from "express";
+import { authRouter } from "./routes/auth";
 import { publicoRouter } from "./routes/publico";
+import { usuariosRouter } from "./routes/usuarios";
 
 export const app = express();
 
@@ -13,6 +15,8 @@ app.get("/api/salud", (_req, res) => {
 });
 
 app.use("/api/publico", publicoRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/usuarios", usuariosRouter);
 
 // Cualquier error no controlado termina acá en lugar de tirar abajo el servidor.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -55,3 +55,103 @@ body {
 .error {
   color: #b91c1c;
 }
+
+/* Barra de navegación */
+.barra {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.barra-interior {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.marca {
+  font-weight: 800;
+  font-size: 20px;
+  color: #1f2a37;
+  text-decoration: none;
+}
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.barra-acciones a {
+  color: #1f2a37;
+}
+
+/* Botones */
+.boton {
+  display: inline-block;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: #ffffff !important;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boton-texto {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #1f2a37;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Formularios */
+.formulario-centrado {
+  max-width: 440px;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.formulario input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 400;
+}
+
+.formulario .fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ayuda {
+  font-size: 14px;
+  font-weight: 400;
+  color: #6b7280;
+}
