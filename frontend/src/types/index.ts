@@ -19,6 +19,8 @@ export interface Clinica {
   instagram: string | null
   latitud: string
   longitud: string
+  telefonoUrgencias: string | null
+  horarioUrgencias: string | null
   horarios: HorarioAtencion[]
 }
 
@@ -29,6 +31,7 @@ export interface Servicio {
   descripcion: string | null
   duracionMin: number
   reservableOnline: boolean
+  fotoUrl: string | null
 }
 
 export type Rol = 'DUENIO' | 'VETERINARIO' | 'ADMIN'
@@ -51,4 +54,65 @@ export interface PreguntaFrecuente {
   id: number
   pregunta: string
   respuesta: string
+}
+
+export interface MiembroEquipo {
+  id: number
+  nombre: string
+  apellido: string
+  matricula: string | null
+  especialidad: string | null
+  presentacion: string | null
+  fotoUrl: string | null
+}
+
+export interface Opinion {
+  id: number
+  autor: string
+  mascota: string | null
+  texto: string
+  puntaje: number
+  fecha: string
+}
+
+export interface FormaPago {
+  id: number
+  nombre: string
+  detalle: string | null
+}
+
+export interface DosisPlan {
+  id: number
+  tipo: 'VACUNA' | 'DESPARASITACION'
+  producto: string
+  edadSemanas: number
+  nota: string | null
+}
+
+export interface PlanSanitario {
+  id: number
+  nombre: string
+  especie: 'PERRO' | 'GATO' | 'OTRO'
+  descripcion: string
+  fotoUrl: string | null
+  dosis: DosisPlan[]
+}
+
+export interface Promocion {
+  id: number
+  titulo: string
+  descripcion: string
+  vigenteHasta: string
+}
+
+// Respuesta de GET /api/publico/sitio
+export interface DatosSitio {
+  clinica: Clinica
+  servicios: Servicio[]
+  equipo: MiembroEquipo[]
+  opiniones: Opinion[]
+  formasPago: FormaPago[]
+  planes: PlanSanitario[]
+  promociones: Promocion[]
+  preguntas: PreguntaFrecuente[]
 }

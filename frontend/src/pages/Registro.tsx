@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { DisenoAcceso } from '../components/DisenoAcceso'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
@@ -31,29 +32,44 @@ export function Registro() {
   }
 
   return (
-    <main className="contenedor formulario-centrado">
+    <DisenoAcceso frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
       <h1>Crear cuenta</h1>
       <p className="ayuda">
-        Con tu cuenta podés ver la historia clínica de tus mascotas, tus turnos y descargar el carnet de vacunas.
-        Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver tus mascotas automáticamente.
+        Con tu cuenta ves la historia clínica de tus mascotas, tus turnos y el carnet de vacunas.
       </p>
       <form onSubmit={enviar} className="formulario">
-        <div className="fila">
-          <label>
+        <div className="fila-campos">
+          <label className="campo">
             Nombre
-            <input value={datos.nombre} onChange={(e) => cambiar('nombre', e.target.value)} required autoComplete="given-name" />
+            <input
+              value={datos.nombre}
+              onChange={(e) => cambiar('nombre', e.target.value)}
+              required
+              autoComplete="given-name"
+            />
           </label>
-          <label>
+          <label className="campo">
             Apellido
-            <input value={datos.apellido} onChange={(e) => cambiar('apellido', e.target.value)} required autoComplete="family-name" />
+            <input
+              value={datos.apellido}
+              onChange={(e) => cambiar('apellido', e.target.value)}
+              required
+              autoComplete="family-name"
+            />
           </label>
         </div>
-        <label>
+        <label className="campo">
           Email
-          <input type="email" value={datos.email} onChange={(e) => cambiar('email', e.target.value)} required autoComplete="email" />
+          <input
+            type="email"
+            value={datos.email}
+            onChange={(e) => cambiar('email', e.target.value)}
+            required
+            autoComplete="email"
+          />
         </label>
-        <label>
-          Teléfono (WhatsApp)
+        <label className="campo">
+          Teléfono con WhatsApp
           <input
             type="tel"
             value={datos.telefono}
@@ -64,7 +80,7 @@ export function Registro() {
           />
           <span className="ayuda">Con código de área, sin el 0 y sin el 15.</span>
         </label>
-        <label>
+        <label className="campo">
           Contraseña
           <input
             type="password"
@@ -76,12 +92,18 @@ export function Registro() {
           />
           <span className="ayuda">Mínimo 8 caracteres.</span>
         </label>
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <p className="mensaje-error" role="alert">
+            {error}
+          </p>
+        )}
         <button type="submit" className="boton" disabled={enviando}>
           {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>
       </form>
-      <p>¿Ya tenés cuenta? <Link to="/ingresar">Ingresá</Link></p>
-    </main>
+      <p>
+        ¿Ya tenés cuenta? <Link to="/ingresar">Ingresá</Link>
+      </p>
+    </DisenoAcceso>
   )
 }

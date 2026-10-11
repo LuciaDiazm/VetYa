@@ -1,38 +1,63 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { BarraNavegacion } from './components/BarraNavegacion'
+import { Pie } from './components/Pie'
+import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
 import { AuthProvider } from './context/AuthContext'
+import { EnConstruccion } from './pages/EnConstruccion'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
 import { Panel } from './pages/Panel'
 import { Registro } from './pages/Registro'
+import { Urgencias } from './pages/Urgencias'
+
+// Páginas públicas y de dueños: llevan la barra de arriba.
+function DisenoPublico() {
+  return (
+    <>
+      <BarraNavegacion />
+      <Outlet />
+      <Pie />
+    </>
+  )
+}
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <BarraNavegacion />
         <Routes>
-          <Route path="/" element={<Inicio />} />
-          <Route path="/ingresar" element={<Ingresar />} />
-          <Route path="/registro" element={<Registro />} />
+          <Route element={<DisenoPublico />}>
+            <Route path="/" element={<Inicio />} />
+            <Route path="/ingresar" element={<Ingresar />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/urgencias" element={<Urgencias />} />
+            <Route
+              path="/mi-cuenta"
+              element={
+                <RutaProtegida roles={['DUENIO']}>
+                  <MiCuenta />
+                </RutaProtegida>
+              }
+            />
+          </Route>
+
           <Route
             path="/panel"
             element={
               <RutaProtegida roles={['VETERINARIO', 'ADMIN']}>
-                <Panel />
+                <DisenoPanel />
               </RutaProtegida>
             }
-          />
-          <Route
-            path="/mi-cuenta"
-            element={
-              <RutaProtegida roles={['DUENIO']}>
-                <MiCuenta />
-              </RutaProtegida>
-            }
-          />
+          >
+            <Route index element={<Panel />} />
+            <Route path="agenda" element={<EnConstruccion titulo="Agenda" />} />
+            <Route path="clientes" element={<EnConstruccion titulo="Clientes y mascotas" />} />
+            <Route path="recordatorios" element={<EnConstruccion titulo="Recordatorios" />} />
+            <Route path="configuracion" element={<EnConstruccion titulo="Configuración" />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

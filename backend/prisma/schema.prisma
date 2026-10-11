@@ -66,25 +66,30 @@ enum TipoRecordatorio {
 // ---------- Clínica y configuración ----------
 
 model Clinica {
-  id               Int     @id @default(autoincrement()) @map("id_clinica")
-  nombre           String
-  direccion        String
-  telefono         String
-  whatsapp         String
-  email            String?
-  instagram        String?
-  latitud          Decimal @db.Decimal(9, 6)
-  longitud         Decimal @db.Decimal(9, 6)
-  horasCancelacion Int     @default(24) @map("horas_cancelacion")
+  id                Int     @id @default(autoincrement()) @map("id_clinica")
+  nombre            String
+  direccion         String
+  telefono          String
+  whatsapp          String
+  email             String?
+  instagram         String?
+  latitud           Decimal @db.Decimal(9, 6)
+  longitud          Decimal @db.Decimal(9, 6)
+  horasCancelacion  Int     @default(24) @map("horas_cancelacion")
+  telefonoUrgencias String? @map("telefono_urgencias")
+  horarioUrgencias  String? @map("horario_urgencias") // Ej.: "Todos los días de 8 a 22 h"
 
-  usuarios       Usuario[]
-  clientes       Cliente[]
-  servicios      Servicio[]
-  horarios       HorarioAtencion[]
-  diasBloqueados DiaBloqueado[]
-  turnos         Turno[]
-  preguntas      PreguntaFrecuente[]
-  promociones    Promocion[]
+  usuarios         Usuario[]
+  clientes         Cliente[]
+  servicios        Servicio[]
+  horarios         HorarioAtencion[]
+  diasBloqueados   DiaBloqueado[]
+  turnos           Turno[]
+  preguntas        PreguntaFrecuente[]
+  promociones      Promocion[]
+  opiniones        Opinion[]
+  formasPago       FormaPago[]
+  planesSanitarios PlanSanitario[]
 
   @@map("clinica")
 }
@@ -100,6 +105,13 @@ model Usuario {
   rol          Rol
   activo       Boolean  @default(true)
   creadoEn     DateTime @default(now()) @map("creado_en")
+
+  // Perfil público (sección "Nuestro equipo" de la web)
+  visibleEnWeb Boolean @default(false) @map("visible_en_web")
+  matricula    String?
+  especialidad String?
+  presentacion String? @db.Text
+  fotoUrl      String? @map("foto_url")
 
   clinica               Clinica        @relation(fields: [clinicaId], references: [id])
   cliente               Cliente?
@@ -162,6 +174,7 @@ model Servicio {
   precioReferencia Decimal?          @map("precio_referencia") @db.Decimal(10, 2)
   reservableOnline Boolean           @default(true) @map("reservable_online")
   activo           Boolean           @default(true)
+  fotoUrl          String?           @map("foto_url")
 
   clinica     Clinica     @relation(fields: [clinicaId], references: [id])
   turnos      Turno[]
@@ -210,11 +223,12 @@ model Turno {
   recordatorioEnviadoEn DateTime?   @map("recordatorio_enviado_en")
   creadoEn              DateTime    @default(now()) @map("creado_en")
 
-  clinica       Clinica        @relation(fields: [clinicaId], references: [id])
-  mascota       Mascota        @relation(fields: [mascotaId], references: [id])
-  servicio      Servicio       @relation(fields: [servicioId], references: [id])
-  veterinario   Usuario?       @relation("TurnoVeterinario", fields: [veterinarioId], references: [id])
+  clinica       Clinica             @relation(fields: [clinicaId], references: [id])
+  mascota       Mascota             @relation(fields: [mascotaId], references: [id])
+  servicio      Servicio            @relation(fields: [servicioId], references: [id])
+  veterinario   Usuario?            @relation("TurnoVeterinario", fields: [veterinarioId], references: [id])
   consulta      Consulta?
+  cuestionario  CuestionarioPrevio?
   recordatorios Recordatorio[]
 
   @@index([clinicaId, fechaHoraInicio])
@@ -309,4 +323,83 @@ model Promocion {
   servicio Servicio? @relation(fields: [servicioId], references: [id])
 
   @@map("promocion")
+}
+
+// ---------- Funciones del sitio público (segunda etapa) ----------
+
+// Opiniones de clientes que el administrador publica en la web.
+model Opinion {
+  id        Int      @id @default(autoincrement()) @map("id_opinion")
+  clinicaId Int      @map("id_clinica")
+  autor     String
+  mascota   String?
+  texto     String   @db.Text
+  puntaje   Int // 1 a 5
+  fecha     DateTime @db.Date
+  visible   Boolean  @default(true)
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@map("opinion")
+}
+
+// Formas de pago que acepta la clínica (efectivo, transferencia, Mercado Pago...).
+model FormaPago {
+  id        Int     @id @default(autoincrement()) @map("id_forma_pago")
+  clinicaId Int     @map("id_clinica")
+  nombre    String
+  detalle   String?
+  orden     Int     @default(0)
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@map("forma_pago")
+}
+
+// Calendario sanitario recomendado según la edad (ej. "Plan cachorro").
+model PlanSanitario {
+  id          Int     @id @default(autoincrement()) @map("id_plan")
+  clinicaId   Int     @map("id_clinica")
+  nombre      String
+  especie     Especie
+  descripcion String  @db.Text
+  fotoUrl     String? @map("foto_url")
+  activo      Boolean @default(true)
+
+  clinica Clinica              @relation(fields: [clinicaId], references: [id])
+  dosis   PlanSanitarioDosis[]
+
+  @@map("plan_sanitario")
+}
+
+// Cada aplicación del plan, con la edad recomendada.
+model PlanSanitarioDosis {
+  id          Int            @id @default(autoincrement()) @map("id_dosis")
+  planId      Int            @map("id_plan")
+  tipo        TipoAplicacion
+  producto    String
+  edadSemanas Int            @map("edad_semanas")
+  nota        String?
+
+  plan PlanSanitario @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("plan_sanitario_dosis")
+}
+
+// Lo completa el dueño al sacar turno; el veterinario lo lee antes de atender.
+model CuestionarioPrevio {
+  id               Int      @id @default(autoincrement()) @map("id_cuestionario")
+  turnoId          Int      @unique @map("id_turno")
+  sintomas         String?  @db.Text
+  desdeCuando      String?  @map("desde_cuando")
+  comeYBebeNormal  Boolean? @map("come_y_bebe_normal")
+  vomitosODiarrea  Boolean? @map("vomitos_o_diarrea")
+  alimentacion     String?  @db.Text
+  medicacionActual String?  @map("medicacion_actual") @db.Text
+  observaciones    String?  @db.Text
+  completadoEn     DateTime @default(now()) @map("completado_en")
+
+  turno Turno @relation(fields: [turnoId], references: [id], onDelete: Cascade)
+
+  @@map("cuestionario_previo")
 }
