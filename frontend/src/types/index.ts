@@ -166,3 +166,66 @@ export interface SolicitudAdopcion {
   creadaEn: string
   animal: { id: number; nombre: string; especie: 'PERRO' | 'GATO'; estado: EstadoAdopcion; fotos: FotoAdopcion[] }
 }
+
+// ---------- Clientes y mascotas (panel) ----------
+
+export type EspecieMascota = 'PERRO' | 'GATO' | 'OTRO'
+
+export interface Mascota {
+  id: number
+  clienteId: number
+  nombre: string
+  especie: EspecieMascota
+  raza: string | null
+  sexo: 'MACHO' | 'HEMBRA'
+  fechaNacimiento: string | null
+  color: string | null
+  castrado: boolean
+  observaciones: string | null
+  activo: boolean
+}
+
+export interface Cliente {
+  id: number
+  nombre: string
+  apellido: string
+  dni: string | null
+  telefono: string
+  email: string | null
+  direccion: string | null
+  creadoEn: string
+  mascotas: Mascota[]
+  usuario?: { id: number; email: string } | null
+}
+
+export interface ConsultaResumen {
+  id: number
+  fecha: string
+  motivo: string
+  pesoKg: string | null
+  diagnostico: string | null
+  tratamiento: string | null
+  veterinario: { nombre: string; apellido: string }
+}
+
+export interface AplicacionSanitaria {
+  id: number
+  tipo: 'VACUNA' | 'DESPARASITACION'
+  producto: string
+  fechaAplicacion: string
+  fechaProximaDosis: string | null
+}
+
+export interface TurnoResumen {
+  id: number
+  fechaHoraInicio: string
+  estado: string
+  servicio: { nombre: string }
+}
+
+export interface FichaMascota extends Mascota {
+  cliente: Omit<Cliente, 'mascotas'>
+  consultas: ConsultaResumen[]
+  aplicaciones: AplicacionSanitaria[]
+  turnos: TurnoResumen[]
+}

@@ -3,6 +3,7 @@ import express from "express";
 import { CARPETA_SUBIDAS } from "./lib/subidas";
 import { adopcionesPublicoRouter, adopcionesRouter, erroresDeSubida } from "./routes/adopciones";
 import { authRouter } from "./routes/auth";
+import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { publicoRouter } from "./routes/publico";
 import { usuariosRouter } from "./routes/usuarios";
 
@@ -24,6 +25,8 @@ app.use("/api/publico", publicoRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/usuarios", usuariosRouter);
 app.use("/api/adopciones", adopcionesRouter);
+app.use("/api/clientes", clientesRouter);
+app.use("/api/mascotas", mascotasRouter);
 
 app.use(erroresDeSubida);
 

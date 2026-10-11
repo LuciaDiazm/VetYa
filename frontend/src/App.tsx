@@ -15,6 +15,10 @@ import { Adopcion } from './pages/Adopcion'
 import { AnimalAdopcion } from './pages/AnimalAdopcion'
 import { Adopciones } from './pages/panel/Adopciones'
 import { FormularioAnimal } from './pages/panel/FormularioAnimal'
+import { ClienteDetalle } from './pages/panel/ClienteDetalle'
+import { Clientes } from './pages/panel/Clientes'
+import { MascotaDetalle } from './pages/panel/MascotaDetalle'
+import { NuevoCliente } from './pages/panel/NuevoCliente'
 
 // Páginas públicas y de dueños: llevan la barra de arriba.
 function DisenoPublico() {
@@ -59,7 +63,10 @@ function App() {
           >
             <Route index element={<Panel />} />
             <Route path="agenda" element={<EnConstruccion titulo="Agenda" />} />
-            <Route path="clientes" element={<EnConstruccion titulo="Clientes y mascotas" />} />
+            <Route path="clientes" element={<Clientes />} />
+            <Route path="clientes/nuevo" element={<NuevoCliente />} />
+            <Route path="clientes/:id" element={<ClienteDetalle />} />
+            <Route path="mascotas/:id" element={<MascotaDetalle />} />
             <Route path="recordatorios" element={<EnConstruccion titulo="Recordatorios" />} />
             <Route path="adopciones" element={<Adopciones />} />
             <Route path="adopciones/nuevo" element={<FormularioAnimal />} />

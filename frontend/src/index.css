@@ -2548,3 +2548,303 @@ svg {
     animation: none;
   }
 }
+
+/* =========================================================
+   Panel: clientes y mascotas
+   ========================================================= */
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 0 18px;
+  border: 2px solid var(--borde);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--gris);
+}
+
+.buscador:focus-within {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 4px var(--azul-suave);
+}
+
+.buscador input {
+  flex: 1;
+  min-width: 0;
+  min-height: 58px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.1rem;
+}
+
+.subtitulo-lista {
+  margin-bottom: 10px;
+  color: var(--gris);
+  font-weight: 500;
+}
+
+.vacio-con-accion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.lista-clientes,
+.lista-mascotas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cliente-fila,
+.mascota-fila {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 2px solid transparent;
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.cliente-fila:hover,
+.mascota-fila:hover {
+  border-color: var(--azul);
+}
+
+.cliente-fila-datos {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.cliente-fila-datos strong {
+  font-size: 1.1rem;
+}
+
+.cliente-fila-datos span {
+  color: var(--gris);
+}
+
+.cliente-fila-mascotas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.chip-mascota {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--azul);
+  font-weight: 500;
+}
+
+.enlace-chico {
+  padding: 0;
+  color: var(--azul);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.acciones-contacto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bloque-ficha {
+  margin-bottom: 16px;
+}
+
+.bloque-ficha-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bloque-ficha-titulo h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--azul);
+}
+
+.subformulario {
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: var(--radio-chico);
+  background: var(--fondo);
+}
+
+.mascota-fila {
+  border-color: var(--borde);
+}
+
+.mascota-fila > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+}
+
+.mascota-fila-detalle {
+  color: var(--gris);
+}
+
+.mascota-fila-ver {
+  margin-left: auto;
+  color: var(--azul);
+  font-weight: 700;
+}
+
+.titulo-mascota {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.titulo-mascota h1 {
+  margin-bottom: 2px;
+}
+
+.icono-grande {
+  width: 64px;
+  height: 64px;
+}
+
+.ficha-panel {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0 16px;
+  align-items: start;
+}
+
+.ficha-ancho-completo {
+  grid-column: 1 / -1;
+}
+
+.lista-dosis,
+.lista-simple,
+.lista-consultas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-dosis li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  border-radius: var(--radio-chico);
+  background: var(--fondo);
+}
+
+.lista-dosis li > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-dosis li > div:first-child span {
+  color: var(--gris);
+  font-size: 0.95rem;
+}
+
+.dosis-proxima {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.estado-dosis {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.estado-dosis.vencida {
+  background: var(--rojo-suave);
+  color: var(--rojo);
+}
+
+.estado-dosis.por-vencer {
+  background: var(--amarillo-suave);
+  color: #8a5a00;
+}
+
+.estado-dosis.al-dia {
+  background: #ddf3e8;
+  color: #1e7a4c;
+}
+
+.lista-consultas li {
+  padding: 14px 16px;
+  border-left: 4px solid var(--amarillo);
+  border-radius: 0 var(--radio-chico) var(--radio-chico) 0;
+  background: var(--fondo);
+}
+
+.lista-consultas p {
+  margin: 0 0 4px;
+}
+
+.consulta-cabecera {
+  font-size: 1.05rem;
+}
+
+.observaciones {
+  padding: 12px 16px;
+  border-radius: var(--radio-chico);
+  background: var(--amarillo-suave);
+}
+
+@media (max-width: 860px) {
+  .ficha-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .cliente-fila {
+    flex-wrap: wrap;
+  }
+
+  .cliente-fila-mascotas {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+}

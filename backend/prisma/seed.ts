@@ -310,6 +310,30 @@ async function main() {
     });
   }
 
+  // ---------- Más clientes ficticios, para probar la búsqueda ----------
+  const masClientes = [
+    {
+      nombre: "María", apellido: "Fernández", telefono: "5493777222333", dni: "30111222",
+      mascotas: [
+        { nombre: "Lola", especie: "PERRO", sexo: "HEMBRA", raza: "Mestiza", color: "Negro", castrado: true, fechaNacimiento: new Date("2021-03-10") },
+        { nombre: "Simón", especie: "GATO", sexo: "MACHO", color: "Atigrado", castrado: true, fechaNacimiento: new Date("2023-07-01") },
+      ],
+    },
+    {
+      nombre: "Diego", apellido: "Martínez", telefono: "5493777444555",
+      mascotas: [{ nombre: "Tom", especie: "PERRO", sexo: "MACHO", raza: "Mestizo", color: "Marrón", castrado: false, fechaNacimiento: new Date("2024-01-15") }],
+    },
+    {
+      nombre: "Silvia", apellido: "Acosta", telefono: "5493777666777",
+      mascotas: [{ nombre: "Coco", especie: "GATO", sexo: "HEMBRA", color: "Blanco", castrado: true, fechaNacimiento: new Date("2019-11-20") }],
+    },
+  ] as const;
+
+  for (const { mascotas, ...c } of masClientes) {
+    if (await prisma.cliente.findFirst({ where: { clinicaId, telefono: c.telefono } })) continue;
+    await prisma.cliente.create({ data: { clinicaId, ...c, mascotas: { create: [...mascotas] } } });
+  }
+
   console.log("Datos de prueba al día.");
 }
 

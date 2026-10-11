@@ -80,7 +80,7 @@ export function Registro() {
             placeholder="3777 123456"
             autoComplete="tel"
           />
-          <span className="ayuda">Con código de área, sin el 0 y sin el 15.</span>
+          <span className="ayuda">Con código de área, por ejemplo 3777 123456.</span>
         </label>
         <label className="campo">
           Contraseña

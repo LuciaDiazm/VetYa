@@ -22,9 +22,11 @@ export function leerToken(): string | null {
 // Error con el mensaje que devuelve el backend, para mostrarlo en pantalla.
 export class ErrorApi extends Error {
   status: number
-  constructor(status: number, mensaje: string) {
+  datos: Record<string, unknown> | null // el cuerpo completo de la respuesta, por si trae datos extra
+  constructor(status: number, mensaje: string, datos: Record<string, unknown> | null = null) {
     super(mensaje)
     this.status = status
+    this.datos = datos
   }
 }
 
@@ -40,7 +42,7 @@ async function apiFetch<T>(ruta: string, opciones: RequestInit = {}): Promise<T>
   })
   const cuerpo = respuesta.status === 204 ? null : await respuesta.json().catch(() => null)
   if (!respuesta.ok) {
-    throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
+    throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`, cuerpo)
   }
   return cuerpo as T
 }
