@@ -1,0 +1,57 @@
+/* Estilos provisorios. El diseño definitivo se hace con la landing. */
+:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2a37;
+  background: #ffffff;
+}
+
+body {
+  margin: 0;
+}
+
+.contenedor {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.boton-whatsapp {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #1fa855;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.servicios {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.servicios li {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.servicios p {
+  margin: 6px 0 0;
+  color: #4b5563;
+}
+
+.categoria {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.error {
+  color: #b91c1c;
+}
