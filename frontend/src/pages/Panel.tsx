@@ -1,10 +1,10 @@
-import { BellRing, CalendarDays, CalendarPlus, Syringe } from 'lucide-react'
+import { BellRing, CalendarDays, CalendarPlus, HeartPulse, Syringe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet } from '../lib/api'
 import { diaLargo, hoyArgentina } from '../lib/fechas'
-import type { Turno } from '../types'
+import type { ResumenRecordatorios, Turno } from '../types'
 import { TarjetaTurno } from '../components/TarjetaTurno'
 
 // Inicio del panel: lo que hay que hacer hoy.
@@ -12,11 +12,13 @@ export function Panel() {
   const { usuario } = useAuth()
   const [hoy] = useState(hoyArgentina)
   const [turnos, setTurnos] = useState<Turno[] | null>(null)
+  const [resumen, setResumen] = useState<ResumenRecordatorios | null>(null)
 
   useEffect(() => {
     apiGet<Turno[]>(`/turnos?desde=${hoy}`)
       .then(setTurnos)
       .catch(() => setTurnos([]))
+    apiGet<ResumenRecordatorios>('/recordatorios/resumen').then(setResumen).catch(() => {})
   }, [hoy])
 
   const activos = (turnos ?? []).filter((t) => t.estado !== 'CANCELADO')
@@ -69,27 +71,24 @@ export function Panel() {
         </Link>
       </section>
 
-      <div className="grilla-resumen">
-        <section className="tarjeta">
-          <div className="resumen-titulo">
-            <span className="icono-circulo">
-              <Syringe size={22} aria-hidden="true" />
-            </span>
-            <h2>Vacunas por vencer</h2>
-          </div>
-          <p className="vacio">Las mascotas que necesitan un refuerzo esta semana van a aparecer acá.</p>
-        </section>
-
-        <section className="tarjeta">
-          <div className="resumen-titulo">
-            <span className="icono-circulo">
-              <BellRing size={22} aria-hidden="true" />
-            </span>
-            <h2>Avisos para enviar</h2>
-          </div>
-          <p className="vacio">Los recordatorios de WhatsApp pendientes, listos para mandar con un clic.</p>
-        </section>
-      </div>
+      {resumen && (
+        <div className="grilla-resumen">
+          {[
+            { cantidad: resumen.turnosManana, icono: BellRing, singular: 'turno de mañana para recordar', plural: 'turnos de mañana para recordar' },
+            { cantidad: resumen.dosis, icono: Syringe, singular: 'vacuna o desparasitación por vencer', plural: 'vacunas y desparasitaciones por vencer' },
+            { cantidad: resumen.recuperar, icono: HeartPulse, singular: 'cliente para recuperar', plural: 'clientes para recuperar' },
+          ].map(({ cantidad, icono: Icono, singular, plural }) => (
+            <Link key={plural} to="/panel/recordatorios" className="tarjeta resumen-numero">
+              <span className="icono-circulo">
+                <Icono size={22} aria-hidden="true" />
+              </span>
+              <span>
+                <strong>{cantidad}</strong> {cantidad === 1 ? singular : plural}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
     </>
   )
 }

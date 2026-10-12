@@ -252,3 +252,24 @@ export interface Turno {
   veterinario: { id: number; nombre: string; apellido: string } | null
   consulta: { id: number } | null
 }
+
+// ---------- Recordatorios ----------
+
+interface MascotaConDueno {
+  id: number
+  nombre: string
+  especie: EspecieMascota
+  cliente: { id: number; nombre: string; apellido: string; telefono: string }
+}
+
+export interface Pendientes {
+  turnosManana: { id: number; fechaHoraInicio: string; mascota: MascotaConDueno; servicio: { nombre: string } }[]
+  dosis: (AplicacionSanitaria & { mascotaId: number; mascota: MascotaConDueno; tieneTurno: boolean })[]
+  recuperar: { mascota: MascotaConDueno; ultimaVisita: string | null; vencidas: string[]; sinVenir: boolean }[]
+}
+
+export interface ResumenRecordatorios {
+  turnosManana: number
+  dosis: number
+  recuperar: number
+}

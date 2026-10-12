@@ -2,6 +2,7 @@ import { BellRing, CalendarDays, HeartHandshake, House, LogOut, PawPrint, Settin
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
+import type { ResumenRecordatorios } from '../types'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from './Logo'
 
@@ -11,6 +12,7 @@ export function DisenoPanel() {
   const navegar = useNavigate()
   const ubicacion = useLocation()
   const solicitudesNuevas = useSolicitudesNuevas(ubicacion.pathname)
+  const avisosPendientes = useAvisosPendientes(ubicacion.pathname)
 
   function cerrarSesion() {
     // Ver el comentario en BarraNavegacion: navegar y salir en la misma transición.
@@ -24,7 +26,7 @@ export function DisenoPanel() {
     { ruta: '/panel', nombre: 'Hoy', icono: House, fin: true },
     { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
     { ruta: '/panel/clientes', nombre: 'Clientes y mascotas', icono: PawPrint },
-    { ruta: '/panel/recordatorios', nombre: 'Recordatorios', icono: BellRing },
+    { ruta: '/panel/recordatorios', nombre: 'Recordatorios', icono: BellRing, globo: avisosPendientes },
     { ruta: '/panel/adopciones', nombre: 'Adopciones', icono: HeartHandshake, globo: solicitudesNuevas },
     ...(usuario?.rol === 'ADMIN'
       ? [{ ruta: '/panel/configuracion', nombre: 'Configuración', icono: Settings }]
@@ -82,4 +84,19 @@ function useSolicitudesNuevas(ruta: string) {
     return () => window.removeEventListener('solicitudes-actualizadas', consultar)
   }, [ruta])
   return nuevas
+}
+
+// Turnos de mañana y dosis por vencer que todavía no se avisaron.
+function useAvisosPendientes(ruta: string) {
+  const [cantidad, setCantidad] = useState(0)
+  useEffect(() => {
+    const consultar = () =>
+      apiGet<ResumenRecordatorios>('/recordatorios/resumen')
+        .then((r) => setCantidad(r.turnosManana + r.dosis))
+        .catch(() => {})
+    consultar()
+    window.addEventListener('recordatorios-actualizados', consultar)
+    return () => window.removeEventListener('recordatorios-actualizados', consultar)
+  }, [ruta])
+  return cantidad
 }

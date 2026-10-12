@@ -334,6 +334,33 @@ async function main() {
     await prisma.cliente.create({ data: { clinicaId, ...c, mascotas: { create: [...mascotas] } } });
   }
 
+  // ---------- Historia de ejemplo, para que los recordatorios tengan casos en la demo ----------
+  // Las fechas son relativas al día en que se corre el seed.
+  const lola = await prisma.mascota.findFirst({ where: { nombre: "Lola", cliente: { clinicaId } } });
+  const simon = await prisma.mascota.findFirst({ where: { nombre: "Simón", cliente: { clinicaId } } });
+  if (lola && simon && (await prisma.consulta.count({ where: { mascotaId: { in: [lola.id, simon.id] } } })) === 0) {
+    const fecha = (dias: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() + dias);
+      return new Date(`${d.toISOString().slice(0, 10)}T00:00:00.000Z`);
+    };
+    // Lola: no viene hace 8 meses y tiene la séxtuple vencida hace 2 meses → "para recuperar".
+    await prisma.consulta.create({
+      data: {
+        mascotaId: lola.id, veterinarioId: vet.id, fecha: fecha(-240), motivo: "Control y vacunación", pesoKg: 21.3,
+        diagnostico: "Buen estado general",
+        aplicaciones: { create: { mascotaId: lola.id, tipo: "VACUNA", producto: "Séxtuple", fechaAplicacion: fecha(-240), fechaProximaDosis: fecha(-60) } },
+      },
+    });
+    // Simón: le toca la desparasitación en 3 días → "por vencer".
+    await prisma.consulta.create({
+      data: {
+        mascotaId: simon.id, veterinarioId: vet.id, fecha: fecha(-87), motivo: "Desparasitación", pesoKg: 4.2,
+        aplicaciones: { create: { mascotaId: simon.id, tipo: "DESPARASITACION", producto: "Desparasitación interna", fechaAplicacion: fecha(-87), fechaProximaDosis: fecha(3) } },
+      },
+    });
+  }
+
   console.log("Datos de prueba al día.");
 }
 

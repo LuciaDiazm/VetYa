@@ -6,6 +6,7 @@ import { authRouter } from "./routes/auth";
 import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { consultasRouter } from "./routes/consultas";
 import { publicoRouter } from "./routes/publico";
+import { recordatoriosRouter } from "./routes/recordatorios";
 import { turnosPublicoRouter, turnosRouter } from "./routes/turnos";
 import { usuariosRouter } from "./routes/usuarios";
 
@@ -32,6 +33,7 @@ app.use("/api/clientes", clientesRouter);
 app.use("/api/mascotas", mascotasRouter);
 app.use("/api/turnos", turnosRouter);
 app.use("/api/consultas", consultasRouter);
+app.use("/api/recordatorios", recordatoriosRouter);
 
 app.use(erroresDeSubida);
 
