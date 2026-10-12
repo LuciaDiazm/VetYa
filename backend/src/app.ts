@@ -4,6 +4,7 @@ import { CARPETA_SUBIDAS } from "./lib/subidas";
 import { adopcionesPublicoRouter, adopcionesRouter, erroresDeSubida } from "./routes/adopciones";
 import { authRouter } from "./routes/auth";
 import { configuracionRouter } from "./routes/configuracion";
+import { estadisticasRouter } from "./routes/estadisticas";
 import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { consultasRouter } from "./routes/consultas";
 import { miCuentaRouter } from "./routes/miCuenta";
@@ -38,6 +39,7 @@ app.use("/api/consultas", consultasRouter);
 app.use("/api/recordatorios", recordatoriosRouter);
 app.use("/api/mi-cuenta", miCuentaRouter);
 app.use("/api/configuracion", configuracionRouter);
+app.use("/api/estadisticas", estadisticasRouter);
 
 app.use(erroresDeSubida);
 

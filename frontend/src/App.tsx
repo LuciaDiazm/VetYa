@@ -5,6 +5,7 @@ import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
 import { AuthProvider } from './context/AuthContext'
 import { Configuracion } from './pages/panel/configuracion/Configuracion'
+import { Estadisticas } from './pages/panel/Estadisticas'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -77,6 +78,7 @@ function App() {
             <Route path="mascotas/:id/consulta" element={<NuevaConsulta />} />
             <Route path="recordatorios" element={<Recordatorios />} />
             <Route path="adopciones" element={<Adopciones />} />
+            <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="adopciones/nuevo" element={<FormularioAnimal />} />
             <Route path="adopciones/:id" element={<FormularioAnimal />} />
             <Route

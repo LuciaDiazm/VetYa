@@ -361,6 +361,79 @@ async function main() {
     });
   }
 
+  // ---------- Historial de turnos de ejemplo (para la pantalla de estadísticas) ----------
+  // Turnos ya pasados de los últimos 10 meses, con estados y orígenes variados. Solo se crean si
+  // todavía no hay ningún turno pasado. No generan consultas, así no cambian los casos de los recordatorios.
+  const inicioDeHoy = new Date(`${new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10)}T03:00:00.000Z`);
+  if ((await prisma.turno.count({ where: { clinicaId, fechaHoraInicio: { lt: inicioDeHoy } } })) === 0) {
+    const nombres = ["Firulais", "Tom", "Coco"];
+    const mascotasHistorial = await prisma.mascota.findMany({
+      where: { nombre: { in: nombres }, cliente: { clinicaId } },
+      include: { cliente: true },
+    });
+    const serviciosHistorial = await prisma.servicio.findMany({ where: { clinicaId, reservableOnline: true } });
+    const veterinaria = await prisma.usuario.findFirst({ where: { clinicaId, rol: "VETERINARIO" } });
+    const horas = ["09:00", "09:45", "10:30", "11:15", "17:00", "17:45", "18:30", "19:15"];
+
+    // Números "al azar" pero siempre iguales, para que la demo sea reproducible.
+    let semilla = 20261012;
+    const azar = () => {
+      semilla = (semilla * 1103515245 + 12345) % 2147483648;
+      return semilla / 2147483648;
+    };
+    const elegir = <T,>(lista: T[]) => lista[Math.floor(azar() * lista.length)];
+
+    const turnos = [];
+    for (let dias = 300; dias >= 1; dias--) {
+      const dia = new Date(inicioDeHoy.getTime() - dias * 24 * 3600 * 1000);
+      const diaSemana = new Date(dia.getTime() - 3 * 3600 * 1000).getUTCDay();
+      if (diaSemana === 0) continue; // domingo cerrado
+      // Lunes y viernes vienen más cargados; el sábado solo hay mañana.
+      const cantidad = Math.floor(azar() * (diaSemana === 1 || diaSemana === 5 ? 5 : 3.5));
+      const horasDelDia = diaSemana === 6 ? horas.slice(0, 4) : horas;
+      const usadas = new Set<string>();
+      for (let i = 0; i < cantidad && usadas.size < horasDelDia.length; i++) {
+        let hora = elegir(horasDelDia);
+        while (usadas.has(hora)) hora = elegir(horasDelDia);
+        usadas.add(hora);
+        const servicio = elegir(serviciosHistorial);
+        const inicio = new Date(dia.getTime() + (Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3))) * 60 * 1000);
+        const r = azar();
+        const o = azar();
+        turnos.push({
+          clinicaId,
+          mascotaId: elegir(mascotasHistorial).id,
+          servicioId: servicio.id,
+          veterinarioId: veterinaria?.id ?? null,
+          fechaHoraInicio: inicio,
+          fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
+          estado: r < 0.8 ? ("ATENDIDO" as const) : r < 0.92 ? ("AUSENTE" as const) : ("CANCELADO" as const),
+          origen: o < 0.3 ? ("ONLINE" as const) : o < 0.8 ? ("TELEFONO" as const) : ("MOSTRADOR" as const),
+          creadoEn: new Date(inicio.getTime() - Math.floor(1 + azar() * 6) * 24 * 3600 * 1000),
+        });
+      }
+    }
+    if (mascotasHistorial.length > 0 && serviciosHistorial.length > 0) {
+      await prisma.turno.createMany({ data: turnos });
+
+      // Avisos de "te extrañamos" de hace 3 meses, para el indicador de clientes recuperados.
+      if (veterinaria) {
+        for (const [i, m] of mascotasHistorial.entries()) {
+          const enviado = new Date(inicioDeHoy.getTime() - (82 - i) * 24 * 3600 * 1000);
+          await prisma.recordatorio.create({
+            data: {
+              clienteId: m.clienteId,
+              usuarioId: veterinaria.id,
+              tipo: "RECUPERO",
+              mensaje: `Hola ${m.cliente.nombre}, hace mucho que no vemos a ${m.nombre}. ¿Le damos un turno para un control?`,
+              enviadoEn: enviado,
+            },
+          });
+        }
+      }
+    }
+  }
+
   console.log("Datos de prueba al día.");
 }
 

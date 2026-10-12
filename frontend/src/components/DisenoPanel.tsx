@@ -1,4 +1,4 @@
-import { BellRing, CalendarDays, HeartHandshake, House, LogOut, PawPrint, Settings } from 'lucide-react'
+import { BarChart3, BellRing, CalendarDays, HeartHandshake, House, LogOut, PawPrint, Settings } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -28,6 +28,7 @@ export function DisenoPanel() {
     { ruta: '/panel/clientes', nombre: 'Clientes y mascotas', icono: PawPrint },
     { ruta: '/panel/recordatorios', nombre: 'Recordatorios', icono: BellRing, globo: avisosPendientes },
     { ruta: '/panel/adopciones', nombre: 'Adopciones', icono: HeartHandshake, globo: solicitudesNuevas },
+    { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
     ...(usuario?.rol === 'ADMIN'
       ? [{ ruta: '/panel/configuracion', nombre: 'Configuración', icono: Settings }]
       : []),
