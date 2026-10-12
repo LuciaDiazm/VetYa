@@ -68,8 +68,11 @@ export function TarjetaTurno({ turno, alCambiar }: { turno: Turno; alCambiar: (t
                 <MessageCircle size={18} aria-hidden="true" /> Confirmar por WhatsApp
               </a>
             )}
-            <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar('ATENDIDO')}>
-              Atendido
+            <Link to={`/panel/mascotas/${turno.mascota.id}/consulta?turno=${turno.id}`} className="boton">
+              Atender
+            </Link>
+            <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('ATENDIDO')}>
+              Atendido sin consulta
             </button>
             <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('AUSENTE')}>
               No vino
@@ -79,7 +82,20 @@ export function TarjetaTurno({ turno, alCambiar }: { turno: Turno; alCambiar: (t
             </button>
           </div>
         )}
-        {terminado && turno.estado !== 'CANCELADO' && (
+        {turno.estado === 'ATENDIDO' && (
+          <div className="turno-acciones">
+            {turno.consulta ? (
+              <Link to={`/panel/mascotas/${turno.mascota.id}`} className="boton boton-contorno">
+                Ver historia clínica
+              </Link>
+            ) : (
+              <Link to={`/panel/mascotas/${turno.mascota.id}/consulta?turno=${turno.id}`} className="boton">
+                Cargar consulta
+              </Link>
+            )}
+          </div>
+        )}
+        {terminado && turno.estado !== 'CANCELADO' && !turno.consulta && (
           <button type="button" className="boton-texto enlace-chico" onClick={() => cambiar('CONFIRMADO')}>
             Deshacer
           </button>

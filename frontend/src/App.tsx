@@ -21,6 +21,7 @@ import { MascotaDetalle } from './pages/panel/MascotaDetalle'
 import { NuevoCliente } from './pages/panel/NuevoCliente'
 import { Agenda } from './pages/panel/Agenda'
 import { NuevoTurno } from './pages/panel/NuevoTurno'
+import { NuevaConsulta } from './pages/panel/NuevaConsulta'
 import { SacarTurno } from './pages/SacarTurno'
 
 // Páginas públicas y de dueños: llevan la barra de arriba.
@@ -72,6 +73,7 @@ function App() {
             <Route path="clientes/nuevo" element={<NuevoCliente />} />
             <Route path="clientes/:id" element={<ClienteDetalle />} />
             <Route path="mascotas/:id" element={<MascotaDetalle />} />
+            <Route path="mascotas/:id/consulta" element={<NuevaConsulta />} />
             <Route path="recordatorios" element={<EnConstruccion titulo="Recordatorios" />} />
             <Route path="adopciones" element={<Adopciones />} />
             <Route path="adopciones/nuevo" element={<FormularioAnimal />} />

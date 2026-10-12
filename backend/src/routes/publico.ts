@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { diaArgentina } from "../lib/agenda";
 import { prisma } from "../lib/prisma";
 
 // Rutas públicas: las usa la web sin iniciar sesión.
@@ -29,7 +30,8 @@ publicoRouter.get("/servicios", async (_req, res) => {
 
 // Todo lo que necesita la página de inicio en una sola consulta.
 publicoRouter.get("/sitio", async (_req, res) => {
-  const hoy = new Date();
+  // Día de hoy en Argentina, a la medianoche UTC (igual que se guardan las fechas sin hora).
+  const hoy = new Date(`${diaArgentina(new Date())}T00:00:00.000Z`);
   const [clinica, servicios, equipo, opiniones, formasPago, planes, promociones, preguntas] = await Promise.all([
     prisma.clinica.findUnique({
       where: { id: CLINICA_ID },

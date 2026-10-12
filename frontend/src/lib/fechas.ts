@@ -28,6 +28,18 @@ export function diaLargo(fecha: string) {
   return DIA_LARGO.format(new Date(`${fecha}T12:00:00Z`))
 }
 
+// "2026-10-12" → "lunes 12 de octubre de 2026" (para fechas lejanas, como la próxima dosis)
+const DIA_LARGO_ANIO = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+export function diaLargoConAnio(fecha: string) {
+  return DIA_LARGO_ANIO.format(new Date(`${fecha}T12:00:00Z`))
+}
+
+// Fecha y hora ISO → "11 de oct de 2026" según el día en Argentina
+const FECHA_CORTA_AR = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: ZONA })
+export function fechaCortaDe(iso: string) {
+  return FECHA_CORTA_AR.format(new Date(iso))
+}
+
 // "2026-10-12" → "lun 12 oct"
 export function diaCorto(fecha: string) {
   return DIA_CORTO.format(new Date(`${fecha}T12:00:00Z`)).replace(/\./g, '').replace(',', '')

@@ -203,9 +203,13 @@ export interface ConsultaResumen {
   fecha: string
   motivo: string
   pesoKg: string | null
+  temperatura: string | null
   diagnostico: string | null
   tratamiento: string | null
+  observaciones: string | null
   veterinario: { nombre: string; apellido: string }
+  aplicaciones: { id: number; tipo: 'VACUNA' | 'DESPARASITACION'; producto: string }[]
+  turno: { servicio: { nombre: string } } | null
 }
 
 export interface AplicacionSanitaria {
@@ -220,6 +224,7 @@ export interface TurnoResumen {
   id: number
   fechaHoraInicio: string
   estado: string
+  observaciones: string | null
   servicio: { nombre: string }
 }
 

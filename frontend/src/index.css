@@ -3291,3 +3291,95 @@ svg {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   Historia clínica
+   ========================================================= */
+
+.fila-aplicacion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio-chico);
+}
+
+.fila-aplicacion-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.campo-en-linea {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-weight: 400;
+}
+
+.boton-icono {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gris);
+  cursor: pointer;
+}
+
+.boton-icono:hover {
+  background: var(--rojo-suave);
+  color: var(--rojo);
+}
+
+.lista-turnos-mascota {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-turnos-mascota li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radio-chico);
+  background: var(--fondo);
+}
+
+.lista-turnos-mascota li > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-turnos-mascota li > span span {
+  color: var(--gris);
+}
+
+.consulta-signos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.lista-consultas .chips {
+  margin: 8px 0;
+}
+
+.lista-consultas .chip-dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--superficie);
+}

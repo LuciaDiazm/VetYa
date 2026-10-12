@@ -1,28 +1,24 @@
-import { ArrowLeft, CalendarDays, MessageCircle, Pencil, Stethoscope, Syringe } from 'lucide-react'
+import { ArrowLeft, CalendarDays, MessageCircle, Pencil, Plus, Stethoscope, Syringe, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CamposMascota } from '../../components/CamposMascota'
+import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
+import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
 import { datosDeMascota, type DatosMascota } from '../../lib/formularios'
-import { apiGet, apiPatch, apiPut } from '../../lib/api'
 import { edadTexto, ESPECIES, FECHA_CORTA, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
-import type { AplicacionSanitaria, FichaMascota } from '../../types'
+import type { AplicacionSanitaria, ConsultaResumen, FichaMascota } from '../../types'
 import { IconoEspecie } from './Clientes'
 
-const FECHA_HORA = new Intl.DateTimeFormat('es-AR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
 // Estado de una dosis según su fecha de próxima aplicación.
-function estadoDosis(a: AplicacionSanitaria, hoy = new Date()) {
+function estadoDosis(a: AplicacionSanitaria, hoy: string) {
   if (!a.fechaProximaDosis) return null
-  const dias = Math.ceil((new Date(a.fechaProximaDosis).getTime() - hoy.getTime()) / (24 * 3600 * 1000))
+  const dias = Math.round(
+    (new Date(a.fechaProximaDosis).getTime() - new Date(`${hoy}T00:00:00Z`).getTime()) / (24 * 3600 * 1000),
+  )
   if (dias < 0) return { clase: 'vencida', texto: 'Vencida' }
-  if (dias <= 15) return { clase: 'por-vencer', texto: dias <= 1 ? 'Vence ya' : `Vence en ${dias} días` }
+  if (dias <= 15) return { clase: 'por-vencer', texto: dias === 0 ? 'Vence hoy' : dias === 1 ? 'Vence mañana' : `Vence en ${dias} días` }
   return { clase: 'al-dia', texto: 'Al día' }
 }
 
@@ -37,6 +33,17 @@ function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
   })
 }
 
+// "subió 0,4 kg" / "bajó 1,2 kg" respecto de la consulta anterior con peso.
+function cambioDePeso(consultas: ConsultaResumen[], indice: number) {
+  const actual = consultas[indice].pesoKg
+  const anterior = consultas.slice(indice + 1).find((c) => c.pesoKg)?.pesoKg
+  if (!actual || !anterior) return null
+  const diferencia = Number(actual) - Number(anterior)
+  if (Math.abs(diferencia) < 0.05) return 'igual que antes'
+  const texto = Math.abs(diferencia).toLocaleString('es-AR', { maximumFractionDigits: 2 })
+  return diferencia > 0 ? `subió ${texto} kg` : `bajó ${texto} kg`
+}
+
 export function MascotaDetalle() {
   const { id } = useParams()
   const [mascota, setMascota] = useState<FichaMascota | null>(null)
@@ -44,6 +51,7 @@ export function MascotaDetalle() {
   const [editando, setEditando] = useState(false)
   const [datos, setDatos] = useState<DatosMascota | null>(null)
   const [guardando, setGuardando] = useState(false)
+  const [hoy] = useState(hoyArgentina)
 
   const cargar = useCallback(() => {
     apiGet<FichaMascota>(`/mascotas/${id}`)
@@ -78,6 +86,12 @@ export function MascotaDetalle() {
     cargar()
   }
 
+  async function borrarAplicacion(a: AplicacionSanitaria) {
+    if (!window.confirm(`¿Borrar el registro de ${a.producto} del ${FECHA_CORTA.format(new Date(a.fechaAplicacion))}?`)) return
+    await apiDelete(`/consultas/aplicaciones/${a.id}`)
+    cargar()
+  }
+
   if (!mascota) {
     return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
   }
@@ -107,17 +121,25 @@ export function MascotaDetalle() {
             </p>
           </div>
         </div>
-        <a
-          href={enlaceWhatsapp(cliente.telefono, `Hola ${cliente.nombre}, te escribimos de la veterinaria por ${mascota.nombre}.`)}
-          target="_blank"
-          rel="noreferrer"
-          className="boton boton-whatsapp"
-        >
-          <MessageCircle size={20} aria-hidden="true" /> Escribir a {cliente.nombre}
-        </a>
+        <div className="acciones-contacto">
+          {mascota.activo && (
+            <Link to={`/panel/mascotas/${mascota.id}/consulta`} className="boton boton-secundario">
+              <Stethoscope size={20} aria-hidden="true" /> Nueva consulta
+            </Link>
+          )}
+          <a
+            href={enlaceWhatsapp(cliente.telefono, `Hola ${cliente.nombre}, te escribimos de la veterinaria por ${mascota.nombre}.`)}
+            target="_blank"
+            rel="noreferrer"
+            className="boton boton-whatsapp"
+          >
+            <MessageCircle size={20} aria-hidden="true" /> Escribir a {cliente.nombre}
+          </a>
+        </div>
       </div>
 
       {error && <p className="mensaje-error">{error}</p>}
+      {mascota.observaciones && <p className="observaciones">⚠ {mascota.observaciones}</p>}
 
       <div className="ficha-panel">
         {/* ---------- Vacunas y desparasitaciones ---------- */}
@@ -132,7 +154,7 @@ export function MascotaDetalle() {
           ) : (
             <ul className="lista-dosis">
               {dosis.map((a) => {
-                const estado = estadoDosis(a)
+                const estado = estadoDosis(a, hoy)
                 return (
                   <li key={a.id}>
                     <div>
@@ -142,27 +164,40 @@ export function MascotaDetalle() {
                         {FECHA_CORTA.format(new Date(a.fechaAplicacion))}
                       </span>
                     </div>
-                    {a.fechaProximaDosis && (
-                      <div className="dosis-proxima">
-                        <span>Próxima: {FECHA_CORTA.format(new Date(a.fechaProximaDosis))}</span>
-                        {estado && <span className={`estado-dosis ${estado.clase}`}>{estado.texto}</span>}
-                      </div>
-                    )}
+                    <div className="dosis-proxima">
+                      {a.fechaProximaDosis ? (
+                        <>
+                          <span>Próxima: {FECHA_CORTA.format(new Date(a.fechaProximaDosis))}</span>
+                          {estado && <span className={`estado-dosis ${estado.clase}`}>{estado.texto}</span>}
+                        </>
+                      ) : (
+                        <span className="ayuda">Sin refuerzo</span>
+                      )}
+                      <button
+                        type="button"
+                        className="boton-icono"
+                        onClick={() => borrarAplicacion(a)}
+                        aria-label={`Borrar ${a.producto}`}
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
                   </li>
                 )
               })}
             </ul>
           )}
+          {mascota.activo && <AplicacionAnterior mascota={mascota} alGuardar={cargar} />}
         </section>
 
-        {/* ---------- Próximos turnos ---------- */}
+        {/* ---------- Turnos ---------- */}
         <section className="tarjeta bloque-ficha">
           <div className="bloque-ficha-titulo">
             <h2>
-              <CalendarDays size={22} aria-hidden="true" /> Próximos turnos
+              <CalendarDays size={22} aria-hidden="true" /> Turnos
             </h2>
             {mascota.activo && (
-              <Link to={`/panel/agenda/nuevo?mascota=${mascota.id}`} className="boton boton-secundario">
+              <Link to={`/panel/agenda/nuevo?mascota=${mascota.id}`} className="boton boton-contorno">
                 Dar turno
               </Link>
             )}
@@ -170,12 +205,25 @@ export function MascotaDetalle() {
           {mascota.turnos.length === 0 ? (
             <p className="vacio">No tiene turnos pendientes.</p>
           ) : (
-            <ul className="lista-simple">
-              {mascota.turnos.map((t) => (
-                <li key={t.id}>
-                  <strong>{t.servicio.nombre}</strong>: {FECHA_HORA.format(new Date(t.fechaHoraInicio))}
-                </li>
-              ))}
+            <ul className="lista-turnos-mascota">
+              {mascota.turnos.map((t) => {
+                const dia = diaDe(t.fechaHoraInicio)
+                return (
+                  <li key={t.id}>
+                    <span>
+                      <strong>{t.servicio.nombre}</strong>
+                      <span>
+                        {dia === hoy ? 'Hoy' : diaLargo(dia)} a las {horaDe(t.fechaHoraInicio)}
+                      </span>
+                    </span>
+                    {dia === hoy && (
+                      <Link to={`/panel/mascotas/${mascota.id}/consulta?turno=${t.id}`} className="boton">
+                        Atender
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
         </section>
@@ -186,24 +234,65 @@ export function MascotaDetalle() {
             <h2>
               <Stethoscope size={22} aria-hidden="true" /> Historia clínica
             </h2>
+            {mascota.activo && (
+              <Link to={`/panel/mascotas/${mascota.id}/consulta`} className="boton boton-contorno">
+                <Plus size={18} aria-hidden="true" /> Nueva consulta
+              </Link>
+            )}
           </div>
           {mascota.consultas.length === 0 ? (
             <p className="vacio">Todavía no tiene consultas registradas.</p>
           ) : (
             <ol className="lista-consultas">
-              {mascota.consultas.map((c) => (
-                <li key={c.id}>
-                  <p className="consulta-cabecera">
-                    <strong>{FECHA_CORTA.format(new Date(c.fecha))}</strong>, {c.motivo}
-                  </p>
-                  {c.diagnostico && <p>Diagnóstico: {c.diagnostico}</p>}
-                  {c.tratamiento && <p>Tratamiento: {c.tratamiento}</p>}
-                  <p className="ayuda">
-                    Atendió {c.veterinario.nombre} {c.veterinario.apellido}
-                    {c.pesoKg ? `. Peso: ${Number(c.pesoKg)} kg` : ''}
-                  </p>
-                </li>
-              ))}
+              {mascota.consultas.map((c, i) => {
+                const cambio = cambioDePeso(mascota.consultas, i)
+                return (
+                  <li key={c.id}>
+                    <p className="consulta-cabecera">
+                      <strong>{fechaCortaDe(c.fecha)}</strong>: {c.motivo}
+                    </p>
+                    {(c.pesoKg || c.temperatura) && (
+                      <p className="consulta-signos">
+                        {c.pesoKg && (
+                          <span>
+                            Peso: <strong>{Number(c.pesoKg).toLocaleString('es-AR')} kg</strong>
+                            {cambio && ` (${cambio})`}
+                          </span>
+                        )}
+                        {c.temperatura && (
+                          <span>
+                            Temperatura: <strong>{Number(c.temperatura).toLocaleString('es-AR')} °C</strong>
+                          </span>
+                        )}
+                      </p>
+                    )}
+                    {c.diagnostico && (
+                      <p>
+                        <strong>Diagnóstico:</strong> {c.diagnostico}
+                      </p>
+                    )}
+                    {c.tratamiento && (
+                      <p>
+                        <strong>Tratamiento:</strong> {c.tratamiento}
+                      </p>
+                    )}
+                    {c.observaciones && <p className="ayuda">{c.observaciones}</p>}
+                    {c.aplicaciones.length > 0 && (
+                      <p className="chips chips-chicas">
+                        {c.aplicaciones.map((a) => (
+                          <span key={a.id} className="chip-dato">
+                            <Syringe size={14} aria-hidden="true" /> {a.producto}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                    <p className="ayuda">
+                      Atendió {c.veterinario.nombre} {c.veterinario.apellido}
+                      {c.turno ? ` (turno de ${c.turno.servicio.nombre.toLowerCase()})` : ''}
+                    </p>
+                  </li>
+                )
+              })}
             </ol>
           )}
         </section>
@@ -265,7 +354,6 @@ export function MascotaDetalle() {
                   </dd>
                 </div>
               </dl>
-              {mascota.observaciones && <p className="observaciones">{mascota.observaciones}</p>}
               <button
                 type="button"
                 className={`boton-texto ${mascota.activo ? 'texto-peligro' : ''}`}
@@ -278,5 +366,68 @@ export function MascotaDetalle() {
         </section>
       </div>
     </>
+  )
+}
+
+// Registrar una vacuna o desparasitación que se aplicó antes (por ejemplo, la que figura en la libreta de papel).
+function AplicacionAnterior({ mascota, alGuardar }: { mascota: FichaMascota; alGuardar: () => void }) {
+  const [abierto, setAbierto] = useState(false)
+  const [fecha, setFecha] = useState(hoyArgentina)
+  const [datos, setDatos] = useState<DatosAplicacion>({ tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: '' })
+  const [error, setError] = useState<string | null>(null)
+  const [guardando, setGuardando] = useState(false)
+
+  async function guardar(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setGuardando(true)
+    try {
+      await apiPost('/consultas/aplicaciones', {
+        mascotaId: mascota.id,
+        tipo: datos.tipo,
+        producto: datos.producto,
+        lote: datos.lote || undefined,
+        fechaAplicacion: fecha,
+        fechaProximaDosis: datos.fechaProximaDosis || undefined,
+      })
+      setAbierto(false)
+      setDatos({ tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: '' })
+      alGuardar()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  if (!abierto) {
+    return (
+      <button type="button" className="boton-texto enlace-chico" onClick={() => setAbierto(true)}>
+        + Cargar una vacuna o desparasitación anterior (de la libreta)
+      </button>
+    )
+  }
+
+  return (
+    <form className="formulario subformulario" onSubmit={guardar}>
+      <label className="campo campo-fecha">
+        ¿Cuándo se aplicó?
+        <input type="date" value={fecha} max={hoyArgentina()} onChange={(e) => setFecha(e.target.value)} required />
+      </label>
+      <FilaAplicacion datos={datos} cambiar={setDatos} especie={mascota.especie} desde={fecha} />
+      {error && (
+        <p className="mensaje-error" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="formulario-botones">
+        <button type="submit" className="boton" disabled={guardando}>
+          {guardando ? 'Guardando…' : 'Guardar'}
+        </button>
+        <button type="button" className="boton-texto" onClick={() => setAbierto(false)}>
+          Cancelar
+        </button>
+      </div>
+    </form>
   )
 }

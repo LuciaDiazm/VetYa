@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
 import { normalizarTelefono } from "../lib/telefono";
@@ -44,7 +45,10 @@ const esquemaMascota = z.object({
     .string()
     .optional()
     .transform((v) => (v ? new Date(`${v}T00:00:00.000Z`) : null))
-    .refine((d) => !d || (!Number.isNaN(d.getTime()) && d <= new Date()), "La fecha de nacimiento no es válida"),
+    .refine(
+      (d) => !d || (!Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) <= diaArgentina(new Date())),
+      "La fecha de nacimiento no es válida",
+    ),
   castrado: z.boolean().default(false),
   observaciones: textoOpcional,
 });
@@ -184,11 +188,16 @@ mascotasRouter.get("/:id", async (req, res) => {
       cliente: true,
       consultas: {
         orderBy: { fecha: "desc" },
-        include: { veterinario: { select: { nombre: true, apellido: true } } },
+        include: {
+          veterinario: { select: { nombre: true, apellido: true } },
+          aplicaciones: { select: { id: true, tipo: true, producto: true } },
+          turno: { select: { servicio: { select: { nombre: true } } } },
+        },
       },
       aplicaciones: { orderBy: { fechaAplicacion: "desc" } },
       turnos: {
-        where: { fechaHoraInicio: { gte: new Date() }, estado: { in: ["PENDIENTE", "CONFIRMADO"] } },
+        // Desde el comienzo de hoy: un turno de las 10:00 se puede atender (y vincular a la consulta) a las 10:05.
+        where: { fechaHoraInicio: { gte: aFechaUTC(diaArgentina(new Date()), "00:00") }, estado: { in: ["PENDIENTE", "CONFIRMADO"] } },
         orderBy: { fechaHoraInicio: "asc" },
         include: { servicio: { select: { nombre: true } } },
       },
