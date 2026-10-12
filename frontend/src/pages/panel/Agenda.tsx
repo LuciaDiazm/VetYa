@@ -12,11 +12,15 @@ export function Agenda() {
   const lunes = lunesDe(dia)
   const [turnosSemana, setTurnosSemana] = useState<Turno[] | null>(null)
   const [verCancelados, setVerCancelados] = useState(false)
+  const [cerrados, setCerrados] = useState<{ fecha: string; motivo: string | null }[]>([])
 
   const cargar = useCallback(() => {
     apiGet<Turno[]>(`/turnos?desde=${lunes}&hasta=${sumarDias(lunes, 6)}`)
       .then(setTurnosSemana)
       .catch(() => setTurnosSemana([]))
+    apiGet<{ fecha: string; motivo: string | null }[]>(`/turnos/dias-cerrados?desde=${lunes}&hasta=${sumarDias(lunes, 6)}`)
+      .then(setCerrados)
+      .catch(() => setCerrados([]))
   }, [lunes])
   useEffect(cargar, [cargar])
 
@@ -26,6 +30,7 @@ export function Agenda() {
   const activos = delDia.filter((t) => t.estado !== 'CANCELADO')
   const cancelados = delDia.filter((t) => t.estado === 'CANCELADO')
   const pendientes = activos.filter((t) => t.estado === 'PENDIENTE').length
+  const cerradoHoy = cerrados.find((c) => c.fecha === dia)
 
   function reemplazar(t: Turno) {
     setTurnosSemana((lista) => lista?.map((x) => (x.id === t.id ? t : x)) ?? null)
@@ -54,16 +59,19 @@ export function Agenda() {
         <div className="semana-dias">
           {Array.from({ length: 6 }, (_, i) => sumarDias(lunes, i)).map((d) => {
             const cantidad = (turnosSemana ?? []).filter((t) => diaDe(t.fechaHoraInicio) === d && t.estado !== 'CANCELADO').length
+            const cerrado = cerrados.some((c) => c.fecha === d)
             return (
               <button
                 key={d}
                 type="button"
-                className={`semana-dia${d === dia ? ' activo' : ''}${d === hoyArgentina() ? ' es-hoy' : ''}`}
+                className={`semana-dia${d === dia ? ' activo' : ''}${d === hoyArgentina() ? ' es-hoy' : ''}${cerrado ? ' cerrado' : ''}`}
                 aria-pressed={d === dia}
                 onClick={() => irA(d)}
               >
                 <span>{diaCorto(d)}</span>
-                <strong>{cantidad === 0 ? '—' : cantidad === 1 ? '1 turno' : `${cantidad} turnos`}</strong>
+                <strong>
+                  {cantidad === 0 ? (cerrado ? 'Cerrado' : '—') : cantidad === 1 ? '1 turno' : `${cantidad} turnos`}
+                </strong>
               </button>
             )
           })}
@@ -76,6 +84,14 @@ export function Agenda() {
         <button type="button" className="boton-texto enlace-chico volver-hoy" onClick={() => irA(hoyArgentina())}>
           Volver a hoy
         </button>
+      )}
+
+      {cerradoHoy && (
+        <p className="aviso-cerrado">
+          La clínica no atiende este día{cerradoHoy.motivo ? ` (${cerradoHoy.motivo})` : ''}. No se ofrecen turnos
+          en la web.
+          {activos.length > 0 && ' Los turnos de abajo se dieron antes de cerrarlo: avisales.'}
+        </p>
       )}
 
       {pendientes > 0 && (

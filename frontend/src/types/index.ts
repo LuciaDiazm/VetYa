@@ -295,3 +295,30 @@ export interface DatosMiCuenta {
   horasCancelacion?: number
   mascotas: MascotaDelDueno[]
 }
+
+// ---------- Configuración ----------
+
+export type ClinicaConfig = Omit<Clinica, 'horarios'> & { horasCancelacion: number }
+
+export interface ServicioConfig extends Servicio {
+  precioReferencia: string | null
+  activo: boolean
+}
+
+export interface Personal extends Omit<Usuario, 'rol'> {
+  rol: 'VETERINARIO' | 'ADMIN'
+  activo: boolean
+  visibleEnWeb: boolean
+  matricula: string | null
+  especialidad: string | null
+  presentacion: string | null
+  fotoUrl: string | null
+}
+
+// Turno ya dado que queda afectado por un cambio de horario o un día cerrado.
+export interface TurnoAfectado {
+  id: number
+  fechaHoraInicio: string
+  servicio: { nombre: string }
+  mascota: { id: number; nombre: string; cliente: { nombre: string; apellido: string; telefono: string } }
+}

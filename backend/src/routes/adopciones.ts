@@ -280,13 +280,16 @@ adopcionesRouter.patch("/solicitudes/:id", async (req, res) => {
 });
 
 // Errores de subida (foto muy pesada, demasiadas fotos) con un mensaje entendible.
-export const erroresDeSubida: ErrorRequestHandler = (err, _req, res, next) => {
+export const erroresDeSubida: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
+    const unaSola = req.originalUrl.startsWith("/api/usuarios/");
     const mensaje =
       err.code === "LIMIT_FILE_SIZE"
         ? "Cada foto puede pesar hasta 8 MB"
         : err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE"
-          ? `Podés subir hasta ${MAX_FOTOS_POR_ANIMAL} fotos`
+          ? unaSola
+            ? "Elegí una sola foto"
+            : `Podés subir hasta ${MAX_FOTOS_POR_ANIMAL} fotos`
           : "No se pudo subir la foto";
     res.status(400).json({ error: mensaje });
     return;

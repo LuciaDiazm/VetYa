@@ -160,6 +160,20 @@ turnosRouter.get("/", async (req, res) => {
   res.json(turnos);
 });
 
+// Días en que la clínica no atiende (para marcarlos en la agenda).
+turnosRouter.get("/dias-cerrados", async (req, res) => {
+  const desde = esFechaValida(req.query.desde) ? req.query.desde : hoy();
+  const hasta = esFechaValida(req.query.hasta) ? req.query.hasta : desde;
+  const dias = await prisma.diaBloqueado.findMany({
+    where: {
+      clinicaId: req.usuario!.clinicaId,
+      fecha: { gte: new Date(`${desde}T00:00:00.000Z`), lte: new Date(`${hasta}T00:00:00.000Z`) },
+    },
+    orderBy: { fecha: "asc" },
+  });
+  res.json(dias.map((d) => ({ fecha: d.fecha.toISOString().slice(0, 10), motivo: d.motivo })));
+});
+
 // Horarios libres de un día para un servicio (el personal puede dar turnos para el mismo día).
 turnosRouter.get("/disponibilidad", async (req, res) => {
   const servicioId = Number(req.query.servicioId);

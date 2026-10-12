@@ -37,3 +37,8 @@ export function enlaceWhatsapp(numero: string, mensaje: string) {
 }
 
 export const MENSAJE_TURNO = 'Hola, quiero pedir un turno para mi mascota.'
+
+// Después de cambiar la configuración, la próxima vez se vuelven a pedir los datos públicos.
+export function olvidarSitio() {
+  pedido = null
+}

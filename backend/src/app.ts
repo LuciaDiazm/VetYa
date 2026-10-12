@@ -3,6 +3,7 @@ import express from "express";
 import { CARPETA_SUBIDAS } from "./lib/subidas";
 import { adopcionesPublicoRouter, adopcionesRouter, erroresDeSubida } from "./routes/adopciones";
 import { authRouter } from "./routes/auth";
+import { configuracionRouter } from "./routes/configuracion";
 import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { consultasRouter } from "./routes/consultas";
 import { miCuentaRouter } from "./routes/miCuenta";
@@ -36,6 +37,7 @@ app.use("/api/turnos", turnosRouter);
 app.use("/api/consultas", consultasRouter);
 app.use("/api/recordatorios", recordatoriosRouter);
 app.use("/api/mi-cuenta", miCuentaRouter);
+app.use("/api/configuracion", configuracionRouter);
 
 app.use(erroresDeSubida);
 

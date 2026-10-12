@@ -4,7 +4,7 @@ import { Pie } from './components/Pie'
 import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
 import { AuthProvider } from './context/AuthContext'
-import { EnConstruccion } from './pages/EnConstruccion'
+import { Configuracion } from './pages/panel/configuracion/Configuracion'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -79,7 +79,14 @@ function App() {
             <Route path="adopciones" element={<Adopciones />} />
             <Route path="adopciones/nuevo" element={<FormularioAnimal />} />
             <Route path="adopciones/:id" element={<FormularioAnimal />} />
-            <Route path="configuracion" element={<EnConstruccion titulo="Configuración" />} />
+            <Route
+              path="configuracion"
+              element={
+                <RutaProtegida roles={['ADMIN']}>
+                  <Configuracion />
+                </RutaProtegida>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
