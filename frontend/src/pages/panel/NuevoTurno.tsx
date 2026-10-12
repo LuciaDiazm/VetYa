@@ -20,7 +20,8 @@ export function NuevoTurno() {
   const [servicio, setServicio] = useState<Servicio | null>(null)
   const [fecha, setFecha] = useState(parametros.get('fecha') ?? hoyArgentina())
   const [libres, setLibres] = useState<string[] | null>(null)
-  const [hora, setHora] = useState<string | null>(null)
+  // Si viene de un rato libre de la agenda, la hora ya queda elegida (si está disponible para el servicio).
+  const [hora, setHora] = useState<string | null>(parametros.get('hora'))
   const [sobreturno, setSobreturno] = useState(false)
   const [origen, setOrigen] = useState<'TELEFONO' | 'MOSTRADOR'>('TELEFONO')
   const [observaciones, setObservaciones] = useState('')
@@ -44,7 +45,9 @@ export function NuevoTurno() {
     if (!servicio || !fecha) return
     let vigente = true
     apiGet<string[]>(`/turnos/disponibilidad?servicioId=${servicio.id}&fecha=${fecha}`).then((r) => {
-      if (vigente) setLibres(r)
+      if (!vigente) return
+      setLibres(r)
+      setHora((h) => (h && r.includes(h) ? h : null))
     })
     return () => {
       vigente = false
@@ -117,8 +120,8 @@ export function NuevoTurno() {
                   className={`chip chip-grande${servicio?.id === s.id ? ' chip-activo' : ''}`}
                   aria-pressed={servicio?.id === s.id}
                   onClick={() => {
+                    // La hora elegida se mantiene si también está libre para este servicio.
                     setServicio(s)
-                    setHora(null)
                     setLibres(null)
                   }}
                 >

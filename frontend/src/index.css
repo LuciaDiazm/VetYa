@@ -3013,6 +3013,12 @@ svg {
 
 /* ---------- Agenda (panel) ---------- */
 
+.agenda-fecha {
+  font-size: 1.15rem;
+  color: var(--tinta) !important;
+}
+
+/* Semana: un botón por día con nombre, número y cantidad de turnos */
 .semana {
   display: flex;
   align-items: stretch;
@@ -3022,7 +3028,7 @@ svg {
 
 .semana-dias {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   flex: 1;
   gap: 6px;
 }
@@ -3031,28 +3037,57 @@ svg {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 10px 6px;
+  min-height: 84px;
+  padding: 8px 4px;
   border: 2px solid var(--borde);
   border-radius: var(--radio-chico);
   background: var(--superficie);
   color: var(--tinta);
   font: inherit;
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 0.18s ease-out,
+    border-color 0.18s ease-out,
+    color 0.18s ease-out,
+    transform 0.12s ease-out;
 }
 
-.semana-dia span {
+.semana-dia:hover {
+  border-color: var(--azul);
+}
+
+.semana-dia:active {
+  transform: scale(0.97);
+}
+
+.semana-dia-nombre {
   font-size: 0.85rem;
+  font-weight: 700;
   text-transform: capitalize;
   color: var(--gris);
 }
 
-.semana-dia strong {
-  font-size: 0.95rem;
+.semana-dia-numero {
+  font-family: var(--fuente-titulos);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.semana-dia-cantidad {
+  font-size: 0.8rem;
+  color: var(--gris);
+  white-space: nowrap;
 }
 
 .semana-dia.es-hoy {
   border-color: var(--amarillo);
+}
+
+.semana-dia.es-hoy .semana-dia-nombre {
+  color: var(--tinta);
 }
 
 .semana-dia.activo {
@@ -3061,33 +3096,82 @@ svg {
   color: #ffffff;
 }
 
-.semana-dia.activo span {
-  color: #d7def0;
+.semana-dia.activo .semana-dia-nombre,
+.semana-dia.activo .semana-dia-cantidad {
+  color: #dfe6f3;
+}
+
+.semana-dia.cerrado:not(.activo) {
+  background: repeating-linear-gradient(135deg, var(--fondo), var(--fondo) 6px, #efe7da 6px, #efe7da 12px);
 }
 
 .boton-flecha {
   display: grid;
   place-items: center;
-  width: 44px;
+  width: 48px;
   border: 2px solid var(--borde);
   border-radius: var(--radio-chico);
   background: var(--superficie);
   color: var(--azul);
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 0.18s ease-out,
+    transform 0.12s ease-out;
+}
+
+.boton-flecha:hover {
+  border-color: var(--azul);
+}
+
+.boton-flecha:active {
+  transform: scale(0.95);
 }
 
 .volver-hoy {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  text-decoration: underline;
 }
 
-.aviso-pendientes {
+/* Resumen del día */
+.resumen-dia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resumen-dia li {
+  padding: 6px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--gris);
+}
+
+.resumen-dia strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen-dia .resumen-pendientes {
+  border-color: var(--amarillo);
+  background: var(--amarillo-suave);
+  color: #6b4700;
+}
+
+.aviso-cerrado {
   margin: 14px 0;
   padding: 12px 16px;
   border-radius: var(--radio-chico);
-  background: var(--amarillo-suave);
+  background: var(--rojo-suave);
+  color: var(--rojo);
   font-weight: 500;
 }
 
+/* Línea del día */
 .lista-turnos {
   display: flex;
   flex-direction: column;
@@ -3097,54 +3181,115 @@ svg {
   list-style: none;
 }
 
+/* Tarjeta de turno: la barra de la izquierda repite el color del estado */
 .turno {
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 84px minmax(0, 1fr);
   gap: 16px;
-  padding: 16px 18px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio);
+  padding: 16px 18px 16px 14px;
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--azul);
+  border-radius: var(--radio-chico);
   background: var(--superficie);
+  transition:
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    opacity 0.2s ease-out;
+}
+
+.turno[aria-busy="true"] {
+  opacity: 0.7;
 }
 
 .turno-PENDIENTE {
-  border-color: var(--amarillo);
+  border-left-color: var(--amarillo);
 }
 
+.turno-ATENDIDO {
+  border-left-color: #1e7a4c;
+}
+
+.turno-AUSENTE,
 .turno-CANCELADO {
-  opacity: 0.6;
+  border-left-color: var(--rojo);
+}
+
+.turno-ATENDIDO,
+.turno-AUSENTE,
+.turno-CANCELADO {
+  background: #fcfaf6;
+}
+
+.turno-CANCELADO .turno-titulo a,
+.turno-CANCELADO .turno-hora strong {
+  text-decoration: line-through;
+}
+
+.turno.turno-sigue {
+  box-shadow: 0 0 0 2px var(--azul), var(--sombra);
+}
+
+.turno-pasado {
+  border-color: var(--amarillo);
+  border-left-color: var(--amarillo);
 }
 
 .turno-hora {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
 
 .turno-hora strong {
   font-family: var(--fuente-titulos);
   font-size: 1.5rem;
+  line-height: 1.2;
   color: var(--azul);
+  font-variant-numeric: tabular-nums;
 }
 
-.turno-hora span {
+.turno-hora > span {
   color: var(--gris);
   font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.turno-hora > .turno-sigue {
+  margin-top: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--azul);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .turno-cuerpo p {
   margin: 0 0 4px;
 }
 
-.turno-titulo {
+.turno-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 2px;
+}
+
+.turno-cuerpo .turno-titulo {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 12px;
+  gap: 2px 12px;
+  min-width: 0;
+  margin: 0;
 }
 
 .turno-titulo a {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .turno-servicio {
@@ -3156,32 +3301,43 @@ svg {
   color: var(--gris);
 }
 
-.turno-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  margin-top: 6px !important;
+.turno-telefono {
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .turno-origen {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   color: var(--gris);
   font-size: 0.9rem;
 }
 
-.estado-turno {
-  padding: 3px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
+.turno-cuerpo .turno-pregunta {
+  margin-top: 10px;
   font-weight: 700;
+  color: #6b4700;
+}
+
+.estado-turno {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition:
+    background-color 0.2s ease-out,
+    color 0.2s ease-out;
 }
 
 .estado-PENDIENTE {
   background: var(--amarillo-suave);
-  color: #8a5a00;
+  color: #6b4700;
 }
 
 .estado-CONFIRMADO {
@@ -3191,30 +3347,159 @@ svg {
 
 .estado-ATENDIDO {
   background: #ddf3e8;
-  color: #1e7a4c;
+  color: #17603b;
 }
 
 .estado-AUSENTE,
 .estado-CANCELADO {
   background: var(--rojo-suave);
-  color: var(--rojo);
+  color: var(--rojo-hover);
+}
+
+/* Acciones: una principal llena, el resto más livianas, y "Cancelar" aparte a la derecha */
+.turno-acciones a,
+.turno-acciones button,
+.hueco-libre a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .turno-acciones {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 8px 12px;
+  margin-top: 14px;
 }
 
 .turno-acciones .boton {
+  min-height: 48px;
+  padding: 8px 20px;
+  transition:
+    background-color 0.15s ease-out,
+    transform 0.12s ease-out;
+}
+
+.turno-acciones .boton:active {
+  transform: scale(0.97);
+}
+
+.turno-acciones .boton-texto {
   min-height: 44px;
-  padding: 8px 18px;
+  padding: 6px 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.turno-acciones .turno-cancelar {
+  margin-left: auto;
+}
+
+.turno-cuerpo .turno-error {
+  margin-top: 10px;
+}
+
+/* Rato libre entre turnos */
+.hueco-libre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 4px 14px 4px 18px;
+  border: 2px dashed var(--borde);
+  border-radius: var(--radio-chico);
+  color: var(--gris);
+}
+
+.hueco-libre > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hueco-libre strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.hueco-libre .boton-texto {
+  min-height: 44px;
+  color: var(--azul);
+  font-weight: 700;
+}
+
+/* Marca de "ahora": separa lo que ya pasó de lo que viene */
+.marca-ahora {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--rojo);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.marca-ahora::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--rojo);
 }
 
 .cancelados {
   margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  .semana,
+  .semana-dias {
+    gap: 4px;
+  }
+
+  .boton-flecha {
+    width: 36px;
+  }
+
+  .semana-dia {
+    min-height: 72px;
+  }
+
+  .semana-dia-numero {
+    font-size: 1.3rem;
+  }
+
+  .semana-dia-cantidad {
+    font-size: 0.75rem;
+  }
+
+  .semana-dia-palabra {
+    display: none;
+  }
+
+  .turno {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 14px;
+  }
+
+  .turno-hora {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .turno-hora > .turno-sigue {
+    margin: 0 0 0 auto;
+  }
+
+  .turno-acciones .boton {
+    flex: 1 1 auto;
+  }
+
+  .turno-acciones .turno-cancelar {
+    margin-left: 0;
+  }
 }
 
 /* ---------- Dar turno (panel) ---------- */
@@ -3259,23 +3544,6 @@ svg {
 
 .campo-fecha input {
   max-width: 260px;
-}
-
-@media (max-width: 860px) {
-  .semana-dias {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .turno {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .turno-hora {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 8px;
-  }
 }
 
 @media (max-width: 560px) {
@@ -3795,19 +4063,3 @@ form.campo-en-linea {
   }
 }
 
-.semana-dia.cerrado:not(.activo) {
-  background: repeating-linear-gradient(135deg, var(--fondo), var(--fondo) 6px, #efe7da 6px, #efe7da 12px);
-}
-
-.semana-dia.cerrado:not(.activo) strong {
-  color: var(--gris);
-}
-
-.aviso-cerrado {
-  margin: 14px 0;
-  padding: 12px 16px;
-  border-radius: var(--radio-chico);
-  background: var(--rojo-suave);
-  color: var(--rojo);
-  font-weight: 500;
-}
