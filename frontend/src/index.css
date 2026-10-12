@@ -43,6 +43,9 @@
   --radio: 20px;
   --radio-grande: 28px;
   --sombra: 0 12px 32px rgba(28, 45, 99, 0.12);
+
+  /* Movimiento */
+  --curva-salida: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 *,
@@ -1638,7 +1641,13 @@ svg {
   }
 
   * {
-    transition: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
+  }
+
+  .semana-dia:active,
+  .boton-flecha:active,
+  .turno-acciones .boton:active {
+    transform: none;
   }
 }
 
@@ -3046,15 +3055,7 @@ svg {
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
-  transition:
-    background-color 0.18s ease-out,
-    border-color 0.18s ease-out,
-    color 0.18s ease-out,
-    transform 0.12s ease-out;
-}
-
-.semana-dia:hover {
-  border-color: var(--azul);
+  transition: transform 140ms var(--curva-salida);
 }
 
 .semana-dia:active {
@@ -3115,17 +3116,19 @@ svg {
   color: var(--azul);
   cursor: pointer;
   touch-action: manipulation;
-  transition:
-    border-color 0.18s ease-out,
-    transform 0.12s ease-out;
-}
-
-.boton-flecha:hover {
-  border-color: var(--azul);
+  transition: transform 140ms var(--curva-salida);
 }
 
 .boton-flecha:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
+}
+
+/* El hover solo con mouse: en el celular queda "pegado" después de tocar */
+@media (hover: hover) and (pointer: fine) {
+  .semana-dia:hover,
+  .boton-flecha:hover {
+    border-color: var(--azul);
+  }
 }
 
 .volver-hoy {
@@ -3191,10 +3194,7 @@ svg {
   border-left: 6px solid var(--azul);
   border-radius: var(--radio-chico);
   background: var(--superficie);
-  transition:
-    border-color 0.2s ease-out,
-    box-shadow 0.2s ease-out,
-    opacity 0.2s ease-out;
+  transition: opacity 160ms var(--curva-salida);
 }
 
 .turno[aria-busy="true"] {
@@ -3331,8 +3331,8 @@ svg {
   font-size: 0.9rem;
   font-weight: 700;
   transition:
-    background-color 0.2s ease-out,
-    color 0.2s ease-out;
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .estado-PENDIENTE {
@@ -3376,12 +3376,23 @@ svg {
   min-height: 48px;
   padding: 8px 20px;
   transition:
-    background-color 0.15s ease-out,
-    transform 0.12s ease-out;
+    background-color 0.15s ease,
+    transform 140ms var(--curva-salida);
 }
 
 .turno-acciones .boton:active {
   transform: scale(0.97);
+}
+
+/* Los botones de texto no tienen el resaltado del navegador: responden con opacidad */
+.turno-acciones .boton-texto,
+.hueco-libre a {
+  transition: opacity 100ms ease;
+}
+
+.turno-acciones .boton-texto:active,
+.hueco-libre a:active {
+  opacity: 0.6;
 }
 
 .turno-acciones .boton-texto {
