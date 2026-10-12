@@ -3,6 +3,7 @@ import { z } from "zod";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
+import { tokenDeCarnet } from "../lib/carnet";
 import { normalizarTelefono } from "../lib/telefono";
 
 // Clientes (dueños) y sus mascotas, para el personal de la clínica.
@@ -207,7 +208,8 @@ mascotasRouter.get("/:id", async (req, res) => {
     res.status(404).json({ error: "Mascota no encontrada" });
     return;
   }
-  res.json(mascota);
+  const { tokenCarnet: _token, ...ficha } = mascota;
+  res.json(ficha);
 });
 
 mascotasRouter.put("/:id", async (req, res) => {
@@ -223,6 +225,16 @@ mascotasRouter.put("/:id", async (req, res) => {
   }
   const mascota = await prisma.mascota.update({ where: { id }, data: resultado.data });
   res.json(mascota);
+});
+
+// Enlace privado del carnet de vacunación (para descargarlo o mandarlo por WhatsApp).
+mascotasRouter.get("/:id/carnet", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!(await mascotaDeLaClinica(id, req.usuario!.clinicaId))) {
+    res.status(404).json({ error: "Mascota no encontrada" });
+    return;
+  }
+  res.json({ url: `/api/publico/carnet/${await tokenDeCarnet(id)}` });
 });
 
 // No se borran: se desactivan (falleció o dejó de venir) para conservar la historia clínica.

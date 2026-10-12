@@ -273,3 +273,25 @@ export interface ResumenRecordatorios {
   dosis: number
   recuperar: number
 }
+
+// ---------- Mi cuenta (dueño) ----------
+
+export interface MascotaDelDueno extends Mascota {
+  aplicaciones: AplicacionSanitaria[]
+  consultas: {
+    id: number
+    fecha: string
+    motivo: string
+    tratamiento: string | null
+    pesoKg: string | null
+    veterinario: { nombre: string; apellido: string }
+  }[]
+  turnos: { id: number; fechaHoraInicio: string; estado: string; servicio: { nombre: string } }[]
+  carnetUrl: string
+}
+
+export interface DatosMiCuenta {
+  cliente: { nombre: string; apellido: string; telefono: string } | null
+  horasCancelacion?: number
+  mascotas: MascotaDelDueno[]
+}

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { diaArgentina } from "../lib/agenda";
+import { datosDelCarnet, escribirCarnet } from "../lib/carnet";
 import { prisma } from "../lib/prisma";
 
 // Rutas públicas: las usa la web sin iniciar sesión.
@@ -68,6 +69,21 @@ publicoRouter.get("/sitio", async (_req, res) => {
     return;
   }
   res.json({ clinica, servicios, equipo, opiniones, formasPago, planes, promociones, preguntas });
+});
+
+// Carnet de vacunación en PDF. Se accede con un enlace privado (imposible de adivinar),
+// así el dueño lo puede abrir desde WhatsApp sin tener cuenta.
+publicoRouter.get("/carnet/:token", async (req, res) => {
+  const mascota = await datosDelCarnet(req.params.token);
+  if (!mascota) {
+    res.status(404).json({ error: "Carnet no encontrado" });
+    return;
+  }
+  const archivo = `carnet-${mascota.nombre.normalize("NFD").replace(/[^\w-]/g, "").toLowerCase() || "mascota"}.pdf`;
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${archivo}"`);
+  res.setHeader("Cache-Control", "no-store");
+  escribirCarnet(mascota, res);
 });
 
 publicoRouter.get("/preguntas-frecuentes", async (_req, res) => {

@@ -156,6 +156,8 @@ model Mascota {
   castrado        Boolean   @default(false)
   observaciones   String?   @db.Text
   activo          Boolean   @default(true)
+  // Enlace privado para ver el carnet de vacunación sin cuenta (se crea la primera vez que se pide).
+  tokenCarnet     String?   @unique @map("token_carnet")
 
   cliente      Cliente               @relation(fields: [clienteId], references: [id])
   turnos       Turno[]

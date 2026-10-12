@@ -1,4 +1,4 @@
-import type { EspecieMascota } from '../types'
+import type { AplicacionSanitaria, EspecieMascota } from '../types'
 
 // Vacunas y desparasitarios más comunes, con el tiempo habitual hasta la próxima dosis.
 // Son sugerencias: el veterinario puede elegir otra fecha o escribir otro producto.
@@ -38,3 +38,25 @@ export const PLAZOS = [
   { meses: 6, texto: 'En 6 meses' },
   { meses: 12, texto: 'En 1 año' },
 ]
+
+// Estado de una dosis según su fecha de próxima aplicación.
+export function estadoDosis(a: AplicacionSanitaria, hoy: string) {
+  if (!a.fechaProximaDosis) return null
+  const dias = Math.round(
+    (new Date(a.fechaProximaDosis).getTime() - new Date(`${hoy}T00:00:00Z`).getTime()) / (24 * 3600 * 1000),
+  )
+  if (dias < 0) return { clase: 'vencida', texto: 'Vencida' }
+  if (dias <= 15) return { clase: 'por-vencer', texto: dias === 0 ? 'Vence hoy' : dias === 1 ? 'Vence mañana' : `Vence en ${dias} días` }
+  return { clase: 'al-dia', texto: 'Al día' }
+}
+
+// Solo se muestra la última aplicación de cada producto: es la que dice cuándo toca la próxima.
+export function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
+  const vistas = new Set<string>()
+  return aplicaciones.filter((a) => {
+    const clave = `${a.tipo}-${a.producto.toLowerCase()}`
+    if (vistas.has(clave)) return false
+    vistas.add(clave)
+    return true
+  })
+}

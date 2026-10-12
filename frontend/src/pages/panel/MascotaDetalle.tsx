@@ -1,37 +1,17 @@
 import { ArrowLeft, CalendarDays, MessageCircle, Pencil, Plus, Stethoscope, Syringe, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { BotonesCarnet } from '../../components/BotonesCarnet'
 import { CamposMascota } from '../../components/CamposMascota'
 import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
 import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
 import { datosDeMascota, type DatosMascota } from '../../lib/formularios'
 import { edadTexto, ESPECIES, FECHA_CORTA, formatearTelefono } from '../../lib/mascotas'
+import { estadoDosis, ultimasPorProducto } from '../../lib/sanitario'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import type { AplicacionSanitaria, ConsultaResumen, FichaMascota } from '../../types'
 import { IconoEspecie } from './Clientes'
-
-// Estado de una dosis según su fecha de próxima aplicación.
-function estadoDosis(a: AplicacionSanitaria, hoy: string) {
-  if (!a.fechaProximaDosis) return null
-  const dias = Math.round(
-    (new Date(a.fechaProximaDosis).getTime() - new Date(`${hoy}T00:00:00Z`).getTime()) / (24 * 3600 * 1000),
-  )
-  if (dias < 0) return { clase: 'vencida', texto: 'Vencida' }
-  if (dias <= 15) return { clase: 'por-vencer', texto: dias === 0 ? 'Vence hoy' : dias === 1 ? 'Vence mañana' : `Vence en ${dias} días` }
-  return { clase: 'al-dia', texto: 'Al día' }
-}
-
-// Solo se muestra la última aplicación de cada producto: es la que dice cuándo toca la próxima.
-function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
-  const vistas = new Set<string>()
-  return aplicaciones.filter((a) => {
-    const clave = `${a.tipo}-${a.producto.toLowerCase()}`
-    if (vistas.has(clave)) return false
-    vistas.add(clave)
-    return true
-  })
-}
 
 // "subió 0,4 kg" / "bajó 1,2 kg" respecto de la consulta anterior con peso.
 function cambioDePeso(consultas: ConsultaResumen[], indice: number) {
@@ -188,6 +168,7 @@ export function MascotaDetalle() {
             </ul>
           )}
           {mascota.activo && <AplicacionAnterior mascota={mascota} alGuardar={cargar} />}
+          {dosis.length > 0 && <BotonesCarnet mascota={mascota} cliente={cliente} />}
         </section>
 
         {/* ---------- Turnos ---------- */}
