@@ -6,7 +6,8 @@ import { diaAmigable, diaCorto, diaLargo } from '../lib/fechas'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import type { EspecieMascota, Servicio } from '../types'
 
-type Disponibilidad = Record<string, string[]>
+// Por día, todos los horarios de atención: los ocupados se muestran tachados.
+type Disponibilidad = Record<string, { hora: string; libre: boolean }[]>
 
 // Pedir turno online en cuatro pasos, sin cuenta: servicio, día, horario y datos.
 export function SacarTurno() {
@@ -53,7 +54,7 @@ export function SacarTurno() {
         <section className="contenedor seccion">
           <div className="turno-listo">
             <CircleCheck size={56} aria-hidden="true" />
-            <h1>¡Listo! Tu turno quedó pedido</h1>
+            <h1>¡Listo! Tu turno está confirmado</h1>
             <p className="turno-listo-detalle">
               <strong>{confirmado.servicio}</strong> para <strong>{confirmado.mascota}</strong>
               <br />
@@ -62,7 +63,7 @@ export function SacarTurno() {
                 : `${diaAmigable(confirmado.dia)}, ${diaLargo(confirmado.dia)}`}{' '}
               a las <strong>{confirmado.hora}</strong>
             </p>
-            <p>La clínica te va a confirmar por WhatsApp. Si no podés venir, avisanos con tiempo.</p>
+            <p>Te vamos a recordar por WhatsApp el día anterior. Si no podés venir, avisanos con tiempo.</p>
             <Link to="/" className="boton boton-grande">
               Volver al inicio
             </Link>
@@ -72,10 +73,10 @@ export function SacarTurno() {
     )
   }
 
-  const diasConLugar = disponibilidad ? Object.entries(disponibilidad).filter(([, horas]) => horas.length > 0) : []
+  const diasConLugar = disponibilidad ? Object.entries(disponibilidad).filter(([, horas]) => horas.some((h) => h.libre)) : []
   const horas = dia && disponibilidad ? disponibilidad[dia] ?? [] : []
-  const maniana = horas.filter((h) => h < '13:00')
-  const tarde = horas.filter((h) => h >= '13:00')
+  const maniana = horas.filter((h) => h.hora < '13:00')
+  const tarde = horas.filter((h) => h.hora >= '13:00')
 
   return (
     <main className="fondo-huellas">
@@ -159,28 +160,36 @@ export function SacarTurno() {
             <h2 id="paso-3">
               <span className="paso-numero">3</span> ¿A qué hora?
             </h2>
+            {horas.some((h) => !h.libre) && <p className="ayuda">Los horarios tachados ya están ocupados.</p>}
             {[
               ['Mañana', maniana],
               ['Tarde', tarde],
             ].map(([titulo, lista]) =>
-              (lista as string[]).length === 0 ? null : (
+              (lista as Disponibilidad[string]).length === 0 ? null : (
                 <div key={titulo as string} className="grupo-horarios">
                   <h3>{titulo as string}</h3>
                   <div className="chips">
-                    {(lista as string[]).map((h) => (
-                      <button
-                        key={h}
-                        type="button"
-                        className={`chip chip-grande${hora === h ? ' chip-activo' : ''}`}
-                        aria-pressed={hora === h}
-                        onClick={() => {
-                          setHora(h)
-                          bajarA(pasoDatos)
-                        }}
-                      >
-                        {h}
-                      </button>
-                    ))}
+                    {(lista as Disponibilidad[string]).map((h) =>
+                      h.libre ? (
+                        <button
+                          key={h.hora}
+                          type="button"
+                          className={`chip chip-grande${hora === h.hora ? ' chip-activo' : ''}`}
+                          aria-pressed={hora === h.hora}
+                          onClick={() => {
+                            setHora(h.hora)
+                            bajarA(pasoDatos)
+                          }}
+                        >
+                          {h.hora}
+                        </button>
+                      ) : (
+                        <span key={h.hora} className="chip chip-grande chip-ocupado">
+                          <s>{h.hora}</s>
+                          <span className="solo-lectores"> (ocupado)</span>
+                        </span>
+                      ),
+                    )}
                   </div>
                 </div>
               ),
@@ -340,8 +349,8 @@ function FormularioDatos({
         {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
       </button>
       <p className="ayuda">
-        <MessageCircle size={16} aria-hidden="true" /> Te confirmamos por WhatsApp. Si ya viniste antes, usá el mismo
-        teléfono.
+        <MessageCircle size={16} aria-hidden="true" /> El día anterior te llega un recordatorio por WhatsApp. Si ya
+        viniste antes, usá el mismo teléfono.
       </p>
     </form>
   )

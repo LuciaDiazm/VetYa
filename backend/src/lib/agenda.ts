@@ -78,6 +78,21 @@ export async function horariosLibres(
   cantidadDias: number,
   opciones: Opciones = {},
 ): Promise<Record<string, string[]>> {
+  const grilla = await grillaHorarios(clinicaId, servicioId, desde, cantidadDias, opciones);
+  return Object.fromEntries(
+    Object.entries(grilla).map(([fecha, horas]) => [fecha, horas.filter((h) => h.libre).map((h) => h.hora)]),
+  );
+}
+
+// Todos los horarios de atención de varios días, marcando cuáles están libres y cuáles ocupados.
+// Los que ya pasaron (o quedan antes de la anticipación mínima) no se incluyen.
+export async function grillaHorarios(
+  clinicaId: number,
+  servicioId: number,
+  desde: string,
+  cantidadDias: number,
+  opciones: Opciones = {},
+): Promise<Record<string, { hora: string; libre: boolean }[]>> {
   const servicio = await prisma.servicio.findFirst({ where: { id: servicioId, clinicaId, activo: true } });
   if (!servicio) return {};
 
@@ -101,7 +116,7 @@ export async function horariosLibres(
 
   const diasBloqueados = new Set(bloqueados.map((b) => b.fecha.toISOString().slice(0, 10)));
   const limite = new Date(Date.now() + (opciones.anticipacionMinutos ?? 0) * MINUTO);
-  const resultado: Record<string, string[]> = {};
+  const resultado: Record<string, { hora: string; libre: boolean }[]> = {};
 
   for (let i = 0; i < cantidadDias; i++) {
     const fecha = sumarDias(desde, i);
@@ -121,7 +136,7 @@ export async function horariosLibres(
         if (comienzo < limite) continue;
         // Se superpone si empieza antes de que termine otro y termina después de que el otro empezó.
         const ocupado = turnos.some((t) => comienzo < t.fechaHoraFin && final > t.fechaHoraInicio);
-        if (!ocupado) resultado[fecha].push(hora);
+        resultado[fecha].push({ hora, libre: !ocupado });
       }
     }
   }

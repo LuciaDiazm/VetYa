@@ -1862,6 +1862,20 @@ svg {
   font-size: 1rem;
 }
 
+/* Horario ocupado al pedir turno: se ve tachado y no se puede tocar. */
+.chip-ocupado {
+  display: inline-flex;
+  align-items: center;
+  border-style: dashed;
+  background: transparent;
+  color: var(--gris);
+  cursor: default;
+}
+
+.chip-ocupado:hover {
+  border-color: var(--borde);
+}
+
 .filtros-resultado {
   display: flex;
   align-items: center;

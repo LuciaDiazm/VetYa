@@ -4,6 +4,7 @@ import {
   aFechaUTC,
   diaArgentina,
   esFechaValida,
+  grillaHorarios,
   horariosLibres,
   sumarDias,
   validarHorario,
@@ -42,7 +43,7 @@ turnosPublicoRouter.get("/servicios", async (_req, res) => {
   res.json(servicios);
 });
 
-// Horarios libres de los próximos días para un servicio.
+// Horarios de los próximos días para un servicio, libres y ocupados (la web muestra los ocupados tachados).
 turnosPublicoRouter.get("/disponibilidad", async (req, res) => {
   const servicioId = Number(req.query.servicioId);
   const servicio = await prisma.servicio.findFirst({
@@ -53,10 +54,10 @@ turnosPublicoRouter.get("/disponibilidad", async (req, res) => {
     return;
   }
   // Hoy aparece solo si todavía queda algún horario libre (el filtro de días vacíos lo hace la web).
-  const libres = await horariosLibres(CLINICA_ID, servicioId, hoy(), DIAS_A_MOSTRAR + 1, {
+  const grilla = await grillaHorarios(CLINICA_ID, servicioId, hoy(), DIAS_A_MOSTRAR + 1, {
     anticipacionMinutos: ANTICIPACION_ONLINE_MINUTOS,
   });
-  res.json(libres);
+  res.json(grilla);
 });
 
 const esquemaTurnoOnline = z.object({
@@ -122,7 +123,8 @@ turnosPublicoRouter.post("/", async (req, res) => {
         servicioId: servicio.id,
         fechaHoraInicio: inicio,
         fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
-        estado: "PENDIENTE",
+        // Queda confirmado en el momento: el horario ya se verificó y el recordatorio sale el día anterior.
+        estado: "CONFIRMADO",
         origen: "ONLINE",
         observaciones: datos.motivo || null,
       },
