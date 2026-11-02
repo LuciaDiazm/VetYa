@@ -214,6 +214,21 @@ export function SacarTurno() {
   )
 }
 
+// La pregunta del comentario cambia según el servicio: "¿Qué le pasa?" no tiene sentido para un baño.
+function textosMotivo(servicio: Servicio): { titulo: string; ejemplo: string } {
+  const nombre = servicio.nombre.toLowerCase()
+  if (servicio.categoria === 'ESTETICA') {
+    return { titulo: '¿Algo que tengamos que saber?', ejemplo: 'Ej.: corte cortito, es miedoso, tiene la piel sensible…' }
+  }
+  if (servicio.categoria === 'DIAGNOSTICO') {
+    return { titulo: '¿Algo que quieras contarnos?', ejemplo: 'Ej.: me lo pidió el veterinario, viene en ayunas…' }
+  }
+  if (nombre.includes('vacun') || nombre.includes('desparasit')) {
+    return { titulo: '¿Algo que quieras contarnos?', ejemplo: 'Ej.: es la primera vez, la última fue en marzo…' }
+  }
+  return { titulo: '¿Qué le pasa?', ejemplo: 'Ej.: se rasca mucho, no come, control anual…' }
+}
+
 function FormularioDatos({
   servicio,
   dia,
@@ -307,13 +322,13 @@ function FormularioDatos({
         </fieldset>
       </div>
       <label className="campo">
-        ¿Qué le pasa? (opcional)
+        {textosMotivo(servicio).titulo} (opcional)
         <textarea
           value={motivo}
           onChange={(e) => setMotivo(e.target.value)}
           rows={2}
           maxLength={500}
-          placeholder="Ej.: control anual, se rasca mucho, no come…"
+          placeholder={textosMotivo(servicio).ejemplo}
         />
       </label>
       {error && (

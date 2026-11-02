@@ -13,8 +13,8 @@ import { prisma } from "../lib/prisma";
 import { normalizarTelefono } from "../lib/telefono";
 
 const CLINICA_ID = 1;
-const DIAS_A_MOSTRAR = 14;
-const ANTICIPACION_ONLINE_MINUTOS = 60; // online no se puede pedir un turno para dentro de menos de 1 hora
+const DIAS_A_MOSTRAR = 14; // a partir de mañana; hoy se suma aparte solo si queda lugar
+const ANTICIPACION_ONLINE_MINUTOS = 120; // online no se puede pedir un turno para dentro de menos de 2 horas
 
 const fecha = z.string().refine(esFechaValida, "Fecha inválida");
 const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Hora inválida");
@@ -52,7 +52,8 @@ turnosPublicoRouter.get("/disponibilidad", async (req, res) => {
     res.status(404).json({ error: "Ese servicio no se puede reservar online" });
     return;
   }
-  const libres = await horariosLibres(CLINICA_ID, servicioId, hoy(), DIAS_A_MOSTRAR, {
+  // Hoy aparece solo si todavía queda algún horario libre (el filtro de días vacíos lo hace la web).
+  const libres = await horariosLibres(CLINICA_ID, servicioId, hoy(), DIAS_A_MOSTRAR + 1, {
     anticipacionMinutos: ANTICIPACION_ONLINE_MINUTOS,
   });
   res.json(libres);
