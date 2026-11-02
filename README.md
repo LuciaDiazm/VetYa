@@ -17,7 +17,16 @@ VetYa/
 - [Ficha del proyecto](docs/00-ficha-proyecto.md)
 - [Modelo de datos (DER)](docs/01-modelo-de-datos.md)
 
-## Requisitos
+## Forma rápida (Windows)
+
+1. Instalá **Node.js** (versión LTS, de nodejs.org), **MySQL 8** (anotá la contraseña que elijas) y **Git** (de git-scm.com).
+2. Doble clic en **`instalar.bat`**: te pide la contraseña de MySQL y deja todo listo (configuración, dependencias, base de datos y datos de ejemplo). Se puede repetir sin problema: no borra nada.
+3. Doble clic en **`iniciar.bat`**: abre el sistema en el navegador (http://localhost:5173). Se abren dos ventanas negras: no las cierres mientras lo uses.
+
+Los usuarios de prueba están en el encabezado de `backend/prisma/seed.ts`.
+
+## Forma manual
+
 
 - Node.js 20 o superior
 - MySQL 8
