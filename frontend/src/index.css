@@ -738,6 +738,15 @@ svg {
   background: var(--superficie);
 }
 
+/* Si la cantidad de tarjetas es impar, la última ocupa todo el ancho y no queda un hueco. */
+.mosaico-tarjeta:last-child:nth-child(odd) img {
+  max-height: 340px;
+}
+
+.mosaico-tarjeta:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 .mosaico-texto {
   display: flex;
   flex-direction: column;

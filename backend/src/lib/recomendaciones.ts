@@ -7,6 +7,7 @@ import { AMARILLO, AZUL, dibujarLogo, GRIS } from "./carnet";
 // ---------------------------------------------------------------------------
 
 export interface Recomendaciones {
+  queEs: string; // "Antes de la ..."
   antes: string[];
   despues: string[];
   avisar: string[];
@@ -21,6 +22,7 @@ const ANTES_COMUN = [
 ];
 
 const CIRUGIA_GENERAL: Recomendaciones = {
+  queEs: "cirugía",
   antes: [...ANTES_COMUN, "Traelo con correa o en transportadora."],
   despues: [
     "Dejalo en un lugar tranquilo y abrigado, lejos de escaleras.",
@@ -39,6 +41,7 @@ const CIRUGIA_GENERAL: Recomendaciones = {
 };
 
 const LIMPIEZA_DENTAL: Recomendaciones = {
+  queEs: "limpieza",
   antes: ANTES_COMUN,
   despues: [
     "Por la anestesia, puede estar dormido o torpe el resto del día.",
@@ -57,7 +60,7 @@ const LIMPIEZA_DENTAL: Recomendaciones = {
 
 // Las cirugías que cargue la clínica más adelante usan las recomendaciones generales.
 export function recomendacionesDe(nombreServicio: string): Recomendaciones {
-  return /dental/i.test(nombreServicio) ? LIMPIEZA_DENTAL : CIRUGIA_GENERAL;
+  return /limpieza/i.test(nombreServicio) ? LIMPIEZA_DENTAL : CIRUGIA_GENERAL;
 }
 
 function seccion(doc: PDFKit.PDFDocument, titulo: string, items: string[], color: string, ancho: number) {
@@ -84,10 +87,12 @@ export function escribirRecomendaciones(nombreServicio: string, clinica: Clinica
   doc.font("Helvetica").fontSize(10).fillColor(GRIS).text(`${clinica.direccion}  -  Tel. ${clinica.telefono}`, 104, 70);
   doc.rect(48, 104, ancho, 3).fill(AMARILLO);
 
-  doc.font("Helvetica-Bold").fontSize(21).fillColor(AZUL).text("Recomendaciones para la cirugía", 48, 122);
-  doc.font("Helvetica").fontSize(13).fillColor(GRIS).text(nombreServicio, 48);
+  const esCirugia = r === CIRUGIA_GENERAL;
+  const titulo = esCirugia ? "Recomendaciones para la cirugía" : "Recomendaciones para la limpieza dental";
+  doc.font("Helvetica-Bold").fontSize(21).fillColor(AZUL).text(titulo, 48, 122);
+  if (esCirugia) doc.font("Helvetica").fontSize(13).fillColor(GRIS).text(nombreServicio, 48);
 
-  seccion(doc, "Antes de la cirugía", r.antes, AZUL, ancho);
+  seccion(doc, `Antes de la ${r.queEs}`, r.antes, AZUL, ancho);
   seccion(doc, "Al volver a casa", r.despues, AZUL, ancho);
   seccion(doc, "Avisanos enseguida si...", r.avisar, "#B3261E", ancho);
 

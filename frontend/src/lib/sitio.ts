@@ -42,3 +42,8 @@ export const MENSAJE_TURNO = 'Hola, quiero pedir un turno para mi mascota.'
 export function olvidarSitio() {
   pedido = null
 }
+
+// La limpieza dental se carga en la categoría Cirugía (lleva anestesia), pero al dueño se le muestra aparte.
+export function esLimpiezaDental(servicio: { nombre: string; categoria: string }) {
+  return servicio.categoria === 'CIRUGIA' && /limpieza/i.test(servicio.nombre)
+}

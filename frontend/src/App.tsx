@@ -49,7 +49,8 @@ function App() {
             <Route path="/registro" element={<Registro />} />
             <Route path="/urgencias" element={<Urgencias />} />
             <Route path="/turno" element={<SacarTurno />} />
-            <Route path="/cirugias" element={<Cirugias />} />
+            <Route path="/cirugias" element={<Cirugias tipo="cirugia" />} />
+            <Route path="/limpieza-dental" element={<Cirugias tipo="limpieza" />} />
             <Route path="/adopcion" element={<Adopcion />} />
             <Route path="/adopcion/:id" element={<AnimalAdopcion />} />
             <Route

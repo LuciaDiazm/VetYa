@@ -197,7 +197,8 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
               <Link to="/turno">Ver todos los servicios</Link>
             ) : (
               <>
-                ¿Necesitás una cirugía o una limpieza dental? <Link to="/cirugias">Mirá cómo se coordinan</Link>
+                ¿Necesitás una <Link to="/cirugias">cirugía</Link> o una <Link to="/limpieza-dental">limpieza dental</Link>? Se
+                coordinan con la clínica.
               </>
             )}
           </p>

@@ -21,15 +21,23 @@ import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
 import { VideoMascotas } from '../components/VideoMascotas'
 import { agruparHorarios } from '../lib/horarios'
-import { enlaceWhatsapp, useSitio } from '../lib/sitio'
+import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { CategoriaServicio, DosisPlan } from '../types'
 
-// Cada categoría de servicios con su foto y su estilo de tarjeta.
-const CATEGORIAS: { clave: CategoriaServicio; nombre: string; foto: string; oscura: boolean }[] = [
-  { clave: 'CLINICA', nombre: 'Consultas y vacunas', foto: '/fotos/caniche-cachorro.jpg', oscura: false },
-  { clave: 'DIAGNOSTICO', nombre: 'Análisis y ecografías', foto: '/fotos/gatito-blanco.jpg', oscura: true },
-  { clave: 'CIRUGIA', nombre: 'Cirugías', foto: '/fotos/jack-russell.jpg', oscura: true },
-  { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/pug-buzo.jpg', oscura: false },
+// Cada tarjeta de servicios con su foto, su estilo y a dónde lleva.
+const TARJETAS: {
+  clave: CategoriaServicio | 'LIMPIEZA'
+  nombre: string
+  foto: string
+  oscura: boolean
+  enlace: string
+  accion: string
+}[] = [
+  { clave: 'CLINICA', nombre: 'Consultas y vacunas', foto: '/fotos/caniche-cachorro.jpg', oscura: false, enlace: '/turno?categoria=CLINICA', accion: 'Pedir turno' },
+  { clave: 'DIAGNOSTICO', nombre: 'Análisis y ecografías', foto: '/fotos/gatito-blanco.jpg', oscura: true, enlace: '/turno?categoria=DIAGNOSTICO', accion: 'Pedir turno' },
+  { clave: 'CIRUGIA', nombre: 'Cirugías', foto: '/fotos/jack-russell.jpg', oscura: true, enlace: '/cirugias', accion: 'Cómo se coordinan' },
+  { clave: 'LIMPIEZA', nombre: 'Limpieza dental', foto: '/fotos/dental.jpg', oscura: false, enlace: '/limpieza-dental', accion: 'Cómo se coordina' },
+  { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/pug-buzo.jpg', oscura: false, enlace: '/turno?categoria=ESTETICA', accion: 'Pedir turno' },
 ]
 
 // 6 semanas → "6 semanas"; 16 semanas → "4 meses"
@@ -214,8 +222,10 @@ export function Inicio() {
           Todo lo que tu mascota necesita
         </h2>
         <div className="mosaico">
-          {CATEGORIAS.map((c) => {
-            const lista = servicios.filter((s) => s.categoria === c.clave)
+          {TARJETAS.map((c) => {
+            const lista = servicios.filter((s) =>
+              c.clave === 'LIMPIEZA' ? esLimpiezaDental(s) : s.categoria === c.clave && !esLimpiezaDental(s),
+            )
             if (lista.length === 0) return null
             return (
               <article key={c.clave} className={`mosaico-tarjeta${c.oscura ? ' tarjeta-oscura' : ''}`}>
@@ -223,11 +233,11 @@ export function Inicio() {
                   <h3>{c.nombre}</h3>
                   <ul>
                     {lista.map((s) => (
-                      <li key={s.id}>{s.nombre}</li>
+                      <li key={s.id}>{s.nombre === c.nombre ? (s.descripcion ?? s.nombre) : s.nombre}</li>
                     ))}
                   </ul>
-                  <Link to={c.clave === 'CIRUGIA' ? '/cirugias' : `/turno?categoria=${c.clave}`} className="mosaico-enlace">
-                    {c.clave === 'CIRUGIA' ? 'Cómo se coordinan' : 'Pedir turno'} <ArrowRight size={18} aria-hidden="true" />
+                  <Link to={c.enlace} className="mosaico-enlace">
+                    {c.accion} <ArrowRight size={18} aria-hidden="true" />
                   </Link>
                 </div>
                 <img src={c.foto} alt="" loading="lazy" />

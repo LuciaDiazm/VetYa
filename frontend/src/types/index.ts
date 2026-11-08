@@ -35,6 +35,7 @@ export interface Servicio {
 }
 
 export interface Cirugia extends Servicio {
+  queEs: string
   antes: string[]
   despues: string[]
   avisar: string[]

@@ -1,4 +1,5 @@
 import { diaDe, diaLargo, horaDe } from './fechas'
+import { esLimpiezaDental } from './sitio'
 import type { Pendientes } from '../types'
 
 // Mensajes de WhatsApp de los recordatorios. Cortos, cordiales y con lo necesario para actuar.
@@ -17,10 +18,11 @@ function queLeToca(d: Pick<Dosis, 'tipo' | 'producto'>) {
 }
 
 export function mensajeTurnoManana(t: TurnoManana, clinica: string) {
-  // Lo que más se olvida en una cirugía es el ayuno: va en el mismo mensaje del día anterior.
+  // Lo que más se olvida con la anestesia es el ayuno: va en el mismo mensaje del día anterior.
+  const pagina = esLimpiezaDental(t.servicio) ? 'limpieza-dental' : 'cirugias'
   const preparacion =
     t.servicio.categoria === 'CIRUGIA'
-      ? `Importante: tiene que venir en ayunas, con 8 a 12 horas sin comer. Todas las recomendaciones: ${window.location.origin}/cirugias . `
+      ? `Importante: tiene que venir en ayunas, con 8 a 12 horas sin comer. Todas las recomendaciones: ${window.location.origin}/${pagina} . `
       : ''
   return (
     `Hola ${t.mascota.cliente.nombre}, te recordamos el turno de ${t.mascota.nombre} (${t.servicio.nombre}) ` +

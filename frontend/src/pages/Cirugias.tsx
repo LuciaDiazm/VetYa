@@ -2,7 +2,7 @@ import { CalendarCheck, Download, MessageCircle, TriangleAlert } from 'lucide-re
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../lib/api'
-import { enlaceWhatsapp, useSitio } from '../lib/sitio'
+import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { Cirugia } from '../types'
 
 const PASOS = [
@@ -11,8 +11,19 @@ const PASOS = [
   ['Te lo recordamos', 'El día anterior te llega un WhatsApp con lo más importante.'],
 ]
 
-// Las cirugías no se reservan solas: esta página explica cómo coordinarlas y cómo preparar a la mascota.
-export function Cirugias() {
+const TEXTOS = {
+  cirugia: {
+    titulo: 'Cirugías',
+    intro: 'Las coordinamos con vos, para que tu mascota llegue bien preparada y sepas cómo cuidarla después.',
+  },
+  limpieza: {
+    titulo: 'Limpieza dental',
+    intro: 'Se hace con anestesia. Por eso la coordinamos con vos, para que tu mascota llegue bien preparada.',
+  },
+}
+
+// Cirugías y limpieza dental no se reservan solas: la página explica cómo coordinarlas y cómo preparar a la mascota.
+export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
   const { datos: sitio } = useSitio()
   const [cirugias, setCirugias] = useState<Cirugia[] | null>(null)
   const [error, setError] = useState(false)
@@ -31,13 +42,15 @@ export function Cirugias() {
   }
   if (!cirugias) return <p className="cargando">Cargando…</p>
 
+  const lista = cirugias.filter((c) => esLimpiezaDental(c) === (tipo === 'limpieza'))
+  // En la página de limpieza, el título ya dice de qué servicio se trata.
+  const mostrarNombre = tipo === 'cirugia' || lista.length > 1
+
   return (
     <main className="fondo-huellas">
       <section className="contenedor seccion">
-        <h1>Cirugías</h1>
-        <p className="ayuda-grande">
-          Las coordinamos con vos, para que tu mascota llegue bien preparada y sepas cómo cuidarla después.
-        </p>
+        <h1>{TEXTOS[tipo].titulo}</h1>
+        <p className="ayuda-grande">{TEXTOS[tipo].intro}</p>
 
         <ol className="cirugia-pasos">
           {PASOS.map(([titulo, texto], i) => (
@@ -51,9 +64,11 @@ export function Cirugias() {
           ))}
         </ol>
 
-        {cirugias.map((c) => (
+        {lista.length === 0 && <p className="vacio">Por ahora no ofrecemos este servicio.</p>}
+
+        {lista.map((c) => (
           <article key={c.id} className="tarjeta cirugia">
-            <h2>{c.nombre}</h2>
+            {mostrarNombre && <h2>{c.nombre}</h2>}
             {c.descripcion && <p>{c.descripcion}</p>}
 
             <div className="cirugia-botones">
@@ -80,7 +95,7 @@ export function Cirugias() {
 
             <div className="cirugia-columnas">
               <section>
-                <h3>Antes de la cirugía</h3>
+                <h3>Antes de la {c.queEs}</h3>
                 <ul>
                   {c.antes.map((t) => (
                     <li key={t}>{t}</li>
