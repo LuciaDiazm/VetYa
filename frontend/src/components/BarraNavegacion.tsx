@@ -1,14 +1,15 @@
-import { Menu, Siren, X } from 'lucide-react'
+import { LogOut, Menu, Siren, UserRound, X } from 'lucide-react'
 import { startTransition, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
 import { Logo } from './Logo'
+import { MenuCuenta } from './MenuCuenta'
 
 const SECCIONES = [
   { ruta: '/#servicios', nombre: 'Servicios' },
   { ruta: '/adopcion', nombre: 'Adopción' },
-  { ruta: '/#equipo', nombre: 'Equipo' },
-  { ruta: '/#preguntas', nombre: 'Preguntas' },
+  { ruta: '/#equipo', nombre: 'Equipo', soloMenu: true },
+  { ruta: '/#preguntas', nombre: 'Preguntas', soloMenu: true },
   { ruta: '/#contacto', nombre: 'Contacto' },
 ]
 
@@ -31,19 +32,26 @@ export function BarraNavegacion() {
 
   const cerrarMenu = () => setMenuAbierto(false)
 
-  const enlacesCuenta = cargando ? null : usuario ? (
-    <>
+  const cuentaMovil = cargando ? null : usuario ? (
+    <div className="menu-movil-cuenta">
+      <p className="menu-movil-usuario">
+        <UserRound size={20} aria-hidden="true" />
+        Hola, {usuario.nombre}
+      </p>
       <Link to={rutaInicial(usuario)} className="barra-enlace" onClick={cerrarMenu}>
         {usuario.rol === 'DUENIO' ? 'Mi cuenta' : 'Panel'}
       </Link>
-      <button type="button" className="barra-enlace boton-texto" onClick={cerrarSesion}>
+      <button type="button" className="barra-enlace boton-texto menu-movil-salir" onClick={cerrarSesion}>
+        <LogOut size={20} aria-hidden="true" />
         Salir
       </button>
-    </>
+    </div>
   ) : (
-    <Link to="/ingresar" className="barra-enlace" onClick={cerrarMenu}>
-      Ingresar
-    </Link>
+    <div className="menu-movil-cuenta">
+      <Link to="/ingresar" className="barra-enlace" onClick={cerrarMenu}>
+        Ingresar
+      </Link>
+    </div>
   )
 
   return (
@@ -54,12 +62,11 @@ export function BarraNavegacion() {
         </Link>
 
         <nav className="menu-principal" aria-label="Secciones del sitio">
-          {SECCIONES.map((s) => (
+          {SECCIONES.filter((s) => !s.soloMenu).map((s) => (
             <Link key={s.ruta} to={s.ruta} className="barra-enlace">
               {s.nombre}
             </Link>
           ))}
-          {enlacesCuenta}
         </nav>
 
         <div className="barra-acciones">
@@ -70,6 +77,18 @@ export function BarraNavegacion() {
           <Link to="/turno" className="boton boton-secundario boton-turno">
             Pedir turno
           </Link>
+          {!cargando && (
+            <div className="cuenta-compu">
+              {usuario ? (
+                <MenuCuenta usuario={usuario} onSalir={cerrarSesion} />
+              ) : (
+                <Link to="/ingresar" className="barra-enlace enlace-ingresar">
+                  <UserRound size={20} aria-hidden="true" />
+                  Ingresar
+                </Link>
+              )}
+            </div>
+          )}
           <button
             type="button"
             className="boton-menu"
@@ -96,7 +115,7 @@ export function BarraNavegacion() {
           <Link to="/urgencias" className="barra-enlace" onClick={cerrarMenu}>
             Urgencias
           </Link>
-          {enlacesCuenta}
+          {cuentaMovil}
         </nav>
       )}
     </header>

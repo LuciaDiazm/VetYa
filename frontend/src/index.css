@@ -357,6 +357,138 @@ svg {
   text-align: left;
 }
 
+/* Cuenta en el encabezado: muestra quién entró y guarda "Salir" */
+
+.enlace-ingresar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.menu-cuenta {
+  position: relative;
+}
+
+.menu-cuenta-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 7px 12px;
+  border: 2px solid var(--azul);
+  border-radius: 999px;
+  background: none;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-cuenta-nombre {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-cuenta-flecha {
+  transition: transform 180ms var(--curva-salida);
+}
+
+.menu-cuenta-flecha.abierta {
+  transform: rotate(180deg);
+}
+
+.menu-cuenta-lista {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  padding: 8px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  transform-origin: top right;
+}
+
+.menu-cuenta-opcion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radio-chico);
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-cuenta-separador {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--borde);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-cuenta-boton:hover,
+  .menu-cuenta-opcion:hover {
+    background: var(--azul-suave);
+    color: var(--azul);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .menu-cuenta-lista {
+    animation: menu-cuenta-entra 160ms var(--curva-salida);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-cuenta-flecha {
+    transition: none;
+  }
+}
+
+@keyframes menu-cuenta-entra {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+.menu-movil-cuenta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--borde);
+}
+
+.menu-movil-usuario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  color: var(--azul);
+  font-weight: 700;
+}
+
+.menu-movil-salir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ---------- Franja de promoción ---------- */
 
 .franja-promo {
@@ -1415,6 +1547,10 @@ svg {
     display: inline-flex;
   }
 
+  .cuenta-compu {
+    display: none;
+  }
+
   .barra-acciones {
     margin-left: auto;
   }
@@ -1571,7 +1707,17 @@ svg {
   }
 
   .enlace-urgencias {
-    padding: 8px 10px;
+    gap: 4px;
+    padding: 8px 6px;
+  }
+
+  .barra-acciones {
+    gap: 6px;
+  }
+
+  .boton-menu {
+    gap: 4px;
+    padding: 7px 8px;
   }
 
   .portada-acciones .boton {

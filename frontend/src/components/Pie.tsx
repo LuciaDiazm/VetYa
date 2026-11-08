@@ -35,6 +35,12 @@ export function Pie() {
           <p className="pie-texto">
             <Link to="/urgencias">Qué hacer en una urgencia</Link>
           </p>
+          <p className="pie-texto">
+            <Link to="/#equipo">Nuestro equipo</Link>
+          </p>
+          <p className="pie-texto">
+            <Link to="/#preguntas">Preguntas frecuentes</Link>
+          </p>
         </div>
       </div>
       <div className="contenedor pie-legal">
