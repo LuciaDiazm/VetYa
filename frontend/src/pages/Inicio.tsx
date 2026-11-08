@@ -105,7 +105,7 @@ export function Inicio() {
 
         <ul className="portada-ventajas">
           <li>
-            <PawPrint size={22} aria-hidden="true" /> Turnos por WhatsApp
+            <PawPrint size={22} aria-hidden="true" /> Turnos online
           </li>
           <li>
             <PawPrint size={22} aria-hidden="true" /> Te avisamos las vacunas
@@ -125,7 +125,7 @@ export function Inicio() {
           {Array.from({ length: 2 }, (_, i) => (
             <span key={i} className="cinta-grupo">
               <strong>VetYa</strong> Clínica veterinaria en Goya <PawPrint size={18} />
-              <strong>VetYa</strong> Turnos por WhatsApp <PawPrint size={18} />
+              <strong>VetYa</strong> Turnos online <PawPrint size={18} />
               <strong>VetYa</strong> Perros y gatos <PawPrint size={18} />
             </span>
           ))}
@@ -144,7 +144,7 @@ export function Inicio() {
             </span>
             <span className="acceso-textos">
               <strong>Pedir un turno</strong>
-              <span>Online, sin llamar ni crear cuenta</span>
+              <span>Online, sin llamar</span>
             </span>
           </Link>
           <Link to="/urgencias" className="acceso-rapido acceso-urgencia">
@@ -226,8 +226,8 @@ export function Inicio() {
                       <li key={s.id}>{s.nombre}</li>
                     ))}
                   </ul>
-                  <Link to="/turno" className="mosaico-enlace">
-                    Pedir turno <ArrowRight size={18} aria-hidden="true" />
+                  <Link to={c.clave === 'CIRUGIA' ? '/cirugias' : `/turno?categoria=${c.clave}`} className="mosaico-enlace">
+                    {c.clave === 'CIRUGIA' ? 'Cómo se coordinan' : 'Pedir turno'} <ArrowRight size={18} aria-hidden="true" />
                   </Link>
                 </div>
                 <img src={c.foto} alt="" loading="lazy" />

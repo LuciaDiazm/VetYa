@@ -6,9 +6,9 @@ import { prisma } from "./prisma";
 // Carnet de vacunación en PDF
 // ---------------------------------------------------------------------------
 
-const AZUL = "#1C2D63";
-const AMARILLO = "#F6C343";
-const GRIS = "#57627A";
+export const AZUL = "#1C2D63";
+export const AMARILLO = "#F6C343";
+export const GRIS = "#57627A";
 const BORDE = "#E6DCCD";
 
 const FECHA = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
@@ -41,7 +41,7 @@ export async function datosDelCarnet(token: string) {
 type DatosCarnet = NonNullable<Awaited<ReturnType<typeof datosDelCarnet>>>;
 
 // Huella con cruz (el logo de VetYa) dibujada con figuras, para no depender de archivos de imagen.
-function dibujarLogo(doc: PDFKit.PDFDocument, x: number, y: number, tamano: number) {
+export function dibujarLogo(doc: PDFKit.PDFDocument, x: number, y: number, tamano: number) {
   const e = tamano / 40;
   doc.roundedRect(x, y, 40 * e, 40 * e, 11 * e).fill(AZUL);
   doc.fillColor(AMARILLO);

@@ -34,6 +34,12 @@ export interface Servicio {
   fotoUrl: string | null
 }
 
+export interface Cirugia extends Servicio {
+  antes: string[]
+  despues: string[]
+  avisar: string[]
+}
+
 export type Rol = 'DUENIO' | 'VETERINARIO' | 'ADMIN'
 
 export interface Usuario {
@@ -263,7 +269,7 @@ interface MascotaConDueno {
 }
 
 export interface Pendientes {
-  turnosManana: { id: number; fechaHoraInicio: string; mascota: MascotaConDueno; servicio: { nombre: string } }[]
+  turnosManana: { id: number; fechaHoraInicio: string; mascota: MascotaConDueno; servicio: { nombre: string; categoria: CategoriaServicio } }[]
   dosis: (AplicacionSanitaria & { mascotaId: number; mascota: MascotaConDueno; tieneTurno: boolean })[]
   recuperar: { mascota: MascotaConDueno; ultimaVisita: string | null; vencidas: string[]; sinVenir: boolean }[]
 }

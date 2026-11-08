@@ -1,6 +1,6 @@
 import { CalendarCheck, CircleCheck, Clock, MessageCircle, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPost, ErrorApi } from '../lib/api'
 import { diaAmigable, diaCorto, diaLargo } from '../lib/fechas'
@@ -14,6 +14,11 @@ type Disponibilidad = Record<string, { hora: string; libre: boolean }[]>
 export function SacarTurno() {
   const { usuario, cargando } = useAuth()
   const { datos: sitio } = useSitio()
+  const { pathname, search } = useLocation()
+  const [parametros] = useSearchParams()
+  const categoria = parametros.get('categoria')
+  // Al registrarse o ingresar vuelve acá, con la misma categoría que había elegido.
+  const volverA = { desde: pathname + search }
 
   if (cargando) {
     return (
@@ -36,10 +41,10 @@ export function SacarTurno() {
               Se crea una sola vez. Si ya viniste a la clínica, usá el mismo teléfono y vas a ver a tus mascotas.
             </p>
             <div className="turno-acceso-botones">
-              <Link to="/registro" state={{ desde: '/turno' }} className="boton boton-grande">
+              <Link to="/registro" state={volverA} className="boton boton-grande">
                 Crear mi cuenta
               </Link>
-              <Link to="/ingresar" state={{ desde: '/turno' }} className="boton boton-contorno boton-grande">
+              <Link to="/ingresar" state={volverA} className="boton boton-contorno boton-grande">
                 Ya tengo cuenta
               </Link>
             </div>
@@ -74,11 +79,12 @@ export function SacarTurno() {
     )
   }
 
-  return <PedirTurno />
+  return <PedirTurno key={categoria ?? 'todos'} categoria={categoria} />
 }
 
 // Los cuatro pasos: servicio, día, horario y mascota.
-function PedirTurno() {
+// Si viene de una tarjeta de servicios, solo muestra esa categoría; si tiene un solo servicio, ya queda elegido.
+function PedirTurno({ categoria }: { categoria: string | null }) {
   const { datos: sitio } = useSitio()
   const [servicios, setServicios] = useState<Servicio[] | null>(null)
   const [servicio, setServicio] = useState<Servicio | null>(null)
@@ -96,7 +102,14 @@ function PedirTurno() {
     window.setTimeout(() => paso.current?.scrollIntoView({ block: 'start' }), 50)
 
   useEffect(() => {
-    apiGet<Servicio[]>('/publico/turnos/servicios').then(setServicios).catch(() => setServicios([]))
+    apiGet<Servicio[]>('/publico/turnos/servicios')
+      .then((lista) => {
+        setServicios(lista)
+        const deLaCategoria = lista.filter((s) => s.categoria === categoria)
+        if (deLaCategoria.length === 1) elegirServicio(deLaCategoria[0])
+      })
+      .catch(() => setServicios([]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function elegirServicio(s: Servicio) {
@@ -141,6 +154,8 @@ function PedirTurno() {
     )
   }
 
+  const deLaCategoria = servicios?.filter((s) => s.categoria === categoria) ?? []
+  const serviciosVisibles = deLaCategoria.length > 0 ? deLaCategoria : servicios ?? []
   const diasConLugar = disponibilidad ? Object.entries(disponibilidad).filter(([, horas]) => horas.some((h) => h.libre)) : []
   const horas = dia && disponibilidad ? disponibilidad[dia] ?? [] : []
   const maniana = horas.filter((h) => h.hora < '13:00')
@@ -151,14 +166,6 @@ function PedirTurno() {
       <section className="contenedor seccion sacar-turno">
         <h1>Pedir turno</h1>
         <p className="ayuda-grande">Elegí el servicio, el día y el horario.</p>
-        {sitio && (
-          <p className="alternativa-whatsapp">
-            ¿Preferís hablar con alguien?{' '}
-            <a href={enlaceWhatsapp(sitio.clinica.whatsapp, MENSAJE_TURNO)} target="_blank" rel="noreferrer">
-              Pedilo por WhatsApp
-            </a>
-          </p>
-        )}
 
         {/* ---------- 1. Servicio ---------- */}
         <section className="paso" aria-labelledby="paso-1">
@@ -169,7 +176,7 @@ function PedirTurno() {
             <p className="cargando">Cargando…</p>
           ) : (
             <div className="opciones-servicio">
-              {servicios.map((s) => (
+              {serviciosVisibles.map((s) => (
                 <button
                   key={s.id}
                   type="button"
@@ -186,7 +193,13 @@ function PedirTurno() {
             </div>
           )}
           <p className="ayuda">
-            ¿Necesitás una cirugía o una limpieza dental? Esas se coordinan directamente con la clínica.
+            {deLaCategoria.length > 0 ? (
+              <Link to="/turno">Ver todos los servicios</Link>
+            ) : (
+              <>
+                ¿Necesitás una cirugía o una limpieza dental? <Link to="/cirugias">Mirá cómo se coordinan</Link>
+              </>
+            )}
           </p>
         </section>
 
@@ -199,7 +212,14 @@ function PedirTurno() {
             {!disponibilidad ? (
               <p className="cargando">Buscando días con lugar…</p>
             ) : diasConLugar.length === 0 ? (
-              <p className="vacio">No hay turnos libres en las próximas dos semanas. Escribinos por WhatsApp.</p>
+              <p className="vacio">
+                No hay turnos libres en las próximas dos semanas.{' '}
+                {sitio && (
+                  <a href={enlaceWhatsapp(sitio.clinica.whatsapp, MENSAJE_TURNO)} target="_blank" rel="noreferrer">
+                    Escribinos por WhatsApp
+                  </a>
+                )}
+              </p>
             ) : (
               <div className="chips">
                 {diasConLugar.map(([d]) => (

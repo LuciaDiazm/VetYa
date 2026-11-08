@@ -1252,20 +1252,6 @@ svg {
   color: var(--azul);
 }
 
-.aviso-sin-cuenta {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-  padding: 18px;
-  border-radius: var(--radio-chico);
-  background: var(--amarillo-suave);
-}
-
-.aviso-sin-cuenta p {
-  margin: 0;
-}
-
 .acceso-formulario .formulario {
   margin: 24px 0;
 }
@@ -3055,6 +3041,83 @@ svg {
   gap: 12px;
   max-width: 340px;
   margin: 24px auto;
+}
+
+/* ---------- Cirugías ---------- */
+
+.cirugia-pasos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 28px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cirugia-pasos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cirugia-pasos p {
+  margin: 4px 0 0;
+  color: var(--gris);
+}
+
+.cirugia {
+  margin-top: 24px;
+}
+
+.cirugia h2 {
+  color: var(--azul);
+}
+
+.cirugia h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--azul);
+}
+
+.cirugia ul {
+  margin: 10px 0 0;
+  padding-left: 22px;
+}
+
+.cirugia li {
+  margin-bottom: 8px;
+}
+
+.cirugia-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 26px;
+}
+
+.cirugia-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.cirugia-aviso {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: var(--radio-chico);
+  background: var(--amarillo-suave);
+}
+
+@media (max-width: 720px) {
+  .cirugia-pasos,
+  .cirugia-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .cirugia-botones .boton {
+    width: 100%;
+  }
 }
 
 /* ---------- Agenda (panel) ---------- */

@@ -41,7 +41,7 @@ async function calcularPendientes(clinicaId: number) {
       recordatorioEnviadoEn: null,
       fechaHoraInicio: { gte: aFechaUTC(manana, "00:00"), lt: aFechaUTC(sumarDias(manana, 1), "00:00") },
     },
-    include: { mascota: mascotaConDueno, servicio: { select: { nombre: true } } },
+    include: { mascota: mascotaConDueno, servicio: { select: { nombre: true, categoria: true } } },
     orderBy: { fechaHoraInicio: "asc" },
   });
 

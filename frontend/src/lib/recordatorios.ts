@@ -17,9 +17,15 @@ function queLeToca(d: Pick<Dosis, 'tipo' | 'producto'>) {
 }
 
 export function mensajeTurnoManana(t: TurnoManana, clinica: string) {
+  // Lo que más se olvida en una cirugía es el ayuno: va en el mismo mensaje del día anterior.
+  const preparacion =
+    t.servicio.categoria === 'CIRUGIA'
+      ? `Importante: tiene que venir en ayunas, con 8 a 12 horas sin comer. Todas las recomendaciones: ${window.location.origin}/cirugias . `
+      : ''
   return (
     `Hola ${t.mascota.cliente.nombre}, te recordamos el turno de ${t.mascota.nombre} (${t.servicio.nombre}) ` +
     `mañana ${diaLargo(diaDe(t.fechaHoraInicio))} a las ${horaDe(t.fechaHoraInicio)} en ${clinica}. ` +
+    preparacion +
     'Si no podés venir, avisanos. ¡Gracias!'
   )
 }

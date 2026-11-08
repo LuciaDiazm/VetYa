@@ -4,6 +4,7 @@ import { Pie } from './components/Pie'
 import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
 import { AuthProvider } from './context/AuthContext'
+import { Cirugias } from './pages/Cirugias'
 import { Configuracion } from './pages/panel/configuracion/Configuracion'
 import { Estadisticas } from './pages/panel/Estadisticas'
 import { Ingresar } from './pages/Ingresar'
@@ -48,6 +49,7 @@ function App() {
             <Route path="/registro" element={<Registro />} />
             <Route path="/urgencias" element={<Urgencias />} />
             <Route path="/turno" element={<SacarTurno />} />
+            <Route path="/cirugias" element={<Cirugias />} />
             <Route path="/adopcion" element={<Adopcion />} />
             <Route path="/adopcion/:id" element={<AnimalAdopcion />} />
             <Route

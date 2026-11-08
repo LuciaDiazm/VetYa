@@ -2,11 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { DisenoAcceso } from '../components/DisenoAcceso'
 import { rutaInicial, useAuth } from '../context/AuthContext'
-import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 
 export function Ingresar() {
   const { ingresar } = useAuth()
-  const { datos } = useSitio()
   const navegar = useNavigate()
   const ubicacion = useLocation()
   const [email, setEmail] = useState('')
@@ -64,21 +62,6 @@ export function Ingresar() {
           Creá una
         </Link>
       </p>
-      {datos && (
-        <div className="aviso-sin-cuenta">
-          <p>
-            <strong>¿No querés crear una cuenta?</strong> Pedí el turno por WhatsApp y te lo anota la clínica.
-          </p>
-          <a
-            href={enlaceWhatsapp(datos.clinica.whatsapp, MENSAJE_TURNO)}
-            target="_blank"
-            rel="noreferrer"
-            className="boton boton-secundario"
-          >
-            Pedir turno por WhatsApp
-          </a>
-        </div>
-      )}
     </DisenoAcceso>
   )
 }

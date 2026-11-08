@@ -2,6 +2,7 @@ import { Router } from "express";
 import { diaArgentina } from "../lib/agenda";
 import { datosDelCarnet, escribirCarnet } from "../lib/carnet";
 import { prisma } from "../lib/prisma";
+import { escribirRecomendaciones, recomendacionesDe } from "../lib/recomendaciones";
 
 // Rutas públicas: las usa la web sin iniciar sesión.
 export const publicoRouter = Router();
@@ -84,6 +85,33 @@ publicoRouter.get("/carnet/:token", async (req, res) => {
   res.setHeader("Content-Disposition", `inline; filename="${archivo}"`);
   res.setHeader("Cache-Control", "no-store");
   escribirCarnet(mascota, res);
+});
+
+// Cirugías con sus recomendaciones para antes y después.
+publicoRouter.get("/cirugias", async (_req, res) => {
+  const cirugias = await prisma.servicio.findMany({
+    where: { clinicaId: CLINICA_ID, activo: true, categoria: "CIRUGIA" },
+    orderBy: { nombre: "asc" },
+  });
+  res.json(cirugias.map((s) => ({ ...s, ...recomendacionesDe(s.nombre) })));
+});
+
+publicoRouter.get("/cirugias/:id/recomendaciones.pdf", async (req, res) => {
+  const id = Number(req.params.id);
+  const [servicio, clinica] = await Promise.all([
+    Number.isInteger(id)
+      ? prisma.servicio.findFirst({ where: { id, clinicaId: CLINICA_ID, activo: true, categoria: "CIRUGIA" } })
+      : null,
+    prisma.clinica.findUnique({ where: { id: CLINICA_ID } }),
+  ]);
+  if (!servicio || !clinica) {
+    res.status(404).json({ error: "Cirugía no encontrada" });
+    return;
+  }
+  const slug = servicio.nombre.split(/[ /]/)[0].normalize("NFD").replace(/[^\w-]/g, "").toLowerCase();
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="recomendaciones-${slug}.pdf"`);
+  escribirRecomendaciones(servicio.nombre, clinica, res);
 });
 
 publicoRouter.get("/preguntas-frecuentes", async (_req, res) => {
