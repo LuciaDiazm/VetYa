@@ -70,12 +70,13 @@ export function BarraNavegacion() {
         </nav>
 
         <div className="barra-acciones">
+          {/* Va primero: cuando se oculta en la portada, el hueco queda junto al menú y nada se corre. */}
+          <Link to="/turno" className="boton boton-secundario boton-turno">
+            Pedir turno
+          </Link>
           <Link to="/urgencias" className="enlace-urgencias">
             <Siren size={20} aria-hidden="true" />
             <span>Urgencias</span>
-          </Link>
-          <Link to="/turno" className="boton boton-secundario boton-turno">
-            Pedir turno
           </Link>
           {!cargando && (
             <div className="cuenta-compu">

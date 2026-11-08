@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { BarraNavegacion } from './components/BarraNavegacion'
+import { BotonArriba } from './components/BotonArriba'
 import { Pie } from './components/Pie'
 import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
@@ -34,6 +35,7 @@ function DisenoPublico() {
       <BarraNavegacion />
       <Outlet />
       <Pie />
+      <BotonArriba />
     </>
   )
 }

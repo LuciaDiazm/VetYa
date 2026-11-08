@@ -357,6 +357,64 @@ svg {
   text-align: left;
 }
 
+/* "Pedir turno" del encabezado: no se repite mientras se ve el botón grande de la portada */
+
+html[data-turno-portada='visible'] .boton-turno {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+}
+
+.barra-acciones .boton-turno {
+  transition:
+    background-color 0.15s,
+    opacity 200ms var(--curva-salida),
+    transform 200ms var(--curva-salida),
+    visibility 200ms;
+}
+
+/* Volver arriba */
+
+.boton-arriba {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: var(--azul);
+  box-shadow: var(--sombra);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition:
+    opacity 200ms var(--curva-salida),
+    transform 200ms var(--curva-salida),
+    visibility 200ms;
+}
+
+.boton-arriba.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-turno-portada='visible'] .boton-turno,
+  .boton-arriba {
+    transform: none;
+  }
+}
+
 /* Cuenta en el encabezado: muestra quién entró y guarda "Salir" */
 
 .enlace-ingresar {

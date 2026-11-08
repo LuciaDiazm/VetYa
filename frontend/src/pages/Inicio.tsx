@@ -40,6 +40,25 @@ const TARJETAS: {
   { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/pug-buzo.jpg', oscura: false, enlace: '/turno?categoria=ESTETICA', accion: 'Pedir turno' },
 ]
 
+// Mientras se ve el botón grande de la portada, el de "Pedir turno" del encabezado se oculta (ver index.css).
+function observarBotonPortada(boton: HTMLElement | null) {
+  if (!boton) return
+  const raiz = document.documentElement
+  raiz.dataset.turnoPortada = 'visible'
+  // El margen descuenta lo que tapa el encabezado fijo.
+  const observador = new IntersectionObserver(
+    ([entrada]) => {
+      raiz.dataset.turnoPortada = entrada.isIntersecting ? 'visible' : 'oculto'
+    },
+    { rootMargin: '-80px 0px 0px 0px' },
+  )
+  observador.observe(boton)
+  return () => {
+    observador.disconnect()
+    delete raiz.dataset.turnoPortada
+  }
+}
+
 // 6 semanas → "6 semanas"; 16 semanas → "4 meses"
 function edadDosis(dosis: DosisPlan) {
   return dosis.edadSemanas >= 12 && dosis.edadSemanas % 4 === 0
@@ -97,7 +116,7 @@ export function Inicio() {
           <h1 id="titulo-portada">Clínica veterinaria en Goya</h1>
           <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
           <div className="portada-acciones">
-            <Link to="/turno" className="boton boton-grande">
+            <Link to="/turno" className="boton boton-grande" ref={observarBotonPortada}>
               <CalendarCheck size={22} aria-hidden="true" />
               Pedir turno
             </Link>
