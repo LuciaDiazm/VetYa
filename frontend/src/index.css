@@ -982,6 +982,81 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--amarillo);
 }
 
+/* Toda la tarjeta es el enlace: el ::after del enlace la cubre entera */
+
+.mosaico-tarjeta {
+  position: relative;
+  transition: transform 200ms var(--curva-salida);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mosaico-enlace::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* por encima de la foto, que al agrandarse con el cursor forma su propia capa */
+}
+
+/* Borde amarillo para resaltarla */
+.mosaico-tarjeta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 2;
+  box-shadow: inset 0 0 0 3px var(--amarillo);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--curva-salida);
+}
+
+.mosaico-tarjeta img,
+.mosaico-enlace svg {
+  transition: transform 250ms var(--curva-salida);
+}
+
+.mosaico-tarjeta:has(.mosaico-enlace:focus-visible)::after {
+  opacity: 1;
+}
+
+/* En el celular no hay cursor: al tocarla se hunde apenas, para confirmar el toque. */
+.mosaico-tarjeta:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mosaico-tarjeta:hover {
+    transform: translateY(-4px);
+  }
+
+  .mosaico-tarjeta:hover::after {
+    opacity: 1;
+  }
+
+  .mosaico-tarjeta:hover img {
+    transform: scale(1.04);
+  }
+
+  .mosaico-tarjeta:hover .mosaico-enlace svg {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaico-tarjeta,
+  .mosaico-tarjeta img,
+  .mosaico-enlace svg {
+    transition: none;
+  }
+
+  .mosaico-tarjeta:hover,
+  .mosaico-tarjeta:active,
+  .mosaico-tarjeta:hover img,
+  .mosaico-tarjeta:hover .mosaico-enlace svg {
+    transform: none;
+  }
+}
+
 /* ---------- Planes ---------- */
 
 .grilla-planes {

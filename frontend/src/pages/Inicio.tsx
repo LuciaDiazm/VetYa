@@ -255,7 +255,7 @@ export function Inicio() {
                       <li key={s.id}>{s.nombre === c.nombre ? (s.descripcion ?? s.nombre) : s.nombre}</li>
                     ))}
                   </ul>
-                  <Link to={c.enlace} className="mosaico-enlace">
+                  <Link to={c.enlace} className="mosaico-enlace" aria-label={`${c.nombre}: ${c.accion.toLowerCase()}`}>
                     {c.accion} <ArrowRight size={18} aria-hidden="true" />
                   </Link>
                 </div>
@@ -480,7 +480,7 @@ function Dudas({ whatsapp }: { whatsapp: string }) {
     <div className="dudas">
       <div className="dudas-texto">
         <h2 id="titulo-dudas">¿Te quedaron dudas?</h2>
-        <p>Escribí tu pregunta y te respondemos por WhatsApp.</p>
+        <p>Escribí tu pregunta. Te responde una persona de la clínica por WhatsApp.</p>
         <form className="formulario" onSubmit={enviar}>
           <label className="campo">
             Tu nombre
