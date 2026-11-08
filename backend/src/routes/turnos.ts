@@ -11,7 +11,6 @@ import {
 } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
-import { normalizarTelefono } from "../lib/telefono";
 
 const CLINICA_ID = 1;
 const DIAS_A_MOSTRAR = 14; // a partir de mañana; hoy se suma aparte solo si queda lugar
@@ -29,7 +28,7 @@ function responderError(res: Response, error: z.ZodError) {
 }
 
 // =====================================================================
-// Turnos online (sin cuenta)
+// Turnos online: los horarios son públicos, pero pedir el turno exige cuenta de dueño
 // =====================================================================
 
 export const turnosPublicoRouter = Router();
@@ -64,16 +63,18 @@ const esquemaTurnoOnline = z.object({
   servicioId: z.number().int(),
   fecha,
   hora,
-  nombre: z.string().trim().min(2, "Escribí tu nombre"),
-  telefono: z.string().trim().min(8, "Escribí un teléfono válido"),
-  mascota: z.object({
-    nombre: z.string().trim().min(1, "Escribí el nombre de tu mascota"),
-    especie: z.enum(["PERRO", "GATO", "OTRO"]),
-  }),
+  // Una mascota que ya está en su ficha, o una nueva.
+  mascota: z.union([
+    z.object({ id: z.number().int() }),
+    z.object({
+      nombre: z.string().trim().min(1, "Escribí el nombre de tu mascota"),
+      especie: z.enum(["PERRO", "GATO", "OTRO"]),
+    }),
+  ]),
   motivo: z.string().trim().max(500).optional(),
 });
 
-turnosPublicoRouter.post("/", async (req, res) => {
+turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req, res) => {
   const resultado = esquemaTurnoOnline.safeParse(req.body);
   if (!resultado.success) return responderError(res, resultado.error);
   const datos = resultado.data;
@@ -86,6 +87,26 @@ turnosPublicoRouter.post("/", async (req, res) => {
     return;
   }
 
+  // El turno siempre queda en la ficha del dueño que inició sesión.
+  const cliente = await prisma.cliente.findUnique({
+    where: { usuarioId: req.usuario!.id },
+    include: { mascotas: { where: { activo: true } } },
+  });
+  if (!cliente) {
+    res.status(400).json({ error: "Tu cuenta no tiene una ficha en la clínica. Escribinos por WhatsApp" });
+    return;
+  }
+  const pedida = datos.mascota;
+  // Si escribe el nombre de una mascota que ya tiene, se usa esa en lugar de duplicarla.
+  const mascotaExistente =
+    "id" in pedida
+      ? cliente.mascotas.find((m) => m.id === pedida.id)
+      : cliente.mascotas.find((m) => m.nombre.trim().toLowerCase() === pedida.nombre.toLowerCase());
+  if ("id" in pedida && !mascotaExistente) {
+    res.status(400).json({ error: "Elegí una de tus mascotas" });
+    return;
+  }
+
   // Se vuelve a verificar el horario: alguien pudo haberlo tomado mientras se completaba el formulario.
   const problema = await validarHorario(CLINICA_ID, servicio.id, datos.fecha, datos.hora, {
     anticipacionMinutos: ANTICIPACION_ONLINE_MINUTOS,
@@ -95,24 +116,16 @@ turnosPublicoRouter.post("/", async (req, res) => {
     return;
   }
 
-  // Regla de negocio 5: si ya es cliente (mismo teléfono) se reutiliza; si no, se crea con su mascota.
-  const telefono = normalizarTelefono(datos.telefono);
-  const [nombre, ...resto] = datos.nombre.split(" ");
   const turno = await prisma.$transaction(async (tx) => {
-    const cliente =
-      (await tx.cliente.findFirst({ where: { clinicaId: CLINICA_ID, telefono }, include: { mascotas: true } })) ??
-      (await tx.cliente.create({
-        data: { clinicaId: CLINICA_ID, nombre, apellido: resto.join(" ") || "-", telefono },
-        include: { mascotas: true },
-      }));
-
-    const mascotaExistente = cliente.mascotas.find(
-      (m) => m.activo && m.nombre.trim().toLowerCase() === datos.mascota.nombre.toLowerCase(),
-    );
     const mascota =
       mascotaExistente ??
       (await tx.mascota.create({
-        data: { clienteId: cliente.id, nombre: datos.mascota.nombre, especie: datos.mascota.especie, sexo: "MACHO" },
+        data: {
+          clienteId: cliente.id,
+          nombre: (pedida as { nombre: string }).nombre,
+          especie: (pedida as { especie: "PERRO" | "GATO" | "OTRO" }).especie,
+          sexo: "MACHO",
+        },
       }));
 
     const inicio = aFechaUTC(datos.fecha, datos.hora);

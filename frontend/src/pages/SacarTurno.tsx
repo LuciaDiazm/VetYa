@@ -1,16 +1,84 @@
-import { CalendarCheck, CircleCheck, Clock, MessageCircle } from 'lucide-react'
+import { CalendarCheck, CircleCheck, Clock, MessageCircle, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { apiGet, apiPost } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
+import { apiGet, apiPost, ErrorApi } from '../lib/api'
 import { diaAmigable, diaCorto, diaLargo } from '../lib/fechas'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
-import type { EspecieMascota, Servicio } from '../types'
+import type { DatosMiCuenta, EspecieMascota, Servicio } from '../types'
 
 // Por día, todos los horarios de atención: los ocupados se muestran tachados.
 type Disponibilidad = Record<string, { hora: string; libre: boolean }[]>
 
-// Pedir turno online en cuatro pasos, sin cuenta: servicio, día, horario y datos.
+// Pedir turno online exige cuenta: sin sesión se invita a crearla (o a pedirlo por WhatsApp).
 export function SacarTurno() {
+  const { usuario, cargando } = useAuth()
+  const { datos: sitio } = useSitio()
+
+  if (cargando) {
+    return (
+      <main className="fondo-huellas">
+        <section className="contenedor seccion">
+          <p className="cargando">Cargando…</p>
+        </section>
+      </main>
+    )
+  }
+
+  if (!usuario) {
+    return (
+      <main className="fondo-huellas">
+        <section className="contenedor seccion">
+          <div className="turno-listo turno-acceso">
+            <UserRound size={56} aria-hidden="true" />
+            <h1>Para pedir turno necesitás tu cuenta</h1>
+            <p className="turno-listo-detalle">
+              Se crea una sola vez. Si ya viniste a la clínica, usá el mismo teléfono y vas a ver a tus mascotas.
+            </p>
+            <div className="turno-acceso-botones">
+              <Link to="/registro" state={{ desde: '/turno' }} className="boton boton-grande">
+                Crear mi cuenta
+              </Link>
+              <Link to="/ingresar" state={{ desde: '/turno' }} className="boton boton-contorno boton-grande">
+                Ya tengo cuenta
+              </Link>
+            </div>
+            {sitio && (
+              <p className="alternativa-whatsapp">
+                ¿Preferís hablar con alguien?{' '}
+                <a href={enlaceWhatsapp(sitio.clinica.whatsapp, MENSAJE_TURNO)} target="_blank" rel="noreferrer">
+                  Pedilo por WhatsApp
+                </a>
+              </p>
+            )}
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  if (usuario.rol !== 'DUENIO') {
+    return (
+      <main className="fondo-huellas">
+        <section className="contenedor seccion">
+          <div className="turno-listo turno-acceso">
+            <UserRound size={56} aria-hidden="true" />
+            <h1>Entraste con una cuenta de la clínica</h1>
+            <p className="turno-listo-detalle">Los turnos de los clientes se cargan desde el panel.</p>
+            <Link to="/panel/agenda/nuevo" className="boton boton-grande">
+              Dar turno
+            </Link>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  return <PedirTurno />
+}
+
+// Los cuatro pasos: servicio, día, horario y mascota.
+function PedirTurno() {
   const { datos: sitio } = useSitio()
   const [servicios, setServicios] = useState<Servicio[] | null>(null)
   const [servicio, setServicio] = useState<Servicio | null>(null)
@@ -64,8 +132,8 @@ export function SacarTurno() {
               a las <strong>{confirmado.hora}</strong>
             </p>
             <p>Te vamos a recordar por WhatsApp el día anterior. Si no podés venir, avisanos con tiempo.</p>
-            <Link to="/" className="boton boton-grande">
-              Volver al inicio
+            <Link to="/mi-cuenta" className="boton boton-grande">
+              Ver mis turnos
             </Link>
           </div>
         </section>
@@ -82,7 +150,7 @@ export function SacarTurno() {
     <main className="fondo-huellas">
       <section className="contenedor seccion sacar-turno">
         <h1>Pedir turno</h1>
-        <p className="ayuda-grande">Elegí el servicio, el día y el horario. No hace falta crear una cuenta.</p>
+        <p className="ayuda-grande">Elegí el servicio, el día y el horario.</p>
         {sitio && (
           <p className="alternativa-whatsapp">
             ¿Preferís hablar con alguien?{' '}
@@ -201,7 +269,7 @@ export function SacarTurno() {
         {servicio && dia && hora && (
           <section className="paso" aria-labelledby="paso-4" ref={pasoDatos}>
             <h2 id="paso-4">
-              <span className="paso-numero">4</span> Tus datos
+              <span className="paso-numero">4</span> ¿Para quién es?
             </h2>
             <p className="resumen-turno">
               <CalendarCheck size={22} aria-hidden="true" />
@@ -251,16 +319,34 @@ function FormularioDatos({
   alConfirmar: (d: { dia: string; hora: string; servicio: string; mascota: string }) => void
   alPerderHorario: () => void
 }) {
-  const [nombre, setNombre] = useState('')
-  const [telefono, setTelefono] = useState('')
+  const { salir } = useAuth()
+  const [mascotas, setMascotas] = useState<{ id: number; nombre: string }[] | null>(null)
+  const [elegida, setElegida] = useState<number | 'nueva' | null>(null)
   const [mascota, setMascota] = useState('')
   const [especie, setEspecie] = useState<EspecieMascota>('PERRO')
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
+  // Con una sola mascota ya queda elegida; sin ninguna, directamente se carga una nueva.
+  useEffect(() => {
+    apiGet<DatosMiCuenta>('/mi-cuenta')
+      .then((d) => {
+        setMascotas(d.mascotas)
+        setElegida(d.mascotas.length === 0 ? 'nueva' : d.mascotas.length === 1 ? d.mascotas[0].id : null)
+      })
+      .catch(() => {
+        setMascotas([])
+        setElegida('nueva')
+      })
+  }, [])
+
   async function enviar(e: FormEvent) {
     e.preventDefault()
+    if (elegida === null) {
+      setError('Elegí para qué mascota es el turno')
+      return
+    }
     setError(null)
     setEnviando(true)
     try {
@@ -268,13 +354,17 @@ function FormularioDatos({
         servicioId: servicio.id,
         fecha: dia,
         hora,
-        nombre,
-        telefono,
-        mascota: { nombre: mascota, especie },
+        mascota: elegida === 'nueva' ? { nombre: mascota, especie } : { id: elegida },
         motivo: motivo || undefined,
       })
-      alConfirmar({ dia, hora, servicio: servicio.nombre, mascota })
+      const nombreMascota = elegida === 'nueva' ? mascota : mascotas?.find((m) => m.id === elegida)?.nombre ?? ''
+      alConfirmar({ dia, hora, servicio: servicio.nombre, mascota: nombreMascota })
     } catch (err) {
+      // Si la sesión venció, vuelve a la pantalla que pide entrar con la cuenta.
+      if (err instanceof ErrorApi && err.status === 401) {
+        salir()
+        return
+      }
       setError(err instanceof Error ? err.message : 'No se pudo pedir el turno')
       // Si otra persona tomó el horario, se actualizan los horarios libres.
       if (err instanceof Error && err.message.includes('no está disponible')) alPerderHorario()
@@ -283,53 +373,63 @@ function FormularioDatos({
     }
   }
 
+  if (mascotas === null) return <p className="cargando">Cargando…</p>
+
   return (
     <form className="formulario" onSubmit={enviar}>
-      <div className="fila-campos">
-        <label className="campo">
-          Tu nombre y apellido
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} required autoComplete="name" />
-        </label>
-        <label className="campo">
-          Tu teléfono (WhatsApp)
-          <input
-            type="tel"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            required
-            placeholder="3777 123456"
-            autoComplete="tel"
-          />
-        </label>
-      </div>
-      <div className="fila-campos">
-        <label className="campo">
-          Nombre de tu mascota
-          <input value={mascota} onChange={(e) => setMascota(e.target.value)} required />
-        </label>
-        <fieldset className="grupo-filtro">
-          <legend>Es un</legend>
-          <div className="chips">
-            {(
-              [
-                ['PERRO', 'Perro'],
-                ['GATO', 'Gato'],
-                ['OTRO', 'Otro'],
-              ] as [EspecieMascota, string][]
-            ).map(([v, t]) => (
-              <button
-                key={v}
-                type="button"
-                className={`chip chip-grande${especie === v ? ' chip-activo' : ''}`}
-                aria-pressed={especie === v}
-                onClick={() => setEspecie(v)}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-      </div>
+      {mascotas.length > 0 && (
+        <div className="chips">
+          {mascotas.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={`chip chip-grande${elegida === m.id ? ' chip-activo' : ''}`}
+              aria-pressed={elegida === m.id}
+              onClick={() => setElegida(m.id)}
+            >
+              {m.nombre}
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`chip chip-grande${elegida === 'nueva' ? ' chip-activo' : ''}`}
+            aria-pressed={elegida === 'nueva'}
+            onClick={() => setElegida('nueva')}
+          >
+            Otra mascota
+          </button>
+        </div>
+      )}
+      {elegida === 'nueva' && (
+        <div className="fila-campos">
+          <label className="campo">
+            Nombre de tu mascota
+            <input value={mascota} onChange={(e) => setMascota(e.target.value)} required />
+          </label>
+          <fieldset className="grupo-filtro">
+            <legend>Es un</legend>
+            <div className="chips">
+              {(
+                [
+                  ['PERRO', 'Perro'],
+                  ['GATO', 'Gato'],
+                  ['OTRO', 'Otro'],
+                ] as [EspecieMascota, string][]
+              ).map(([v, t]) => (
+                <button
+                  key={v}
+                  type="button"
+                  className={`chip chip-grande${especie === v ? ' chip-activo' : ''}`}
+                  aria-pressed={especie === v}
+                  onClick={() => setEspecie(v)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      )}
       <label className="campo">
         {textosMotivo(servicio).titulo} (opcional)
         <textarea
@@ -349,8 +449,7 @@ function FormularioDatos({
         {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
       </button>
       <p className="ayuda">
-        <MessageCircle size={16} aria-hidden="true" /> El día anterior te llega un recordatorio por WhatsApp. Si ya
-        viniste antes, usá el mismo teléfono.
+        <MessageCircle size={16} aria-hidden="true" /> El día anterior te llega un recordatorio al WhatsApp de tu cuenta.
       </p>
     </form>
   )

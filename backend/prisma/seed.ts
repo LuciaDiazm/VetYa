@@ -75,11 +75,17 @@ async function main() {
   }
 
   // ---------- Preguntas frecuentes ----------
+  const RESPUESTA_CUENTA = "Sí. Se crea una sola vez, con tu nombre, tu teléfono y un email. Si preferís, pedí el turno por WhatsApp.";
+  // Las bases que ya tenían la respuesta anterior (cuando no hacía falta cuenta) se corrigen.
+  await prisma.preguntaFrecuente.updateMany({
+    where: { clinicaId, respuesta: "No. Podés sacar turno solo con tu nombre, tu teléfono y los datos de tu mascota." },
+    data: { respuesta: RESPUESTA_CUENTA },
+  });
   if ((await prisma.preguntaFrecuente.count({ where: { clinicaId } })) === 0) {
     await prisma.preguntaFrecuente.createMany({
       data: [
         { clinicaId, orden: 1, pregunta: "¿Atienden urgencias?", respuesta: "Sí. Ante una urgencia comunicate directamente por teléfono o WhatsApp antes de venir." },
-        { clinicaId, orden: 2, pregunta: "¿Necesito crear una cuenta para sacar turno?", respuesta: "No. Podés sacar turno solo con tu nombre, tu teléfono y los datos de tu mascota." },
+        { clinicaId, orden: 2, pregunta: "¿Necesito crear una cuenta para sacar turno?", respuesta: RESPUESTA_CUENTA },
         { clinicaId, orden: 3, pregunta: "¿Cada cuánto hay que vacunar a mi mascota?", respuesta: "Depende de la edad y la vacuna. En general los refuerzos son anuales; te avisamos por WhatsApp cuando le toca." },
         { clinicaId, orden: 4, pregunta: "¿Qué tengo que hacer antes de una castración?", respuesta: "La mascota debe venir con 8 a 12 horas de ayuno. Te damos las indicaciones al confirmar el turno." },
         { clinicaId, orden: 5, pregunta: "¿Puedo cancelar un turno?", respuesta: "Sí, con al menos 24 horas de anticipación desde la web o por WhatsApp." },

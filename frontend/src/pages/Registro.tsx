@@ -1,14 +1,15 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { DisenoAcceso } from '../components/DisenoAcceso'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
 
-// Registro de dueños de mascotas. Es opcional: para sacar turno no hace falta cuenta.
+// Registro de dueños de mascotas. Hace falta para pedir turno por la web.
 export function Registro() {
   const { registrarse } = useAuth()
   const navegar = useNavigate()
+  const ubicacion = useLocation()
   const [datos, setDatos] = useState<DatosRegistro>(VACIO)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
@@ -23,7 +24,9 @@ export function Registro() {
     setEnviando(true)
     try {
       await registrarse(datos)
-      navegar('/mi-cuenta', { replace: true })
+      // Si venía de pedir un turno, vuelve ahí.
+      const desde = (ubicacion.state as { desde?: string } | null)?.desde
+      navegar(desde ?? '/mi-cuenta', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo crear la cuenta')
     } finally {
@@ -37,7 +40,7 @@ export function Registro() {
       frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
       <h1>Crear cuenta</h1>
       <p className="ayuda">
-        Con tu cuenta ves la historia clínica de tus mascotas, tus turnos y el carnet de vacunas.
+        Con tu cuenta pedís turnos y ves la historia clínica de tus mascotas y el carnet de vacunas.
       </p>
       <form onSubmit={enviar} className="formulario">
         <div className="fila-campos">
@@ -104,7 +107,10 @@ export function Registro() {
         </button>
       </form>
       <p>
-        ¿Ya tenés cuenta? <Link to="/ingresar">Ingresá</Link>
+        ¿Ya tenés cuenta?{' '}
+        <Link to="/ingresar" state={ubicacion.state}>
+          Ingresá
+        </Link>
       </p>
     </DisenoAcceso>
   )

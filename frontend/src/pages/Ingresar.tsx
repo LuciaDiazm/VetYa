@@ -59,12 +59,15 @@ export function Ingresar() {
         </button>
       </form>
       <p>
-        ¿Todavía no tenés cuenta? <Link to="/registro">Creá una</Link>
+        ¿Todavía no tenés cuenta?{' '}
+        <Link to="/registro" state={ubicacion.state}>
+          Creá una
+        </Link>
       </p>
       {datos && (
         <div className="aviso-sin-cuenta">
           <p>
-            <strong>¿Solo querés pedir un turno?</strong> No necesitás cuenta.
+            <strong>¿No querés crear una cuenta?</strong> Pedí el turno por WhatsApp y te lo anota la clínica.
           </p>
           <a
             href={enlaceWhatsapp(datos.clinica.whatsapp, MENSAJE_TURNO)}

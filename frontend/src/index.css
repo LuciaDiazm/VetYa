@@ -1704,7 +1704,7 @@ svg {
 .huella-dedos {
   position: relative;
   height: 0;
-  padding-top: 34%;
+  padding-top: 36%;
 }
 
 .huella-dedo {
@@ -1739,24 +1739,25 @@ svg {
   border-color: var(--amarillo);
 }
 
+/* Los cuatro dedos con la misma separación, formando un arco sobre la almohadilla */
 .huella-dedo-1 {
   left: 0;
-  top: 30%;
+  top: 34%;
 }
 
 .huella-dedo-2 {
-  left: 24%;
+  left: 25.6%;
   top: 0;
 }
 
 .huella-dedo-3 {
-  right: 24%;
+  right: 25.6%;
   top: 0;
 }
 
 .huella-dedo-4 {
   right: 0;
-  top: 30%;
+  top: 34%;
 }
 
 @keyframes dedo-entra {
@@ -1769,10 +1770,10 @@ svg {
 /* La almohadilla grande de la huella, con el título y el botón */
 .huella-almohadilla {
   position: relative;
-  width: 80%;
-  margin: 18% auto 0;
-  padding: 56px 40px 48px;
-  border-radius: 46% 46% 42% 42% / 54% 54% 46% 46%;
+  width: 88%;
+  margin: 0 auto;
+  padding: 84px 64px 60px;
+  border-radius: 50% 50% 40% 40% / 52% 52% 48% 48%;
   background: var(--azul);
   color: #ffffff;
   text-align: center;
@@ -1780,15 +1781,20 @@ svg {
 
 .huella-almohadilla h1 {
   color: #ffffff;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.9rem, 4.6vw, 2.5rem);
 }
 
 .huella-almohadilla p {
+  margin: 14px 0 0;
   color: #d7def0;
   font-size: 1.15rem;
 }
 
+/* En su propia línea, para que no quede pegado al botón */
 .huella-almohadilla .sello-gratis {
+  display: flex;
+  justify-content: center;
+  margin: 14px 0 22px;
   color: var(--amarillo);
 }
 
@@ -2521,11 +2527,16 @@ svg {
 
 @media (max-width: 560px) {
   .huella-dedos {
-    padding-top: 40%;
+    padding-top: 38%;
   }
 
   .huella-dedo {
-    width: 25%;
+    width: 23.5%;
+  }
+
+  .huella-dedo-1,
+  .huella-dedo-4 {
+    top: 28%;
   }
 
   .huella-dedo span {
@@ -2534,17 +2545,17 @@ svg {
   }
 
   .huella-dedo-2 {
-    left: 23%;
+    left: 25.5%;
   }
 
   .huella-dedo-3 {
-    right: 23%;
+    right: 25.5%;
   }
 
   .huella-almohadilla {
     width: 100%;
-    margin-top: 22%;
-    padding: 44px 22px 36px;
+    margin-top: 4%;
+    padding: 52px 26px 40px;
     border-radius: 40% 40% 32% 32% / 30% 30% 26% 26%;
   }
 
@@ -3032,6 +3043,18 @@ svg {
 .turno-listo-detalle {
   font-size: 1.2rem;
   line-height: 1.7;
+}
+
+.turno-acceso > svg {
+  color: var(--azul);
+}
+
+.turno-acceso-botones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 340px;
+  margin: 24px auto;
 }
 
 /* ---------- Agenda (panel) ---------- */
