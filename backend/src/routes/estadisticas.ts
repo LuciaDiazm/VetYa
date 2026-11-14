@@ -40,14 +40,48 @@ async function resumen(clinicaId: number, inicio: Date, fin: Date) {
   };
 }
 
-estadisticasRouter.get("/", async (req, res) => {
+// Lee "desde" y "hasta" de la dirección (por defecto, este mes). Devuelve null si el período no sirve.
+function leerPeriodo(query: Record<string, unknown>) {
   const hoy = diaArgentina(new Date());
-  const desde = esFechaValida(req.query.desde) ? req.query.desde : `${hoy.slice(0, 8)}01`;
-  const hasta = esFechaValida(req.query.hasta) ? req.query.hasta : hoy;
-  if (hasta < desde || diasEntre(desde, hasta) > MAX_DIAS) {
+  const desde = esFechaValida(query.desde) ? query.desde : `${hoy.slice(0, 8)}01`;
+  const hasta = esFechaValida(query.hasta) ? query.hasta : hoy;
+  if (hasta < desde || diasEntre(desde, hasta) > MAX_DIAS) return null;
+  return { desde, hasta };
+}
+
+// Informe: todos los turnos del período, con lo necesario para listarlos, filtrarlos e imprimirlos.
+estadisticasRouter.get("/turnos", async (req, res) => {
+  const periodo = leerPeriodo(req.query);
+  if (!periodo) {
     res.status(400).json({ error: "Período inválido" });
     return;
   }
+  const turnos = await prisma.turno.findMany({
+    where: {
+      clinicaId: req.usuario!.clinicaId,
+      fechaHoraInicio: { gte: aFechaUTC(periodo.desde, "00:00"), lt: aFechaUTC(sumarDias(periodo.hasta, 1), "00:00") },
+    },
+    select: {
+      id: true,
+      fechaHoraInicio: true,
+      estado: true,
+      origen: true,
+      servicio: { select: { id: true, nombre: true } },
+      veterinario: { select: { id: true, nombre: true, apellido: true } },
+      mascota: { select: { nombre: true, cliente: { select: { nombre: true, apellido: true } } } },
+    },
+    orderBy: { fechaHoraInicio: "asc" },
+  });
+  res.json(turnos);
+});
+
+estadisticasRouter.get("/", async (req, res) => {
+  const periodo = leerPeriodo(req.query);
+  if (!periodo) {
+    res.status(400).json({ error: "Período inválido" });
+    return;
+  }
+  const { desde, hasta } = periodo;
   const clinicaId = req.usuario!.clinicaId;
   const inicio = aFechaUTC(desde, "00:00");
   const fin = aFechaUTC(sumarDias(hasta, 1), "00:00");

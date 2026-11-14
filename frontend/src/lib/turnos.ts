@@ -1,3 +1,4 @@
+import { Ban, CalendarCheck, Check, Clock, Globe, Phone, Store, UserX } from 'lucide-react'
 import { diaDe, diaLargo, horaDe } from './fechas'
 import type { EstadoTurno, HorarioAtencion, Turno } from '../types'
 
@@ -7,6 +8,21 @@ export const ESTADOS_TURNO: Record<EstadoTurno, string> = {
   ATENDIDO: 'Atendido',
   AUSENTE: 'No vino',
   CANCELADO: 'Cancelado',
+}
+
+// El estado siempre se muestra con ícono y texto, no solo con color.
+export const ICONOS_ESTADO = {
+  PENDIENTE: Clock,
+  CONFIRMADO: CalendarCheck,
+  ATENDIDO: Check,
+  AUSENTE: UserX,
+  CANCELADO: Ban,
+}
+
+export const ORIGENES = {
+  ONLINE: { texto: 'Pedido online', icono: Globe },
+  TELEFONO: { texto: 'Por teléfono', icono: Phone },
+  MOSTRADOR: { texto: 'En el mostrador', icono: Store },
 }
 
 // Mensaje de WhatsApp para confirmarle el turno al dueño.

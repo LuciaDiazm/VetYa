@@ -1,39 +1,13 @@
-import {
-  Ban,
-  CalendarCheck,
-  Check,
-  Clock,
-  Globe,
-  MessageCircle,
-  Phone,
-  Stethoscope,
-  Store,
-  Undo2,
-  UserX,
-} from 'lucide-react'
+import { MessageCircle, Stethoscope, Undo2, UserX } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiPatch } from '../lib/api'
 import { horaDe } from '../lib/fechas'
 import { formatearTelefono } from '../lib/mascotas'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
-import { ESTADOS_TURNO, mensajeConfirmacion } from '../lib/turnos'
+import { ESTADOS_TURNO, ICONOS_ESTADO, mensajeConfirmacion, ORIGENES } from '../lib/turnos'
 import type { EstadoTurno, Turno } from '../types'
 
-const ORIGENES = {
-  ONLINE: { texto: 'Pedido online', icono: Globe },
-  TELEFONO: { texto: 'Por teléfono', icono: Phone },
-  MOSTRADOR: { texto: 'En el mostrador', icono: Store },
-}
-
-// El estado siempre se muestra con ícono y texto, no solo con color.
-const ICONOS_ESTADO = {
-  PENDIENTE: Clock,
-  CONFIRMADO: CalendarCheck,
-  ATENDIDO: Check,
-  AUSENTE: UserX,
-  CANCELADO: Ban,
-}
 
 interface Props {
   turno: Turno

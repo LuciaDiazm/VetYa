@@ -1,3 +1,5 @@
+import type { DatosAplicacion } from '../components/FilaAplicacion'
+import { hoyArgentina } from './fechas'
 import type { AplicacionSanitaria, EspecieMascota } from '../types'
 
 // Vacunas y desparasitarios más comunes, con el tiempo habitual hasta la próxima dosis.
@@ -59,4 +61,9 @@ export function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
     vistas.add(clave)
     return true
   })
+}
+
+// Vacuna nueva aplicada hoy: ya propone el refuerzo en 1 año, que es lo que más se olvida.
+export function vacunaNueva(): DatosAplicacion {
+  return { tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: sumarMeses(hoyArgentina(), 12) }
 }

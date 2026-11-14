@@ -54,16 +54,24 @@ async function main() {
   }
 
   // ---------- Servicios (se crean si faltan y se les agrega la foto) ----------
+  const DESCRIPCION_PELUQUERIA = "Solo perros chicos y medianos, con turno previo. Baño, secado, limpieza de oídos, corte de uñas y peinado.";
   const servicios = [
     { nombre: "Consulta y control", categoria: "CLINICA", duracionMin: 20, fotoUrl: "/fotos/gatito-control.jpg", descripcion: "Examen físico general, orientación diagnóstica y controles de rutina." },
     { nombre: "Vacunación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/vacunacion.jpg", descripcion: "Plan de vacunación para perros y gatos, con registro en el carnet digital." },
     { nombre: "Desparasitación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/cachorro.jpg", descripcion: "Desparasitación interna y externa." },
     { nombre: "Análisis de sangre y orina", categoria: "DIAGNOSTICO", duracionMin: 20, fotoUrl: "/fotos/gato-consulta.jpg", descripcion: "Extracción de muestras para análisis clínicos." },
+    { nombre: "Electrocardiograma", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/perro-doctor.jpg", descripcion: "Estudio del corazón, por ejemplo antes de una cirugía o en mascotas mayores." },
     { nombre: "Ecografía", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/ecografia.jpg", descripcion: "Estudio por imágenes para detectar problemas a tiempo." },
     { nombre: "Castración / esterilización", categoria: "CIRUGIA", duracionMin: 120, reservableOnline: false, fotoUrl: "/fotos/cirugia.jpg", descripcion: "Cirugía programada. Se coordina con la clínica." },
     { nombre: "Limpieza dental", categoria: "CIRUGIA", duracionMin: 60, reservableOnline: false, fotoUrl: "/fotos/dental.jpg", descripcion: "Eliminación de sarro y placa bacteriana." },
-    { nombre: "Baño y peluquería", categoria: "ESTETICA", duracionMin: 90, fotoUrl: "/fotos/peluqueria.jpg", descripcion: "Baño, secado, limpieza de oídos, corte de uñas y peinado." },
+    { nombre: "Baño y peluquería", categoria: "ESTETICA", duracionMin: 90, fotoUrl: "/fotos/peluqueria.jpg", descripcion: DESCRIPCION_PELUQUERIA },
   ] as const;
+
+  // La peluquería es solo para perros chicos y medianos: se corrige el texto si quedó el de antes.
+  await prisma.servicio.updateMany({
+    where: { clinicaId, nombre: "Baño y peluquería", descripcion: "Baño, secado, limpieza de oídos, corte de uñas y peinado." },
+    data: { descripcion: DESCRIPCION_PELUQUERIA },
+  });
 
   for (const s of servicios) {
     const existente = await prisma.servicio.findFirst({ where: { clinicaId, nombre: s.nombre } });
@@ -111,7 +119,7 @@ async function main() {
     visibleEnWeb: true,
     matricula: "M.P. 0001",
     especialidad: "Clínica de pequeños animales",
-    presentacion: "Me ocupo de los controles, las vacunas y el seguimiento de cada paciente desde cachorro.",
+    presentacion: "Me sigo capacitando todo el tiempo para atender mejor a cada paciente, desde cachorro.",
   };
   const vet = await prisma.usuario.upsert({
     where: { email: "veterinario@vetya.test" },

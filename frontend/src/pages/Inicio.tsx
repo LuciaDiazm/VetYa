@@ -1,6 +1,6 @@
 import {
   ArrowRight,
-  BadgePercent,
+  BellRing,
   CalendarCheck,
   Clock,
   CreditCard,
@@ -11,6 +11,7 @@ import {
   MessageCircle,
   PawPrint,
   Phone,
+  ShoppingBag,
   Siren,
   Star,
   Stethoscope,
@@ -71,7 +72,6 @@ function iniciales(nombre: string, apellido: string) {
 }
 
 // Las fechas sin hora se guardan a la medianoche UTC: se muestran en UTC para no correrse un día.
-const FECHA_PROMO = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', timeZone: 'UTC' })
 
 export function Inicio() {
   const { datos, error } = useSitio()
@@ -93,22 +93,20 @@ export function Inicio() {
   }
   if (!datos) return <p className="cargando">Cargando…</p>
 
-  const { clinica, servicios, equipo, opiniones, formasPago, planes, promociones, preguntas } = datos
-  const promo = promociones[0]
+  const { clinica, servicios, equipo, opiniones, formasPago, planes, preguntas } = datos
   const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`
 
   return (
     <main className="fondo-huellas">
-      {promo && (
-        <div className="franja-promo">
-          <div className="contenedor franja-promo-interior">
-            <BadgePercent size={20} aria-hidden="true" />
-            <p>
-              <strong>{promo.titulo}.</strong> Válido hasta el {FECHA_PROMO.format(new Date(promo.vigenteHasta))}.
-            </p>
-          </div>
+      {/* La clínica no quiere un enfoque comercial: la franja cuenta algo útil en vez de una promoción. */}
+      <div className="franja-promo">
+        <div className="contenedor franja-promo-interior">
+          <BellRing size={20} aria-hidden="true" />
+          <p>
+            <strong>No te olvides de sus vacunas:</strong> te avisamos por WhatsApp cuando le toca la próxima.
+          </p>
         </div>
-      )}
+      </div>
 
       {/* ---------- Portada ---------- */}
       <section className="contenedor portada" aria-labelledby="titulo-portada">
@@ -264,6 +262,10 @@ export function Inicio() {
             )
           })}
         </div>
+        <p className="servicios-productos">
+          <ShoppingBag size={22} aria-hidden="true" />
+          También tenemos alimentos, medicamentos y accesorios para tu mascota. Consultanos en la clínica.
+        </p>
       </section>
 
       {/* ---------- Planes ---------- */}
@@ -302,7 +304,7 @@ export function Inicio() {
           <div>
             <p className="pastilla pastilla-izquierda">Adopción</p>
             <h2 id="titulo-adopcion">Perros y gatos de Goya buscan familia</h2>
-            <p>Son rescatados, están sanos y la adopción es gratuita. Elegí por tamaño, edad o cómo son.</p>
+            <p>Ayudamos a difundirlos y la adopción es gratuita. Elegí por tamaño, edad o cómo son.</p>
             <Link to="/adopcion" className="boton boton-grande boton-secundario">
               <HeartHandshake size={22} aria-hidden="true" />
               Conocelos
@@ -318,6 +320,7 @@ export function Inicio() {
           <h2 id="titulo-equipo" className="titulo-centrado">
             Quiénes atienden a tu mascota
           </h2>
+          <p className="texto-centrado">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
           <ul className="grilla-equipo">
             {equipo.map((m) => (
               <li key={m.id} className="miembro">

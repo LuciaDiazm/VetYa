@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext'
 import { Cirugias } from './pages/Cirugias'
 import { Configuracion } from './pages/panel/configuracion/Configuracion'
 import { Estadisticas } from './pages/panel/Estadisticas'
+import { InformeTurnos } from './pages/panel/InformeTurnos'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -84,6 +85,7 @@ function App() {
             <Route path="recordatorios" element={<Recordatorios />} />
             <Route path="adopciones" element={<Adopciones />} />
             <Route path="estadisticas" element={<Estadisticas />} />
+            <Route path="informe" element={<InformeTurnos />} />
             <Route path="adopciones/nuevo" element={<FormularioAnimal />} />
             <Route path="adopciones/:id" element={<FormularioAnimal />} />
             <Route

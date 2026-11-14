@@ -66,3 +66,17 @@ export function diaAmigable(fecha: string) {
   if (fecha === sumarDias(hoy, 1)) return 'Mañana'
   return diaLargo(fecha)
 }
+
+// "2026-11-14" → "2026-11-01"
+export function primeroDeMes(fecha: string) {
+  return `${fecha.slice(0, 8)}01`
+}
+
+// Explica por qué un período elegido a mano no sirve (o null si está bien). Máximo ~13 meses, como el servidor.
+export function problemaDePeriodo(desde: string, hasta: string) {
+  const valida = (f: string) => /^\d{4}-\d{2}-\d{2}$/.test(f) && !Number.isNaN(Date.parse(f))
+  if (!valida(desde) || !valida(hasta)) return 'Revisá las fechas: alguna no es válida.'
+  if (hasta < desde) return 'La fecha «Hasta» tiene que ser igual o posterior a «Desde».'
+  if ((Date.parse(hasta) - Date.parse(desde)) / 86_400_000 + 1 > 400) return 'Elegí un período de hasta 13 meses.'
+  return null
+}

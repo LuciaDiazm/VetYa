@@ -1,4 +1,4 @@
-import { CalendarCheck, Download, MessageCircle, TriangleAlert } from 'lucide-react'
+import { CalendarCheck, Download, Phone, TriangleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -6,7 +6,7 @@ import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { Cirugia } from '../types'
 
 const PASOS = [
-  ['Escribinos', 'Nos contás qué necesita tu mascota y acordamos el día.'],
+  ['Llamanos', 'Nos contás qué necesita tu mascota y acordamos el día.'],
   ['Preparala', 'Seguí las recomendaciones. Podés descargarlas para tenerlas a mano.'],
   ['Te lo recordamos', 'El día anterior te llega un WhatsApp con lo más importante.'],
 ]
@@ -77,14 +77,10 @@ export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
                   <CalendarCheck size={22} aria-hidden="true" /> Pedir turno
                 </Link>
               ) : (
+                // Se coordinan hablando: llamar es la acción principal.
                 sitio && (
-                  <a
-                    href={enlaceWhatsapp(sitio.clinica.whatsapp, `Hola, quiero coordinar este servicio para mi mascota: ${c.nombre}.`)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="boton boton-grande boton-whatsapp"
-                  >
-                    <MessageCircle size={22} aria-hidden="true" /> Coordinar por WhatsApp
+                  <a href={`tel:+${sitio.clinica.whatsapp}`} className="boton boton-grande">
+                    <Phone size={22} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
                   </a>
                 )
               )}
@@ -92,6 +88,19 @@ export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
                 <Download size={22} aria-hidden="true" /> Descargar recomendaciones
               </a>
             </div>
+
+            {!c.reservableOnline && sitio && (
+              <p className="ayuda cirugia-alternativa">
+                ¿No podés llamar ahora?{' '}
+                <a
+                  href={enlaceWhatsapp(sitio.clinica.whatsapp, `Hola, quiero coordinar este servicio para mi mascota: ${c.nombre}. ¿Me pueden llamar?`)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Escribinos por WhatsApp y te llamamos
+                </a>
+              </p>
+            )}
 
             <div className="cirugia-columnas">
               <section>

@@ -53,7 +53,8 @@ export function FilaAplicacion({
               type="button"
               className={`chip${datos.tipo === v ? ' chip-activo' : ''}`}
               aria-pressed={datos.tipo === v}
-              onClick={() => cambiar({ ...datos, tipo: v, producto: '', fechaProximaDosis: '' })}
+              // La vacuna se repite una vez al año: si no se carga la fecha, el aviso al dueño no sale.
+              onClick={() => cambiar({ ...datos, tipo: v, producto: '', fechaProximaDosis: v === 'VACUNA' ? sumarMeses(desde, 12) : '' })}
             >
               {t}
             </button>
@@ -123,8 +124,12 @@ export function FilaAplicacion({
             onChange={(e) => cambiar({ ...datos, fechaProximaDosis: e.target.value })}
           />
         </label>
-        {datos.fechaProximaDosis && (
+        {datos.fechaProximaDosis ? (
           <p className="ayuda">Le vamos a avisar al dueño antes del {diaLargoConAnio(datos.fechaProximaDosis)}.</p>
+        ) : (
+          datos.tipo === 'VACUNA' && (
+            <p className="aviso-sin-fecha">Sin fecha no le vamos a avisar al dueño cuando le toque el refuerzo.</p>
+          )
         )}
       </fieldset>
     </div>

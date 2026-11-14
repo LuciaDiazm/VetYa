@@ -19,7 +19,7 @@ const COMPROMISO = [
   'Castrarlo si todavía no lo está',
   'Mantener sus vacunas al día',
   'No tenerlo atado ni encerrado todo el día',
-  'Si no puedo cuidarlo, devolverlo a la clínica: nunca abandonarlo',
+  'Si no puedo cuidarlo, avisar a quien me lo dio: nunca abandonarlo',
 ]
 
 export function AnimalAdopcion() {
@@ -186,8 +186,8 @@ function FormularioConocer({ animal }: { animal: Animal }) {
         <CircleCheck size={48} aria-hidden="true" />
         <h2>¡Listo, {nombre.split(' ')[0]}!</h2>
         <p>
-          La clínica recibió tu pedido para conocer a {animal.nombre} y te va a llamar al {telefono} para coordinar una
-          visita.
+          Recibimos tu pedido para conocer a {animal.nombre}. Le pasamos tus datos a quien lo cuida y te van a llamar al{' '}
+          {telefono} para coordinar una visita.
         </p>
         {sitio && (
           <a
@@ -210,7 +210,7 @@ function FormularioConocer({ animal }: { animal: Animal }) {
   return (
     <section className="conocer" aria-labelledby="titulo-conocer">
       <h2 id="titulo-conocer">Quiero conocer a {animal.nombre}</h2>
-      <p className="ayuda-grande">Dejanos tus datos y la clínica te llama para coordinar una visita.</p>
+      <p className="ayuda-grande">Dejanos tus datos: se los pasamos a quien lo cuida para que te llame y coordinen una visita.</p>
 
       <form className="formulario" onSubmit={enviar}>
         <div className="fila-campos">

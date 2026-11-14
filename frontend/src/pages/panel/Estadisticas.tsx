@@ -1,9 +1,10 @@
-import { ArrowDown, ArrowUp, CalendarDays, Globe, HeartPulse, Minus, Stethoscope, UserPlus, UserX } from 'lucide-react'
+import { ArrowDown, ArrowUp, CalendarDays, FileText, Globe, HeartPulse, Minus, Stethoscope, UserPlus, UserX } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { ElegirFechas } from '../../components/ElegirFechas'
 import { Barras, Columnas, type Dato } from '../../components/Graficos'
 import { apiGet } from '../../lib/api'
-import { hoyArgentina, lunesDe, sumarDias } from '../../lib/fechas'
+import { hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, sumarDias } from '../../lib/fechas'
 
 interface Resumen {
   turnos: number
@@ -30,10 +31,6 @@ interface DatosEstadisticas {
 }
 
 // ---------- Períodos ----------
-
-function primeroDeMes(fecha: string) {
-  return `${fecha.slice(0, 8)}01`
-}
 
 const PERIODOS = [
   { clave: 'mes', nombre: 'Este mes', rango: (hoy: string) => [primeroDeMes(hoy), hoy] },
@@ -133,14 +130,20 @@ const DIAS_SEMANA_LARGO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes',
 // Estadísticas de la clínica: cuánto se trabaja, cuántos no vienen y qué se pide más.
 export function Estadisticas() {
   const [parametros, setParametros] = useSearchParams()
-  const periodo = PERIODOS.find((p) => p.clave === parametros.get('periodo')) ?? PERIODOS[0]
   const [hoy] = useState(hoyArgentina)
-  const [desde, hasta] = periodo.rango(hoy)
+  // "Elegir fechas": el período lo pone la persona con Desde y Hasta.
+  const aMano = parametros.get('periodo') === 'fechas'
+  const periodo = aMano ? null : (PERIODOS.find((p) => p.clave === parametros.get('periodo')) ?? PERIODOS[0])
+  const [desde, hasta] = periodo
+    ? periodo.rango(hoy)
+    : [parametros.get('desde') ?? primeroDeMes(hoy), parametros.get('hasta') ?? hoy]
+  const problema = aMano ? problemaDePeriodo(desde, hasta) : null
   const [datos, setDatos] = useState<DatosEstadisticas | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (problema) return
     let vigente = true
     apiGet<DatosEstadisticas>(`/estadisticas?desde=${desde}&hasta=${hasta}`)
       .then((d) => {
@@ -153,11 +156,16 @@ export function Estadisticas() {
     return () => {
       vigente = false
     }
-  }, [desde, hasta])
+  }, [desde, hasta, problema])
 
   function elegir(clave: string) {
     setCargando(true)
     setParametros(clave === PERIODOS[0].clave ? {} : { periodo: clave })
+  }
+
+  function elegirFechas(d: string, h: string) {
+    setCargando(true)
+    setParametros({ periodo: 'fechas', desde: d, hasta: h }, { replace: aMano })
   }
 
   const porPeriodo = useMemo(() => (datos ? agrupar(datos.porDia, datos.desde, datos.hasta) : null), [datos])
@@ -182,10 +190,25 @@ export function Estadisticas() {
             {p.nombre}
           </button>
         ))}
+        <button
+          type="button"
+          className={`chip${aMano ? ' chip-activo' : ''}`}
+          aria-pressed={aMano}
+          onClick={() => elegirFechas(desde, hasta)}
+        >
+          Elegir fechas
+        </button>
       </div>
+      {aMano && <ElegirFechas desde={desde} hasta={hasta} alCambiar={elegirFechas} />}
+      <p className="ayuda">
+        <Link to={`/panel/informe?desde=${desde}&hasta=${hasta}`} className="enlace-con-icono">
+          <FileText size={18} aria-hidden="true" /> Ver el detalle de estos turnos
+        </Link>
+      </p>
 
+      {problema && <p className="mensaje-error">{problema}</p>}
       {error && <p className="mensaje-error">{error}</p>}
-      {!datos ? (
+      {problema ? null : !datos ? (
         !error && <p className="cargando">Cargando…</p>
       ) : (
         <div className={`estadisticas${cargando ? ' recargando' : ''}`} aria-busy={cargando}>

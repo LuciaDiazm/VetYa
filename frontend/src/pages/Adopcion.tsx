@@ -98,7 +98,7 @@ export function Adopcion() {
         {datos.enAdopcion.length > 0 ? (
           <HuellaAdopcion animales={datos.enAdopcion}>
             <h1>¿Buscás un amigo?</h1>
-            <p>Perros y gatos rescatados en Goya esperan una familia.</p>
+            <p>Perros y gatos de Goya que buscan familia. Nosotros ayudamos a difundirlos.</p>
             <p className="sello-gratis">
               <HeartHandshake size={20} aria-hidden="true" /> Adopción gratuita
             </p>

@@ -5,9 +5,9 @@ import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplic
 import { apiGet, apiPost } from '../../lib/api'
 import { fechaCortaDe } from '../../lib/fechas'
 import { edadTexto, ESPECIES } from '../../lib/mascotas'
+import { vacunaNueva } from '../../lib/sanitario'
 import type { FichaMascota } from '../../types'
 
-const APLICACION_VACIA: DatosAplicacion = { tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: '' }
 
 // "12,5" o "12.5" → 12.5; vacío → null
 function aNumero(texto: string) {
@@ -149,7 +149,7 @@ export function NuevaConsulta() {
           <button
             type="button"
             className="boton boton-contorno"
-            onClick={() => setAplicaciones((lista) => [...lista, APLICACION_VACIA])}
+            onClick={() => setAplicaciones((lista) => [...lista, vacunaNueva()])}
           >
             <Plus size={20} aria-hidden="true" /> Agregar vacuna o desparasitación
           </button>

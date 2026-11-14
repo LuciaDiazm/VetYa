@@ -4463,6 +4463,243 @@ form.campo-en-linea {
 }
 
 
+/* Vacuna sin fecha de refuerzo: el aviso al dueño no va a salir */
+.aviso-sin-fecha {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--radio-chico);
+  background: var(--amarillo-suave);
+}
+
+.cirugia-alternativa {
+  margin: -14px 0 22px;
+}
+
+/* Inicio: lo que también se vende en la clínica (solo informativo, sin precios) */
+.servicios-productos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 24px 0 0;
+  color: var(--gris);
+  text-align: center;
+}
+
+.servicios-productos svg {
+  flex-shrink: 0;
+  color: var(--azul);
+}
+
+/* ---------- Panel: elegir fechas e informe de turnos ---------- */
+
+.elegir-fechas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.enlace-con-icono {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-weight: 700;
+}
+
+.informe-filtros {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  margin-bottom: 20px;
+}
+
+.informe-filtros .filtro-periodo {
+  margin-bottom: 0;
+}
+
+.informe-campos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.informe-campos .elegir-fechas {
+  margin-bottom: 0;
+}
+
+.informe-campos > .campo {
+  min-width: 200px;
+}
+
+.informe-totales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.informe-totales li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 18px;
+  color: var(--gris);
+}
+
+.informe-totales strong {
+  color: var(--azul);
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.informe-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.informe-tabla th,
+.informe-tabla td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  vertical-align: top;
+}
+
+.informe-tabla th {
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.informe-fecha {
+  white-space: nowrap;
+}
+
+.informe-fecha::first-letter {
+  text-transform: uppercase;
+}
+
+.informe-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.informe-estado.estado-atendido {
+  color: #1e7a46;
+}
+
+.informe-estado.estado-ausente,
+.informe-estado.estado-cancelado {
+  color: var(--rojo);
+}
+
+.solo-impresion {
+  display: none;
+}
+
+/* En el celular, cada turno es un bloque con su etiqueta, en vez de una tabla ancha. */
+@media (max-width: 760px) {
+  .elegir-fechas {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .informe-campos,
+  .informe-campos > .campo {
+    width: 100%;
+  }
+
+  .informe-tabla thead {
+    display: none;
+  }
+
+  .informe-tabla tr {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .informe-tabla td {
+    padding: 2px 0;
+    border: none;
+  }
+
+  .informe-tabla td[data-etiqueta] {
+    grid-column: 1 / -1;
+  }
+
+  .informe-tabla td[data-etiqueta]::before {
+    content: attr(data-etiqueta) ': ';
+    color: var(--gris);
+  }
+
+  .informe-fecha {
+    font-weight: 700;
+  }
+}
+
+/* Al imprimir: sin menú ni filtros, con encabezado propio y la tabla completa. */
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .panel-menu,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .panel {
+    display: block;
+  }
+
+  .panel-contenido {
+    padding: 0;
+  }
+
+  .solo-impresion {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .solo-impresion h1 {
+    margin: 4px 0;
+    font-size: 18pt;
+  }
+
+  .solo-impresion p {
+    margin: 2px 0;
+  }
+
+  .tarjeta {
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .informe-totales li {
+    padding: 8px 10px;
+    border: 1px solid #cccccc;
+  }
+
+  .informe-tabla {
+    font-size: 10pt;
+  }
+
+  .informe-tabla tr {
+    break-inside: avoid;
+  }
+}
+
 /* ---------- Panel: estadísticas ---------- */
 
 .filtro-periodo {
