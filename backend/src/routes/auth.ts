@@ -13,13 +13,13 @@ const CLINICA_ID = 1;
 const esquemaRegistro = z.object({
   nombre: z.string().trim().min(1, "Ingresá tu nombre"),
   apellido: z.string().trim().min(1, "Ingresá tu apellido"),
-  email: z.email("Email inválido").trim().toLowerCase(),
+  email: z.string().trim().toLowerCase().pipe(z.email("Email inválido")),
   telefono: z.string().trim().min(8, "Teléfono inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 const esquemaLogin = z.object({
-  email: z.email("Email inválido").trim().toLowerCase(),
+  email: z.string().trim().toLowerCase().pipe(z.email("Email inválido")),
   password: z.string().min(1, "Ingresá tu contraseña"),
 });
 
