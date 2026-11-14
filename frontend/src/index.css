@@ -749,7 +749,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .cinta-pista {
   display: flex;
   width: max-content;
-  animation: cinta 40s linear infinite;
+  animation: cinta 120s linear infinite; /* 3 veces más largo, misma velocidad */
 }
 
 .cinta-grupo {

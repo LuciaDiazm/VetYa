@@ -17,7 +17,7 @@ import {
   Stethoscope,
   Syringe,
 } from 'lucide-react'
-import { useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
 import { VideoMascotas } from '../components/VideoMascotas'
@@ -148,10 +148,15 @@ export function Inicio() {
       <div className="cinta" aria-hidden="true">
         <div className="cinta-pista">
           {Array.from({ length: 2 }, (_, i) => (
+            // Cada grupo repite las frases 3 veces para cubrir hasta las pantallas más anchas.
             <span key={i} className="cinta-grupo">
-              <strong>VetYa</strong> Clínica veterinaria en Goya <PawPrint size={18} />
-              <strong>VetYa</strong> Turnos online <PawPrint size={18} />
-              <strong>VetYa</strong> Perros y gatos <PawPrint size={18} />
+              {Array.from({ length: 3 }, (_, j) => (
+                <Fragment key={j}>
+                  <strong>VetYa</strong> Clínica veterinaria en Goya <PawPrint size={18} />
+                  <strong>VetYa</strong> Turnos online <PawPrint size={18} />
+                  <strong>VetYa</strong> Perros y gatos <PawPrint size={18} />
+                </Fragment>
+              ))}
             </span>
           ))}
         </div>
