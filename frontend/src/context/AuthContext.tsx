@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { apiGet, apiPost, guardarToken, leerToken } from '../lib/api'
+import { apiGet, apiPost, ErrorApi, guardarToken, leerToken } from '../lib/api'
 import type { RespuestaSesion, Usuario } from '../types'
 
 export interface DatosRegistro {
@@ -29,9 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Al abrir la página, si hay un token guardado se recupera el usuario.
   useEffect(() => {
     if (!leerToken()) return
-    apiGet<Usuario>('/auth/yo')
-      .then(setUsuario)
-      .catch(() => guardarToken(null))
+    // Cada visita trae una sesión renovada: así no se vence mientras sigan entrando.
+    apiGet<Usuario & { token?: string }>('/auth/yo')
+      .then(({ token, ...usuario }) => {
+        if (token) guardarToken(token)
+        setUsuario(usuario)
+      })
+      // Solo se cierra la sesión si el servidor dice que venció; si no hubo conexión, se conserva.
+      .catch((error) => {
+        if (error instanceof ErrorApi && error.status === 401) guardarToken(null)
+      })
       .finally(() => setCargando(false))
   }, [])
 

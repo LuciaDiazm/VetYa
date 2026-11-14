@@ -4980,3 +4980,33 @@ form.campo-en-linea {
 .grafico-tabla td:first-child::first-letter {
   text-transform: uppercase;
 }
+
+/* Ingresar: contraseña olvidada */
+.ingresar-olvido {
+  display: grid;
+  gap: 12px;
+  margin: 8px 0 16px;
+  padding: 16px;
+  border-radius: var(--radio);
+  background: var(--amarillo-suave);
+}
+
+.ingresar-olvido p {
+  margin: 0;
+}
+
+.ingresar-olvido-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ingresar-olvido-botones .boton {
+  flex: 1 1 200px;
+}
+
+/* Emails largos: que corten en vez de salirse de la tarjeta */
+.bloque-ficha strong,
+.ficha-tabla dd {
+  overflow-wrap: anywhere;
+}

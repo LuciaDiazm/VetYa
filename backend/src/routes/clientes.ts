@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
@@ -158,6 +159,30 @@ clientesRouter.put("/:id", async (req, res) => {
   }
   const cliente = await prisma.cliente.update({ where: { id }, data: { ...resultado.data, telefono } });
   res.json(cliente);
+});
+
+// Contraseña nueva para la cuenta web del dueño, si se la olvidó (lo pide llamando o por WhatsApp).
+clientesRouter.patch("/:id/password", async (req, res) => {
+  const resultado = z
+    .object({ password: z.string().min(8, "La contraseña tiene que tener al menos 8 caracteres") })
+    .safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: primerError(resultado.error) });
+    return;
+  }
+  const cliente = await prisma.cliente.findFirst({
+    where: { id: Number(req.params.id), clinicaId: req.usuario!.clinicaId },
+    select: { usuarioId: true },
+  });
+  if (!cliente?.usuarioId) {
+    res.status(404).json({ error: "Este cliente no tiene cuenta en la web" });
+    return;
+  }
+  await prisma.usuario.update({
+    where: { id: cliente.usuarioId },
+    data: { passwordHash: await bcrypt.hash(resultado.data.password, 10) },
+  });
+  res.json({ ok: true });
 });
 
 clientesRouter.post("/:id/mascotas", async (req, res) => {

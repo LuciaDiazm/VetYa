@@ -119,14 +119,17 @@ authRouter.post("/login", async (req, res) => {
 });
 
 // Devuelve los datos del usuario que tiene la sesión iniciada.
+// También renueva la sesión: mientras entren de vez en cuando, nunca tienen que volver a poner la contraseña.
 authRouter.get("/yo", requiereSesion, async (req, res) => {
   const usuario = await prisma.usuario.findUnique({
     where: { id: req.usuario!.id },
-    select: camposPublicos,
+    select: { ...camposPublicos, activo: true, clinicaId: true },
   });
-  if (!usuario) {
-    res.status(404).json({ error: "Usuario no encontrado" });
+  if (!usuario || !usuario.activo) {
+    res.status(401).json({ error: "Tenés que iniciar sesión" });
     return;
   }
-  res.json(usuario);
+  const { activo: _, clinicaId, ...publico } = usuario;
+  const token = firmarToken({ id: usuario.id, clinicaId, rol: usuario.rol });
+  res.json({ ...publico, token });
 });

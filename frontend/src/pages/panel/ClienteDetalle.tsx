@@ -1,10 +1,10 @@
-import { ArrowLeft, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { ArrowLeft, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CamposCliente } from '../../components/CamposCliente'
 import { CamposMascota } from '../../components/CamposMascota'
 import { datosDeCliente, MASCOTA_VACIA, type DatosCliente, type DatosMascota } from '../../lib/formularios'
-import { apiGet, apiPost, apiPut } from '../../lib/api'
+import { apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
 import { edadTexto, ESPECIES, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import type { Cliente, Mascota } from '../../types'
@@ -21,6 +21,9 @@ export function ClienteDetalle() {
   const [agregando, setAgregando] = useState(false)
   const [nuevaMascota, setNuevaMascota] = useState<DatosMascota>(MASCOTA_VACIA)
   const [guardando, setGuardando] = useState(false)
+  const [cambiandoClave, setCambiandoClave] = useState(false)
+  const [claveNueva, setClaveNueva] = useState('')
+  const [claveLista, setClaveLista] = useState(false)
 
   const cargar = useCallback(() => {
     apiGet<Cliente>(`/clientes/${id}`)
@@ -54,6 +57,21 @@ export function ClienteDetalle() {
       navegar(`/panel/mascotas/${mascota.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar')
+      setGuardando(false)
+    }
+  }
+
+  async function guardarClave(e: FormEvent) {
+    e.preventDefault()
+    setGuardando(true)
+    setError(null)
+    try {
+      await apiPatch(`/clientes/${id}/password`, { password: claveNueva })
+      setCambiandoClave(false)
+      setClaveLista(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar la contraseña')
+    } finally {
       setGuardando(false)
     }
   }
@@ -203,6 +221,61 @@ export function ClienteDetalle() {
           </dl>
         )}
       </section>
+
+      {cliente.usuario && (
+        <section className="tarjeta bloque-ficha">
+          <div className="bloque-ficha-titulo">
+            <h2>Cuenta en la web</h2>
+            {!cambiandoClave && (
+              <button
+                type="button"
+                className="boton boton-contorno"
+                onClick={() => {
+                  setClaveNueva('')
+                  setClaveLista(false)
+                  setCambiandoClave(true)
+                }}
+              >
+                <KeyRound size={18} aria-hidden="true" /> Darle una contraseña nueva
+              </button>
+            )}
+          </div>
+          <p>
+            Entra con <strong>{cliente.usuario.email}</strong>. Si se olvidó la contraseña, dale una nueva y pasásela por
+            WhatsApp o en persona.
+          </p>
+          {cambiandoClave && (
+            <form className="formulario subformulario" onSubmit={guardarClave}>
+              <label className="campo">
+                Contraseña nueva (mínimo 8 caracteres)
+                {/* Se ve mientras se escribe, para poder dictarla o copiarla. */}
+                <input
+                  type="text"
+                  value={claveNueva}
+                  onChange={(e) => setClaveNueva(e.target.value)}
+                  minLength={8}
+                  required
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </label>
+              <div className="formulario-botones">
+                <button type="submit" className="boton" disabled={guardando}>
+                  {guardando ? 'Guardando…' : 'Guardar contraseña'}
+                </button>
+                <button type="button" className="boton-texto" onClick={() => setCambiandoClave(false)}>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
+          {claveLista && (
+            <p className="mensaje-exito" role="status">
+              Listo. Ya puede entrar con la contraseña nueva.
+            </p>
+          )}
+        </section>
+      )}
     </>
   )
 }

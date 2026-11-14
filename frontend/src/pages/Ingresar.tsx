@@ -1,7 +1,9 @@
+import { MessageCircle, Phone } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { DisenoAcceso } from '../components/DisenoAcceso'
 import { rutaInicial, useAuth } from '../context/AuthContext'
+import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 
 export function Ingresar() {
   const { ingresar } = useAuth()
@@ -11,6 +13,8 @@ export function Ingresar() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
+  const [olvido, setOlvido] = useState(false)
+  const { datos: sitio } = useSitio()
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
@@ -56,6 +60,39 @@ export function Ingresar() {
           {enviando ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
+
+      {/* Sin emails automáticos: la clínica le da una contraseña nueva desde la ficha del cliente. */}
+      {!olvido ? (
+        <button type="button" className="boton-texto" onClick={() => setOlvido(true)} aria-expanded={false}>
+          ¿Te olvidaste la contraseña?
+        </button>
+      ) : (
+        sitio && (
+          <div className="ingresar-olvido" role="region" aria-label="Recuperar la contraseña">
+            <p>
+              <strong>Tus datos y tus mascotas siguen guardados.</strong> Escribinos o llamanos y te damos una
+              contraseña nueva.
+            </p>
+            <div className="ingresar-olvido-botones">
+              <a
+                className="boton boton-whatsapp"
+                href={enlaceWhatsapp(
+                  sitio.clinica.whatsapp,
+                  `Hola, me olvidé la contraseña de mi cuenta en la web${email ? ` (${email})` : ''}. ¿Me dan una nueva?`,
+                )}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <MessageCircle size={20} aria-hidden="true" /> Escribir por WhatsApp
+              </a>
+              <a className="boton boton-contorno" href={`tel:+${sitio.clinica.whatsapp}`}>
+                <Phone size={20} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
+              </a>
+            </div>
+          </div>
+        )
+      )}
+
       <p>
         ¿Todavía no tenés cuenta?{' '}
         <Link to="/registro" state={ubicacion.state}>

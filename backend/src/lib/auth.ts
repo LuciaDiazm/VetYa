@@ -24,8 +24,11 @@ function secreto(): string {
   return s;
 }
 
+// La sesión se renueva cada vez que entran, así que mientras usen el sistema no vuelve a pedir la contraseña.
+// Dueños: 6 meses (pueden pasar meses entre visitas). Personal: 30 días (se cierra sola si una compu deja de usarse).
 export function firmarToken(usuario: UsuarioToken): string {
-  return jwt.sign(usuario, secreto(), { expiresIn: "8h" });
+  const { id, clinicaId, rol } = usuario;
+  return jwt.sign({ id, clinicaId, rol }, secreto(), { expiresIn: rol === "DUENIO" ? "180d" : "30d" });
 }
 
 // Middleware: exige un token válido en el encabezado "Authorization: Bearer <token>".
