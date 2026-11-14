@@ -1,7 +1,15 @@
 # VetYa
 
 Plataforma web de gestión y comunicación para una clínica veterinaria de Goya, Corrientes.
-Trabajo Final Integrador.
+Trabajo Final Integrador — Tecnicatura Universitaria en Programación (UTN FRRe, Extensión Áulica Goya).
+
+> La clínica, las personas y los datos que aparecen son ficticios.
+
+## Qué hace
+
+- **Sitio público:** servicios, equipo, preguntas frecuentes, contacto con mapa, urgencias, pedir turno online y adopción.
+- **Cuenta del dueño:** sus mascotas, vacunas, visitas y próximos turnos.
+- **Panel de la clínica:** turnos del día, agenda, clientes y mascotas, historia clínica, recordatorios por WhatsApp, carnet de vacunas en PDF, adopciones, configuración, estadísticas e informe de turnos entre dos fechas.
 
 ## Estructura
 
@@ -27,6 +35,7 @@ Los usuarios de prueba están en el encabezado de `backend/prisma/seed.ts`.
 
 ## Forma manual
 
+### Requisitos
 
 - Node.js 20 o superior
 - MySQL 8
