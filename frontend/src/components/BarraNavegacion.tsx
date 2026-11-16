@@ -10,7 +10,7 @@ const SECCIONES = [
   { ruta: '/adopcion', nombre: 'Adopción' },
   { ruta: '/#equipo', nombre: 'Equipo', soloMenu: true },
   { ruta: '/#preguntas', nombre: 'Preguntas', soloMenu: true },
-  { ruta: '/#contacto', nombre: 'Contacto' },
+  { ruta: '/#contacto', nombre: 'Horarios y dirección' },
 ]
 
 // Encabezado de la parte pública. Pocas opciones y bien grandes:

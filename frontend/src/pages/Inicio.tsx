@@ -4,7 +4,6 @@ import {
   CalendarCheck,
   Clock,
   CreditCard,
-  FileHeart,
   HeartHandshake,
   HeartPulse,
   MapPin,
@@ -12,7 +11,6 @@ import {
   PawPrint,
   Phone,
   ShoppingBag,
-  Siren,
   Star,
   Stethoscope,
   Syringe,
@@ -166,74 +164,62 @@ export function Inicio() {
         </div>
       </div>
 
-      {/* ---------- ¿Qué necesitás? ---------- */}
-      <section className="contenedor seccion" aria-labelledby="titulo-necesitas">
-        <h2 id="titulo-necesitas" className="titulo-centrado">
-          ¿Qué necesitás?
-        </h2>
-        <div className="accesos">
-          <Link to="/turno" className="acceso-rapido">
-            <span className="acceso-icono">
-              <CalendarCheck size={34} aria-hidden="true" />
-            </span>
-            <span className="acceso-textos">
-              <strong>Pedir un turno</strong>
-              <span>Online, sin llamar</span>
-            </span>
-          </Link>
-          <Link to="/urgencias" className="acceso-rapido acceso-urgencia">
-            <span className="acceso-icono">
-              <Siren size={34} aria-hidden="true" />
-            </span>
-            <span className="acceso-textos">
-              <strong>Es una urgencia</strong>
-              <span>Qué hacer y a quién llamar</span>
-            </span>
-          </Link>
-          <a href="#contacto" className="acceso-rapido">
-            <span className="acceso-icono">
-              <MapPin size={34} aria-hidden="true" />
-            </span>
-            <span className="acceso-textos">
-              <strong>Horarios y dirección</strong>
-              <span>Cuándo abrimos y cómo llegar</span>
-            </span>
-          </a>
-          <Link to="/ingresar" className="acceso-rapido">
-            <span className="acceso-icono">
-              <FileHeart size={34} aria-hidden="true" />
-            </span>
-            <span className="acceso-textos">
-              <strong>Ver a mi mascota</strong>
-              <span>Vacunas y consultas</span>
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ---------- Sobre nosotros ---------- */}
+      {/* ---------- Quiénes somos ---------- */}
       <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
         <img src="/fotos/gato-costado.webp" alt="" className="asomado asomado-costado" loading="lazy" />
-        <p className="pastilla">Sobre nosotros</p>
         <h2 id="titulo-sobre" className="sobre-frase">
           Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}
           <strong>sin vueltas</strong>.
         </h2>
-        <div className="sobre-tarjetas">
-          <div className="tarjeta-dato tarjeta-oscura">
-            <Stethoscope size={30} aria-hidden="true" />
-            <h3>Veterinarios con experiencia</h3>
-          </div>
-          <div className="tarjeta-dato">
-            <Syringe size={30} aria-hidden="true" />
-            <h3>Te avisamos cada vacuna</h3>
-          </div>
-          <div className="tarjeta-dato">
-            <HeartPulse size={30} aria-hidden="true" />
-            <h3>Su historia clínica, siempre a mano</h3>
-          </div>
-        </div>
+        <ul className="sobre-etiquetas">
+          <li>
+            <Stethoscope size={20} aria-hidden="true" /> Veterinarios con experiencia
+          </li>
+          <li>
+            <Syringe size={20} aria-hidden="true" /> Te avisamos cada vacuna
+          </li>
+          <li>
+            <HeartPulse size={20} aria-hidden="true" /> Su historia clínica, siempre a mano
+          </li>
+        </ul>
       </section>
+
+      {/* ---------- Equipo ---------- */}
+      {equipo.length > 0 && (
+        <section id="equipo" className="contenedor seccion" aria-labelledby="titulo-equipo">
+          <p className="pastilla">Nuestro equipo</p>
+          <h2 id="titulo-equipo" className="titulo-centrado">
+            Quiénes atienden a tu mascota
+          </h2>
+          <p className="texto-centrado">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
+          <ul className="grilla-equipo">
+            {equipo.map((m) => (
+              <li key={m.id} className="miembro">
+                {m.fotoUrl ? (
+                  <img src={m.fotoUrl} alt="" className="miembro-foto" loading="lazy" />
+                ) : (
+                  <span className="miembro-avatar" aria-hidden="true">
+                    {iniciales(m.nombre, m.apellido)}
+                  </span>
+                )}
+                <h3>
+                  {m.nombre} {m.apellido}
+                </h3>
+                {m.especialidad && <p className="miembro-datos">{m.especialidad}</p>}
+                {m.matricula && <p className="miembro-matricula">{m.matricula}</p>}
+                <a
+                  href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="boton boton-secundario"
+                >
+                  Pedir turno con {m.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ---------- Servicios ---------- */}
       <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
@@ -318,43 +304,6 @@ export function Inicio() {
           </div>
         </div>
       </section>
-
-      {/* ---------- Equipo ---------- */}
-      {equipo.length > 0 && (
-        <section id="equipo" className="contenedor seccion" aria-labelledby="titulo-equipo">
-          <p className="pastilla">Nuestro equipo</p>
-          <h2 id="titulo-equipo" className="titulo-centrado">
-            Quiénes atienden a tu mascota
-          </h2>
-          <p className="texto-centrado">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
-          <ul className="grilla-equipo">
-            {equipo.map((m) => (
-              <li key={m.id} className="miembro">
-                {m.fotoUrl ? (
-                  <img src={m.fotoUrl} alt="" className="miembro-foto" loading="lazy" />
-                ) : (
-                  <span className="miembro-avatar" aria-hidden="true">
-                    {iniciales(m.nombre, m.apellido)}
-                  </span>
-                )}
-                <h3>
-                  {m.nombre} {m.apellido}
-                </h3>
-                {m.especialidad && <p className="miembro-datos">{m.especialidad}</p>}
-                {m.matricula && <p className="miembro-matricula">{m.matricula}</p>}
-                <a
-                  href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="boton boton-secundario"
-                >
-                  Pedir turno con {m.nombre}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* ---------- Opiniones ---------- */}
       {opiniones.length > 0 && (
