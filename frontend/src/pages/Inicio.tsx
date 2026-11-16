@@ -126,7 +126,7 @@ export function Inicio() {
         </div>
 
         <div className="portada-foto">
-          <img src="/fotos/perro-doctor.webp" alt="Un perrito con guardapolvo y estetoscopio" />
+          <img src="/fotos/perro-inicio.webp" alt="Un perro con un estetoscopio en la boca" />
         </div>
 
         <ul className="portada-ventajas">
@@ -234,7 +234,6 @@ export function Inicio() {
 
       {/* ---------- Servicios ---------- */}
       <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
-        <img src="/fotos/dalmata-espia.webp" alt="" className="asomado asomado-dalmata" loading="lazy" />
         <p className="pastilla">Servicios</p>
         <h2 id="titulo-servicios" className="titulo-centrado">
           Todo lo que tu mascota necesita
@@ -382,7 +381,7 @@ export function Inicio() {
 
       {/* ---------- Preguntas frecuentes ---------- */}
       {preguntas.length > 0 && (
-        // Franja blanca de lado a lado; el perro espía desde el borde derecho.
+        // Franja de lado a lado; el dálmata espía desde el borde derecho.
         <section id="preguntas" className="preguntas-banda" aria-labelledby="titulo-preguntas">
           <div className="contenedor seccion preguntas-seccion">
             <div>
@@ -397,7 +396,7 @@ export function Inicio() {
               </div>
             </div>
           </div>
-          <img src="/fotos/perro-lengua.webp" alt="" className="preguntas-foto" loading="lazy" />
+          <img src="/fotos/dalmata-espia.webp" alt="" className="preguntas-foto" loading="lazy" />
         </section>
       )}
 
@@ -506,7 +505,7 @@ function Dudas({ whatsapp }: { whatsapp: string }) {
           </button>
         </form>
       </div>
-      <img src="/fotos/gato-choca.webp" alt="" className="dudas-foto" loading="lazy" />
+      <img src="/fotos/siames-saluda.webp" alt="" className="dudas-foto" loading="lazy" />
     </div>
   )
 }

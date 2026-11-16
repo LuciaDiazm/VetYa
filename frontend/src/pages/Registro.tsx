@@ -36,7 +36,7 @@ export function Registro() {
 
   return (
     <DisenoAcceso
-      foto="/fotos/siames-saluda.webp"
+      foto="/fotos/gato-choca.webp"
       frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
       <h1>Crear cuenta</h1>
       <p className="ayuda">

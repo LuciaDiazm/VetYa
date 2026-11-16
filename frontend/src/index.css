@@ -702,22 +702,24 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 28px;
 }
 
-/* Perrito parado sobre la cinta azul (como en la página de referencia) */
+/* Foto del perrito con estetoscopio dentro de un círculo con un aro amarillo */
 .portada-foto {
-  align-self: end;
+  align-self: center;
   justify-self: center;
   width: 100%;
-  max-width: 340px;
+  max-width: 400px;
+  aspect-ratio: 1;
+  margin-bottom: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--superficie);
+  box-shadow: 0 0 0 14px var(--amarillo-suave);
 }
 
 .portada-foto img {
-  display: block;
   width: 100%;
-  height: auto;
-  /* La foto original tiene un fondo gris claro con degradé: se esfuman los bordes para que no se vea el recuadro. */
-  mask-image: radial-gradient(ellipse 56% 60% at 50% 45%, #000 72%, transparent 100%),
-    linear-gradient(to top, #000 10%, transparent 26%);
-  mask-composite: add;
+  height: 100%;
+  object-fit: cover;
 }
 
 .portada-ventajas {
@@ -919,29 +921,12 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .asomado-costado {
   right: calc((100% - 100vw) / 2);
-  bottom: 150px;
-  width: 110px;
+  bottom: 110px;
+  width: 160px;
 }
 
 @media (max-width: 1240px) {
   .asomado-costado {
-    display: none;
-  }
-}
-
-/* Dálmata que espía desde el costado izquierdo de la pantalla */
-.servicios {
-  position: relative;
-}
-
-.asomado-dalmata {
-  top: 0;
-  left: calc((100% - 100vw) / 2);
-  width: 210px;
-}
-
-@media (max-width: 1240px) {
-  .asomado-dalmata {
     display: none;
   }
 }
@@ -1335,18 +1320,18 @@ html[data-turno-portada='visible'] .boton-turno {
 .preguntas-banda {
   position: relative;
   overflow: hidden;
-  background: var(--superficie);
 }
 
 .preguntas-foto {
   position: absolute;
+  top: 50%;
   right: 0;
-  bottom: 0;
   width: auto;
-  height: 92%;
-  max-width: 36%;
+  height: min(82%, 460px);
+  max-width: 34%;
   object-fit: contain;
-  object-position: right bottom;
+  object-position: right center;
+  transform: translateY(-50%);
 }
 
 /* ---------- ¿Te quedaron dudas? ---------- */
@@ -1816,8 +1801,8 @@ html[data-turno-portada='visible'] .boton-turno {
   .portada-foto {
     grid-column: auto;
     grid-row: auto;
-    order: 3;
-    max-width: 260px;
+    max-width: 280px;
+    margin-bottom: 8px;
   }
 
   .portada-ventajas {
@@ -1825,7 +1810,7 @@ html[data-turno-portada='visible'] .boton-turno {
     flex-wrap: wrap;
     justify-content: center;
     gap: 12px 28px;
-    padding-bottom: 8px;
+    padding-bottom: 40px;
   }
 
 
