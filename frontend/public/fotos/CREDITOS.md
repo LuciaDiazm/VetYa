@@ -4,6 +4,8 @@ Las fotos de animales se descargaron de internet para mostrar el diseño en el T
 
 **Antes de usar el sitio en una clínica real hay que reemplazarlas por fotos propias o con licencia de uso comercial.** Por ejemplo, `perro-toalla.webp` y `rottweiler-cachorro.webp` son de la fotógrafa Elke Vogelsang.
 
+El dibujo del logo (`public/logo.png` y `public/favicon.png`, un perro y un gato) también se bajó de internet; antes de un uso real hay que reemplazarlo por uno propio o con licencia.
+
 Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con inteligencia artificial: son personas ficticias, igual que los nombres del equipo.
 
 | Archivo | Dónde se usa |

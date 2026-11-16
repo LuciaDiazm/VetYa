@@ -156,13 +156,23 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  color: var(--azul);
+}
+
+/* Perro y gato: el dibujo es una máscara y se pinta con el color del texto */
+.logo-marca {
+  flex-shrink: 0;
+  width: 78px;
+  height: 38px;
+  background-color: currentColor;
+  mask: url('/logo.png') center / contain no-repeat;
 }
 
 .logo-texto {
   font-family: var(--fuente-logo);
   font-weight: 600;
   font-size: 1.6rem;
-  color: var(--azul);
+  color: inherit;
 }
 
 .enlace-logo {
@@ -1404,7 +1414,7 @@ html[data-turno-portada='visible'] .boton-turno {
   padding-top: 48px;
 }
 
-.pie .logo-texto {
+.pie .logo {
   color: #ffffff;
 }
 
@@ -1734,6 +1744,11 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 @media (max-width: 860px) {
+  .logo-marca {
+    width: 60px;
+    height: 30px;
+  }
+
   .portada {
     grid-template-columns: 1fr;
     text-align: center;
@@ -1873,7 +1888,7 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .boton-turno {
-    display: none; /* en el celular el turno está en "¿Qué necesitás?" y en el menú */
+    display: none; /* en el celular el turno está en el menú */
   }
 
   .enlace-urgencias {
