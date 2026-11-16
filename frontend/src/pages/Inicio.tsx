@@ -1,10 +1,8 @@
 import {
   ArrowRight,
-  BellRing,
   CalendarCheck,
   Clock,
   CreditCard,
-  HeartHandshake,
   HeartPulse,
   MapPin,
   MessageCircle,
@@ -20,7 +18,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
 import { agruparHorarios } from '../lib/horarios'
 import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
-import type { CategoriaServicio, DosisPlan } from '../types'
+import type { CategoriaServicio } from '../types'
 
 // Cada tarjeta de servicios con su foto, su estilo y a dónde lleva.
 // "recorte": la foto es un animal sin fondo, que se apoya en el borde de abajo de la tarjeta.
@@ -59,13 +57,6 @@ function observarBotonPortada(boton: HTMLElement | null) {
   }
 }
 
-// 6 semanas → "6 semanas"; 16 semanas → "4 meses"
-function edadDosis(dosis: DosisPlan) {
-  return dosis.edadSemanas >= 12 && dosis.edadSemanas % 4 === 0
-    ? `${dosis.edadSemanas / 4} meses`
-    : `${dosis.edadSemanas} semanas`
-}
-
 function iniciales(nombre: string, apellido: string) {
   return `${nombre[0] ?? ''}${apellido[0] ?? ''}`.toUpperCase()
 }
@@ -92,59 +83,53 @@ export function Inicio() {
   }
   if (!datos) return <p className="cargando">Cargando…</p>
 
-  const { clinica, servicios, equipo, opiniones, formasPago, planes, preguntas } = datos
+  const { clinica, servicios, equipo, opiniones, formasPago, preguntas } = datos
   const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`
 
   return (
     <main className="fondo-huellas">
-      {/* La clínica no quiere un enfoque comercial: la franja cuenta algo útil en vez de una promoción. */}
-      <div className="franja-promo">
-        <div className="contenedor franja-promo-interior">
-          <BellRing size={20} aria-hidden="true" />
-          <p>
-            <strong>No te olvides de sus vacunas:</strong> te avisamos por WhatsApp cuando le toca la próxima.
-          </p>
+      {/* ---------- Portada (franja de vidrio esmerilado, de borde a borde, sobre manchas de color) ---------- */}
+      <div className="portada-escena">
+        <div className="portada-vidrio">
+          <section className="contenedor portada" aria-labelledby="titulo-portada">
+            <div className="portada-texto">
+              <h1 id="titulo-portada" className="titulo-portada">
+                <span className="titulo-cursiva">Clínica veterinaria</span>
+                <span className="titulo-serif">en Goya</span>
+              </h1>
+              <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
+              <div className="portada-acciones">
+                <Link to="/turno" className="boton boton-grande" ref={observarBotonPortada}>
+                  <CalendarCheck size={22} aria-hidden="true" />
+                  Pedir turno
+                </Link>
+                <a href="#servicios" className="boton boton-grande boton-contorno">
+                  Ver servicios
+                </a>
+              </div>
+            </div>
+
+            <div className="portada-foto">
+              <img src="/fotos/perro-inicio.webp" alt="Un perro con un estetoscopio en la boca" />
+            </div>
+
+            <ul className="portada-ventajas">
+              <li>
+                <PawPrint size={22} aria-hidden="true" /> Turnos online
+              </li>
+              <li>
+                <PawPrint size={22} aria-hidden="true" /> Te avisamos las vacunas
+              </li>
+              <li>
+                <PawPrint size={22} aria-hidden="true" /> Historia clínica online
+              </li>
+              <li>
+                <PawPrint size={22} aria-hidden="true" /> Atendemos urgencias
+              </li>
+            </ul>
+          </section>
         </div>
       </div>
-
-      {/* ---------- Portada ---------- */}
-      <section className="contenedor portada" aria-labelledby="titulo-portada">
-        <div className="portada-texto">
-          <h1 id="titulo-portada" className="titulo-portada">
-            <span className="titulo-cursiva">Clínica veterinaria</span>
-            <span className="titulo-serif">en Goya</span>
-          </h1>
-          <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
-          <div className="portada-acciones">
-            <Link to="/turno" className="boton boton-grande" ref={observarBotonPortada}>
-              <CalendarCheck size={22} aria-hidden="true" />
-              Pedir turno
-            </Link>
-            <a href="#servicios" className="boton boton-grande boton-contorno">
-              Ver servicios
-            </a>
-          </div>
-        </div>
-
-        <div className="portada-foto">
-          <img src="/fotos/perro-inicio.webp" alt="Un perro con un estetoscopio en la boca" />
-        </div>
-
-        <ul className="portada-ventajas">
-          <li>
-            <PawPrint size={22} aria-hidden="true" /> Turnos online
-          </li>
-          <li>
-            <PawPrint size={22} aria-hidden="true" /> Te avisamos las vacunas
-          </li>
-          <li>
-            <PawPrint size={22} aria-hidden="true" /> Historia clínica online
-          </li>
-          <li>
-            <PawPrint size={22} aria-hidden="true" /> Atendemos urgencias
-          </li>
-        </ul>
-      </section>
 
       {/* ---------- Cinta en movimiento ---------- */}
       <div className="cinta" aria-hidden="true">
@@ -154,9 +139,9 @@ export function Inicio() {
             <span key={i} className="cinta-grupo">
               {Array.from({ length: 3 }, (_, j) => (
                 <Fragment key={j}>
-                  <strong>VetYa</strong> Clínica veterinaria en Goya <PawPrint size={18} />
-                  <strong>VetYa</strong> Turnos online <PawPrint size={18} />
-                  <strong>VetYa</strong> Perros y gatos <PawPrint size={18} />
+                  Clínica veterinaria en Goya <PawPrint size={18} />
+                  Turnos online <PawPrint size={18} />
+                  Perros y gatos <PawPrint size={18} />
                 </Fragment>
               ))}
             </span>
@@ -182,44 +167,40 @@ export function Inicio() {
             <HeartPulse size={20} aria-hidden="true" /> Su historia clínica, siempre a mano
           </li>
         </ul>
-      </section>
 
-      {/* ---------- Equipo ---------- */}
-      {equipo.length > 0 && (
-        <section id="equipo" className="contenedor seccion" aria-labelledby="titulo-equipo">
-          <p className="pastilla">Nuestro equipo</p>
-          <h2 id="titulo-equipo" className="titulo-centrado">
-            Quiénes atienden a tu mascota
-          </h2>
-          <p className="texto-centrado">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
-          <ul className="grilla-equipo">
-            {equipo.map((m) => (
-              <li key={m.id} className="miembro">
-                {m.fotoUrl ? (
-                  <img src={m.fotoUrl} alt="" className="miembro-foto" loading="lazy" />
-                ) : (
-                  <span className="miembro-avatar" aria-hidden="true">
-                    {iniciales(m.nombre, m.apellido)}
-                  </span>
-                )}
-                <h3>
-                  {m.nombre} {m.apellido}
-                </h3>
-                {m.especialidad && <p className="miembro-datos">{m.especialidad}</p>}
-                {m.matricula && <p className="miembro-matricula">{m.matricula}</p>}
-                <a
-                  href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="boton boton-secundario"
-                >
-                  Pedir turno con {m.nombre}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {/* Equipo: sigue directo después de las etiquetas, sin título aparte */}
+        {equipo.length > 0 && (
+          <div id="equipo" className="sobre-equipo">
+            <p className="sobre-capacitacion">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
+            <ul className="grilla-equipo">
+              {equipo.map((m) => (
+                <li key={m.id} className="miembro">
+                  {m.fotoUrl ? (
+                    <img src={m.fotoUrl} alt="" className="miembro-foto" loading="lazy" />
+                  ) : (
+                    <span className="miembro-avatar" aria-hidden="true">
+                      {iniciales(m.nombre, m.apellido)}
+                    </span>
+                  )}
+                  <h3>
+                    {m.nombre} {m.apellido}
+                  </h3>
+                  {m.especialidad && <p className="miembro-datos">{m.especialidad}</p>}
+                  {m.matricula && <p className="miembro-matricula">{m.matricula}</p>}
+                  <a
+                    href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="boton boton-secundario"
+                  >
+                    Pedir turno con {m.nombre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
 
       {/* ---------- Servicios ---------- */}
       <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
@@ -260,49 +241,21 @@ export function Inicio() {
         </p>
       </section>
 
-      {/* ---------- Planes ---------- */}
-      {planes.length > 0 && (
-        <section id="planes" className="contenedor seccion" aria-labelledby="titulo-planes">
-          <p className="pastilla">Cachorros y gatitos</p>
-          <h2 id="titulo-planes" className="titulo-centrado">
-            Sus vacunas del primer año
-          </h2>
-          <p className="texto-centrado">Te avisamos por WhatsApp antes de cada una.</p>
-          <div className="grilla-planes">
-            {planes.map((plan) => (
-              <article key={plan.id} className="plan">
-                {plan.fotoUrl && <img src={plan.fotoUrl} alt="" loading="lazy" className="plan-foto" />}
-                <div className="plan-cuerpo">
-                  <h3>{plan.nombre}</h3>
-                  <ol className="linea-tiempo">
-                    {plan.dosis.map((d) => (
-                      <li key={d.id}>
-                        <span className="linea-tiempo-edad">{edadDosis(d)}</span>
-                        <span>{d.producto}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ---------- Adopción ---------- */}
-      <section className="contenedor seccion" aria-labelledby="titulo-adopcion">
-        <div className="adopcion-invitacion">
-          <img src="/fotos/perros-asomados.webp" alt="" className="asomado asomado-perros" loading="lazy" />
-          <div>
-            <p className="pastilla pastilla-izquierda">Adopción</p>
-            <h2 id="titulo-adopcion">Perros y gatos de Goya buscan familia</h2>
-            <p>Ayudamos a difundirlos y la adopción es gratuita. Elegí por tamaño, edad o cómo son.</p>
-            <Link to="/adopcion" className="boton boton-grande boton-secundario">
-              <HeartHandshake size={22} aria-hidden="true" />
-              Conocelos
-            </Link>
-          </div>
-        </div>
+      {/* ---------- Difusión: la clínica no gestiona adopciones, solo ayuda a difundir ---------- */}
+      <section className="contenedor difusion" aria-label="Ayuda para difundir">
+        <p>
+          <PawPrint size={22} aria-hidden="true" />
+          ¿Encontraste un animal o buscás adoptar? Escribinos y te ayudamos a difundir.
+        </p>
+        <a
+          href={enlaceWhatsapp(clinica.whatsapp, 'Hola, quiero que me ayuden a difundir un animal.')}
+          target="_blank"
+          rel="noreferrer"
+          className="boton boton-whatsapp"
+        >
+          <MessageCircle size={20} aria-hidden="true" />
+          Escribir por WhatsApp
+        </a>
       </section>
 
       {/* ---------- Opiniones ---------- */}

@@ -15,10 +15,6 @@ import { MiCuenta } from './pages/MiCuenta'
 import { Panel } from './pages/Panel'
 import { Registro } from './pages/Registro'
 import { Urgencias } from './pages/Urgencias'
-import { Adopcion } from './pages/Adopcion'
-import { AnimalAdopcion } from './pages/AnimalAdopcion'
-import { Adopciones } from './pages/panel/Adopciones'
-import { FormularioAnimal } from './pages/panel/FormularioAnimal'
 import { ClienteDetalle } from './pages/panel/ClienteDetalle'
 import { Clientes } from './pages/panel/Clientes'
 import { MascotaDetalle } from './pages/panel/MascotaDetalle'
@@ -54,8 +50,6 @@ function App() {
             <Route path="/turno" element={<SacarTurno />} />
             <Route path="/cirugias" element={<Cirugias tipo="cirugia" />} />
             <Route path="/limpieza-dental" element={<Cirugias tipo="limpieza" />} />
-            <Route path="/adopcion" element={<Adopcion />} />
-            <Route path="/adopcion/:id" element={<AnimalAdopcion />} />
             <Route
               path="/mi-cuenta"
               element={
@@ -83,11 +77,8 @@ function App() {
             <Route path="mascotas/:id" element={<MascotaDetalle />} />
             <Route path="mascotas/:id/consulta" element={<NuevaConsulta />} />
             <Route path="recordatorios" element={<Recordatorios />} />
-            <Route path="adopciones" element={<Adopciones />} />
             <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="informe" element={<InformeTurnos />} />
-            <Route path="adopciones/nuevo" element={<FormularioAnimal />} />
-            <Route path="adopciones/:id" element={<FormularioAnimal />} />
             <Route
               path="configuracion"
               element={

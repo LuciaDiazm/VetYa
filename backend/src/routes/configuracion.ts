@@ -64,6 +64,11 @@ const esquemaClinica = z.object({
     .transform((e) => e || null),
   instagram: textoOpcional.transform((i) => (i ? i.replace(/^@/, "") : null)),
   horasCancelacion: z.number().int().min(0, "Las horas no pueden ser negativas").max(168, "Como máximo, una semana"),
+  // Regla contra el abuso de turnos web (0 en el límite = no se suspende a nadie automáticamente).
+  limiteCancelaciones: z.number().int().min(0, "El número no puede ser negativo").max(20, "Como máximo, 20 cancelaciones"),
+  diasCancelaciones: z.number().int().min(1, "Al menos 1 día").max(90, "Como máximo, 90 días"),
+  diasSuspension: z.number().int().min(1, "Al menos 1 día").max(365, "Como máximo, un año"),
+  maxTurnosOnline: z.number().int().min(0, "El número no puede ser negativo").max(20, "Como máximo, 20 turnos"),
   telefonoUrgencias: z
     .string()
     .trim()

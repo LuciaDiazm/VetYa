@@ -74,6 +74,11 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
         <p className="turno-origen">
           <Origen.icono size={16} aria-hidden="true" /> {Origen.texto}
         </p>
+        {turno.estado === 'CANCELADO' && turno.canceladoPor && (
+          <p className="turno-origen">
+            {turno.canceladoPor === 'DUENIO' ? 'Lo canceló el dueño desde la web' : 'Lo canceló la clínica'}
+          </p>
+        )}
 
         {marca === 'pasado' && <p className="turno-pregunta">Ya pasó la hora: ¿vino?</p>}
 

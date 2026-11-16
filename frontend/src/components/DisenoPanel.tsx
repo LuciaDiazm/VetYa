@@ -1,4 +1,4 @@
-import { BarChart3, BellRing, CalendarDays, FileText, HeartHandshake, House, LogOut, PawPrint, Settings } from 'lucide-react'
+import { BarChart3, BellRing, CalendarDays, FileText, House, LogOut, PawPrint, Settings } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -11,7 +11,6 @@ export function DisenoPanel() {
   const { usuario, salir } = useAuth()
   const navegar = useNavigate()
   const ubicacion = useLocation()
-  const solicitudesNuevas = useSolicitudesNuevas(ubicacion.pathname)
   const avisosPendientes = useAvisosPendientes(ubicacion.pathname)
 
   function cerrarSesion() {
@@ -27,7 +26,6 @@ export function DisenoPanel() {
     { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
     { ruta: '/panel/clientes', nombre: 'Clientes y mascotas', icono: PawPrint },
     { ruta: '/panel/recordatorios', nombre: 'Recordatorios', icono: BellRing, globo: avisosPendientes },
-    { ruta: '/panel/adopciones', nombre: 'Adopciones', icono: HeartHandshake, globo: solicitudesNuevas },
     { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
     { ruta: '/panel/informe', nombre: 'Informe de turnos', icono: FileText },
     ...(usuario?.rol === 'ADMIN'
@@ -70,22 +68,6 @@ export function DisenoPanel() {
       </main>
     </div>
   )
-}
-
-// Cantidad de solicitudes de adopción nuevas. Se vuelve a consultar al cambiar de página
-// y cuando la pantalla de adopciones avisa que cambió algo.
-function useSolicitudesNuevas(ruta: string) {
-  const [nuevas, setNuevas] = useState(0)
-  useEffect(() => {
-    const consultar = () =>
-      apiGet<{ nuevas: number }>('/adopciones/solicitudes/resumen')
-        .then((r) => setNuevas(r.nuevas))
-        .catch(() => {})
-    consultar()
-    window.addEventListener('solicitudes-actualizadas', consultar)
-    return () => window.removeEventListener('solicitudes-actualizadas', consultar)
-  }, [ruta])
-  return nuevas
 }
 
 // Turnos de mañana y dosis por vencer que todavía no se avisaron.

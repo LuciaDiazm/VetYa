@@ -18,8 +18,6 @@ Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con intelig
 | limpieza-dental.webp | Limpieza dental |
 | perro-toalla.webp | Baño y peluquería |
 | rottweiler-cachorro.webp, gatito-vacuna.webp | Planes de vacunas del primer año; ingreso |
-| perros-asomados.webp | Invitación a adopción |
-| caniche-blanco.webp, adopcion-*.webp | Animales de ejemplo en adopción |
 | dalmata-espia.webp | Preguntas frecuentes (espía desde el borde derecho) |
 | siames-saluda.webp | ¿Te quedaron dudas? |
 | gato-choca.webp | Crear cuenta |

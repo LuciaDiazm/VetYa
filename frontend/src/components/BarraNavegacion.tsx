@@ -7,7 +7,6 @@ import { MenuCuenta } from './MenuCuenta'
 
 const SECCIONES = [
   { ruta: '/#servicios', nombre: 'Servicios' },
-  { ruta: '/adopcion', nombre: 'Adopción' },
   { ruta: '/#equipo', nombre: 'Equipo', soloMenu: true },
   { ruta: '/#preguntas', nombre: 'Preguntas', soloMenu: true },
   { ruta: '/#contacto', nombre: 'Horarios y dirección' },

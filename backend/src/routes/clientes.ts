@@ -5,6 +5,7 @@ import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
 import { tokenDeCarnet } from "../lib/carnet";
+import { suspensionVigente } from "../lib/sanciones";
 import { normalizarTelefono } from "../lib/telefono";
 
 // Clientes (dueños) y sus mascotas, para el personal de la clínica.
@@ -124,6 +125,33 @@ clientesRouter.post("/", async (req, res) => {
   res.status(201).json(cliente);
 });
 
+// Clientes que el sistema suspendió solo (canceló muchos turnos web seguidos) y la clínica todavía no revisó.
+clientesRouter.get("/suspensiones", async (req, res) => {
+  const clientes = await prisma.cliente.findMany({
+    where: { clinicaId: req.usuario!.clinicaId, suspensionRevisada: false, suspendidoHasta: { gt: new Date() } },
+    select: { id: true, nombre: true, apellido: true, telefono: true, suspendidoHasta: true, suspensionMotivo: true },
+    orderBy: { suspendidoHasta: "asc" },
+  });
+  res.json(clientes);
+});
+
+// Cómo viene el cliente con los turnos de los últimos 6 meses (para que la clínica decida).
+async function resumenTurnos(clienteId: number) {
+  const desde = new Date(Date.now() - 183 * 24 * 3600 * 1000);
+  const filas = await prisma.turno.groupBy({
+    by: ["estado", "canceladoPor"],
+    where: { mascota: { clienteId }, fechaHoraInicio: { gte: desde } },
+    _count: true,
+  });
+  const contar = (filtro: (f: (typeof filas)[number]) => boolean) =>
+    filas.filter(filtro).reduce((total, f) => total + f._count, 0);
+  return {
+    atendidos: contar((f) => f.estado === "ATENDIDO"),
+    ausentes: contar((f) => f.estado === "AUSENTE"),
+    canceladosPorElDueno: contar((f) => f.estado === "CANCELADO" && f.canceladoPor === "DUENIO"),
+  };
+}
+
 clientesRouter.get("/:id", async (req, res) => {
   const cliente = await prisma.cliente.findFirst({
     where: { id: Number(req.params.id), clinicaId: req.usuario!.clinicaId },
@@ -136,7 +164,42 @@ clientesRouter.get("/:id", async (req, res) => {
     res.status(404).json({ error: "Cliente no encontrado" });
     return;
   }
-  res.json(cliente);
+  res.json({ ...cliente, suspendidoHasta: suspensionVigente(cliente), resumenTurnos: await resumenTurnos(cliente.id) });
+});
+
+// La clínica decide: mantener la suspensión automática, levantarla o suspender a mano.
+clientesRouter.patch("/:id/suspension", async (req, res) => {
+  const resultado = z.object({ accion: z.enum(["mantener", "levantar", "suspender"]) }).safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: "Acción inválida" });
+    return;
+  }
+  const id = Number(req.params.id);
+  const clinicaId = req.usuario!.clinicaId;
+  const cliente = await prisma.cliente.findFirst({ where: { id, clinicaId } });
+  if (!cliente) {
+    res.status(404).json({ error: "Cliente no encontrado" });
+    return;
+  }
+  const { accion } = resultado.data;
+  let datos;
+  if (accion === "mantener") {
+    datos = { suspensionRevisada: true };
+  } else if (accion === "levantar") {
+    datos = { suspendidoHasta: null, suspensionMotivo: null, suspensionRevisada: true };
+  } else {
+    const { diasSuspension } = await prisma.clinica.findUniqueOrThrow({
+      where: { id: clinicaId },
+      select: { diasSuspension: true },
+    });
+    datos = {
+      suspendidoHasta: new Date(Date.now() + diasSuspension * 24 * 3600 * 1000),
+      suspensionMotivo: "Suspendido por la clínica",
+      suspensionRevisada: true,
+    };
+  }
+  const actualizado = await prisma.cliente.update({ where: { id }, data: datos });
+  res.json({ suspendidoHasta: suspensionVigente(actualizado), suspensionMotivo: actualizado.suspensionMotivo });
 });
 
 clientesRouter.put("/:id", async (req, res) => {

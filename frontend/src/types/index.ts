@@ -124,56 +124,6 @@ export interface DatosSitio {
   preguntas: PreguntaFrecuente[]
 }
 
-// ---------- Adopciones ----------
-
-export type EdadAproximada = 'CACHORRO' | 'JOVEN' | 'ADULTO' | 'MAYOR'
-export type Tamano = 'CHICO' | 'MEDIANO' | 'GRANDE'
-export type EstadoAdopcion = 'DISPONIBLE' | 'RESERVADO' | 'ADOPTADO'
-export type EstadoSolicitud = 'NUEVA' | 'CONTACTADA' | 'APROBADA' | 'RECHAZADA'
-export type Vivienda = 'CASA_CON_PATIO' | 'CASA_SIN_PATIO' | 'DEPARTAMENTO'
-
-export interface FotoAdopcion {
-  id: number
-  url: string
-  orden: number
-}
-
-export interface AnimalAdopcion {
-  id: number
-  nombre: string
-  especie: 'PERRO' | 'GATO'
-  sexo: 'MACHO' | 'HEMBRA'
-  edad: EdadAproximada
-  tamano: Tamano
-  color: string
-  historia: string | null
-  tranquilo: boolean
-  jugueton: boolean
-  buenoConChicos: boolean
-  conviveConPerros: boolean
-  conviveConGatos: boolean
-  vacunado: boolean
-  desparasitado: boolean
-  castrado: boolean
-  estado: EstadoAdopcion
-  publicadoEn: string
-  adoptadoEn: string | null
-  fotos: FotoAdopcion[]
-  _count?: { solicitudes: number }
-}
-
-export interface SolicitudAdopcion {
-  id: number
-  nombre: string
-  telefono: string
-  vivienda: Vivienda
-  otrosAnimales: boolean
-  mensaje: string | null
-  estado: EstadoSolicitud
-  creadaEn: string
-  animal: { id: number; nombre: string; especie: 'PERRO' | 'GATO'; estado: EstadoAdopcion; fotos: FotoAdopcion[] }
-}
-
 // ---------- Clientes y mascotas (panel) ----------
 
 export type EspecieMascota = 'PERRO' | 'GATO' | 'OTRO'
@@ -203,6 +153,22 @@ export interface Cliente {
   creadoEn: string
   mascotas: Mascota[]
   usuario?: { id: number; email: string } | null
+}
+
+// Ficha del cliente en el panel: suma la suspensión para turnos web y cómo viene con los turnos.
+export interface ClienteDetalle extends Cliente {
+  suspendidoHasta: string | null
+  suspensionMotivo: string | null
+  resumenTurnos: { atendidos: number; ausentes: number; canceladosPorElDueno: number }
+}
+
+export interface ClienteSuspendido {
+  id: number
+  nombre: string
+  apellido: string
+  telefono: string
+  suspendidoHasta: string
+  suspensionMotivo: string | null
 }
 
 export interface ConsultaResumen {
@@ -254,6 +220,7 @@ export interface Turno {
   estado: EstadoTurno
   origen: OrigenTurno
   observaciones: string | null
+  canceladoPor?: 'DUENIO' | 'CLINICA' | null
   mascota: Mascota & { cliente: { id: number; nombre: string; apellido: string; telefono: string } }
   servicio: { id: number; nombre: string; duracionMin: number; categoria: CategoriaServicio }
   veterinario: { id: number; nombre: string; apellido: string } | null
@@ -300,12 +267,23 @@ export interface MascotaDelDueno extends Mascota {
 export interface DatosMiCuenta {
   cliente: { nombre: string; apellido: string; telefono: string } | null
   horasCancelacion?: number
+  suspendidoHasta?: string | null
+  cancelacionesRecientes?: number
+  limiteCancelaciones?: number
+  diasCancelaciones?: number
+  diasSuspension?: number
   mascotas: MascotaDelDueno[]
 }
 
 // ---------- Configuración ----------
 
-export type ClinicaConfig = Omit<Clinica, 'horarios'> & { horasCancelacion: number }
+export type ClinicaConfig = Omit<Clinica, 'horarios'> & {
+  horasCancelacion: number
+  limiteCancelaciones: number
+  diasCancelaciones: number
+  diasSuspension: number
+  maxTurnosOnline: number
+}
 
 export interface ServicioConfig extends Servicio {
   precioReferencia: string | null

@@ -3,6 +3,7 @@ import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { tokenDeCarnet } from "../lib/carnet";
 import { prisma } from "../lib/prisma";
+import { cancelacionesWebRecientes, revisarAbuso, suspensionVigente } from "../lib/sanciones";
 
 // "Mi cuenta" del dueño: sus mascotas, vacunas, consultas y turnos.
 export const miCuentaRouter = Router();
@@ -52,10 +53,19 @@ miCuentaRouter.get("/", async (req, res) => {
     })),
   );
 
-  const clinica = await prisma.clinica.findUnique({ where: { id: cliente.clinicaId }, select: { horasCancelacion: true } });
+  const clinica = await prisma.clinica.findUniqueOrThrow({
+    where: { id: cliente.clinicaId },
+    select: { horasCancelacion: true, limiteCancelaciones: true, diasCancelaciones: true, diasSuspension: true },
+  });
   res.json({
     cliente: { nombre: cliente.nombre, apellido: cliente.apellido, telefono: cliente.telefono },
-    horasCancelacion: clinica?.horasCancelacion ?? 24,
+    horasCancelacion: clinica.horasCancelacion,
+    // Para avisarle antes de que una cancelación más lo deje sin turnos web.
+    suspendidoHasta: suspensionVigente(cliente),
+    cancelacionesRecientes: await cancelacionesWebRecientes(cliente.id, clinica.diasCancelaciones),
+    limiteCancelaciones: clinica.limiteCancelaciones,
+    diasCancelaciones: clinica.diasCancelaciones,
+    diasSuspension: clinica.diasSuspension,
     mascotas: conCarnet,
   });
 });
@@ -84,6 +94,11 @@ miCuentaRouter.patch("/turnos/:id/cancelar", async (req, res) => {
     });
     return;
   }
-  await prisma.turno.update({ where: { id: turno.id }, data: { estado: "CANCELADO" } });
-  res.json({ ok: true });
+  await prisma.turno.update({
+    where: { id: turno.id },
+    data: { estado: "CANCELADO", canceladoEn: new Date(), canceladoPor: "DUENIO" },
+  });
+  // Si viene cancelando muchos seguidos, queda suspendido para la web y la clínica ve el aviso.
+  const suspendidoHasta = await revisarAbuso(cliente!.id, turno.clinicaId);
+  res.json({ ok: true, suspendidoHasta });
 });

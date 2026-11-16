@@ -11,6 +11,7 @@ import {
 } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
+import { bloquearAgenda, opcionesReserva, suspensionVigente, turnosWebActivos } from "../lib/sanciones";
 
 const CLINICA_ID = 1;
 const DIAS_A_MOSTRAR = 14; // a partir de mañana; hoy se suma aparte solo si queda lugar
@@ -25,6 +26,17 @@ function hoy() {
 
 function responderError(res: Response, error: z.ZodError) {
   res.status(400).json({ error: error.issues[0].message });
+}
+
+// Corta la reserva desde adentro de la transacción (deshace todo) con un mensaje para la persona.
+class ProblemaReserva extends Error {
+  constructor(mensaje: string, readonly estado = 409) {
+    super(mensaje);
+  }
+}
+
+function fechaCorta(fecha: Date) {
+  return fecha.toLocaleDateString("es-AR", { day: "numeric", month: "long", timeZone: "America/Argentina/Buenos_Aires" });
 }
 
 // =====================================================================
@@ -96,6 +108,14 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
     res.status(400).json({ error: "Tu cuenta no tiene una ficha en la clínica. Escribinos por WhatsApp" });
     return;
   }
+  // La clínica puede suspender a quien abusa de los turnos web (cancela muchos seguidos).
+  const suspendido = suspensionVigente(cliente);
+  if (suspendido) {
+    res.status(403).json({
+      error: `Por ahora no podés sacar turnos por la web (hasta el ${fechaCorta(suspendido)}). Escribinos por WhatsApp y te damos uno.`,
+    });
+    return;
+  }
   const pedida = datos.mascota;
   // Si escribe el nombre de una mascota que ya tiene, se usa esa en lugar de duplicarla.
   const mascotaExistente =
@@ -107,42 +127,63 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
     return;
   }
 
-  // Se vuelve a verificar el horario: alguien pudo haberlo tomado mientras se completaba el formulario.
-  const problema = await validarHorario(CLINICA_ID, servicio.id, datos.fecha, datos.hora, {
-    anticipacionMinutos: ANTICIPACION_ONLINE_MINUTOS,
+  const { maxTurnosOnline } = await prisma.clinica.findUniqueOrThrow({
+    where: { id: CLINICA_ID },
+    select: { maxTurnosOnline: true },
   });
-  if (problema) {
-    res.status(409).json({ error: problema });
-    return;
-  }
 
-  const turno = await prisma.$transaction(async (tx) => {
-    const mascota =
-      mascotaExistente ??
-      (await tx.mascota.create({
+  let turno;
+  try {
+    turno = await prisma.$transaction(async (tx) => {
+      // Una reserva por vez: si otra persona está pidiendo un turno en este mismo momento, se espera a que termine.
+      await bloquearAgenda(tx, CLINICA_ID);
+
+      // Se vuelve a verificar el horario: alguien pudo haberlo tomado mientras se completaba el formulario.
+      const problema = await validarHorario(CLINICA_ID, servicio.id, datos.fecha, datos.hora, {
+        anticipacionMinutos: ANTICIPACION_ONLINE_MINUTOS,
+      });
+      if (problema) throw new ProblemaReserva(problema);
+
+      if (maxTurnosOnline > 0 && (await turnosWebActivos(cliente.id, tx)) >= maxTurnosOnline) {
+        throw new ProblemaReserva(
+          `Ya tenés ${maxTurnosOnline} turnos pedidos por la web. Cuando pase uno vas a poder pedir otro, o escribinos por WhatsApp.`,
+          400,
+        );
+      }
+
+      const mascota =
+        mascotaExistente ??
+        (await tx.mascota.create({
+          data: {
+            clienteId: cliente.id,
+            nombre: (pedida as { nombre: string }).nombre,
+            especie: (pedida as { especie: "PERRO" | "GATO" | "OTRO" }).especie,
+            sexo: "MACHO",
+          },
+        }));
+
+      const inicio = aFechaUTC(datos.fecha, datos.hora);
+      return tx.turno.create({
         data: {
-          clienteId: cliente.id,
-          nombre: (pedida as { nombre: string }).nombre,
-          especie: (pedida as { especie: "PERRO" | "GATO" | "OTRO" }).especie,
-          sexo: "MACHO",
+          clinicaId: CLINICA_ID,
+          mascotaId: mascota.id,
+          servicioId: servicio.id,
+          fechaHoraInicio: inicio,
+          fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
+          // Queda confirmado en el momento: el horario ya se verificó y el recordatorio sale el día anterior.
+          estado: "CONFIRMADO",
+          origen: "ONLINE",
+          observaciones: datos.motivo || null,
         },
-      }));
-
-    const inicio = aFechaUTC(datos.fecha, datos.hora);
-    return tx.turno.create({
-      data: {
-        clinicaId: CLINICA_ID,
-        mascotaId: mascota.id,
-        servicioId: servicio.id,
-        fechaHoraInicio: inicio,
-        fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
-        // Queda confirmado en el momento: el horario ya se verificó y el recordatorio sale el día anterior.
-        estado: "CONFIRMADO",
-        origen: "ONLINE",
-        observaciones: datos.motivo || null,
-      },
-    });
-  });
+      });
+    }, opcionesReserva);
+  } catch (error) {
+    if (error instanceof ProblemaReserva) {
+      res.status(error.estado).json({ error: error.message });
+      return;
+    }
+    throw error;
+  }
 
   res.status(201).json({ id: turno.id, fechaHoraInicio: turno.fechaHoraInicio, servicio: servicio.nombre });
 });
@@ -224,30 +265,40 @@ turnosRouter.post("/", async (req, res) => {
     return;
   }
 
-  const problema = await validarHorario(clinicaId, servicio.id, datos.fecha, datos.hora, {
-    sobreturno: datos.sobreturno,
-  });
-  if (problema) {
-    res.status(409).json({ error: problema });
-    return;
-  }
-
   const inicio = aFechaUTC(datos.fecha, datos.hora);
-  const turno = await prisma.turno.create({
-    data: {
-      clinicaId,
-      mascotaId: mascota.id,
-      servicioId: servicio.id,
-      veterinarioId: datos.veterinarioId ?? null,
-      fechaHoraInicio: inicio,
-      fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
-      // Si lo carga el personal, el cliente ya está avisado: queda confirmado.
-      estado: "CONFIRMADO",
-      origen: datos.origen,
-      observaciones: datos.observaciones || null,
-    },
-    include: incluirDetalle,
-  });
+  let turno;
+  try {
+    turno = await prisma.$transaction(async (tx) => {
+      // Igual que en la web: una reserva por vez, así dos personas no se quedan con el mismo horario.
+      await bloquearAgenda(tx, clinicaId);
+      const problema = await validarHorario(clinicaId, servicio.id, datos.fecha, datos.hora, {
+        sobreturno: datos.sobreturno,
+      });
+      if (problema) throw new ProblemaReserva(problema);
+
+      return tx.turno.create({
+        data: {
+          clinicaId,
+          mascotaId: mascota.id,
+          servicioId: servicio.id,
+          veterinarioId: datos.veterinarioId ?? null,
+          fechaHoraInicio: inicio,
+          fechaHoraFin: new Date(inicio.getTime() + servicio.duracionMin * 60 * 1000),
+          // Si lo carga el personal, el cliente ya está avisado: queda confirmado.
+          estado: "CONFIRMADO",
+          origen: datos.origen,
+          observaciones: datos.observaciones || null,
+        },
+        include: incluirDetalle,
+      });
+    }, opcionesReserva);
+  } catch (error) {
+    if (error instanceof ProblemaReserva) {
+      res.status(error.estado).json({ error: error.message });
+      return;
+    }
+    throw error;
+  }
   res.status(201).json(turno);
 });
 
@@ -270,6 +321,12 @@ turnosRouter.patch("/:id/estado", async (req, res) => {
     where: { id },
     data: {
       estado: resultado.data.estado,
+      // Se guarda quién canceló: la regla de abuso solo cuenta las cancelaciones del dueño por la web.
+      ...(resultado.data.estado === "CANCELADO"
+        ? turno.estado === "CANCELADO"
+          ? {}
+          : { canceladoEn: new Date(), canceladoPor: "CLINICA" as const }
+        : { canceladoEn: null, canceladoPor: null }),
       // Quien marca "atendido" queda como el veterinario del turno, si no tenía uno.
       ...(resultado.data.estado === "ATENDIDO" && !turno.veterinarioId && req.usuario!.rol === "VETERINARIO"
         ? { veterinarioId: req.usuario!.id }

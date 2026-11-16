@@ -1,6 +1,7 @@
-import { CalendarDays, CalendarPlus, FileDown, MessageCircle, Stethoscope, Syringe } from 'lucide-react'
+import { Ban, CalendarDays, CalendarPlus, FileDown, MessageCircle, Stethoscope, Syringe } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { GuiaVacunas } from '../components/GuiaVacunas'
 import { IlustracionMascotas } from '../components/Ilustracion'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPatch, ErrorApi } from '../lib/api'
@@ -186,11 +187,26 @@ export function MiCuenta() {
   useEffect(cargar, [cargar])
 
   async function cancelar(turnoId: number) {
-    if (!window.confirm('¿Seguro que querés cancelar este turno?')) return
+    // Si con esta cancelación llega al límite, se le avisa antes que va a quedar sin turnos web por un tiempo.
+    const limite = datos?.limiteCancelaciones ?? 0
+    const llegaAlLimite = limite > 0 && (datos?.cancelacionesRecientes ?? 0) + 1 >= limite
+    const pregunta = llegaAlLimite
+      ? `¿Seguro que querés cancelar este turno?
+
+Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a poder sacar turnos por la web durante ${datos?.diasSuspension ?? 30} días (los vas a poder pedir por WhatsApp).`
+      : '¿Seguro que querés cancelar este turno?'
+    if (!window.confirm(pregunta)) return
     setError(null)
     try {
-      await apiPatch(`/mi-cuenta/turnos/${turnoId}/cancelar`, {})
-      setAviso('Listo, cancelamos el turno. ¡Gracias por avisar!')
+      const respuesta = await apiPatch<{ ok: boolean; suspendidoHasta: string | null }>(
+        `/mi-cuenta/turnos/${turnoId}/cancelar`,
+        {},
+      )
+      setAviso(
+        respuesta.suspendidoHasta
+          ? 'Listo, cancelamos el turno. Como cancelaste varios seguidos, por un tiempo los turnos se piden por WhatsApp.'
+          : 'Listo, cancelamos el turno. ¡Gracias por avisar!',
+      )
       cargar()
     } catch (e) {
       setError(e instanceof ErrorApi ? e.message : 'No se pudo cancelar el turno.')
@@ -206,11 +222,35 @@ export function MiCuenta() {
         <div>
           <h1>Hola, {usuario?.nombre}</h1>
           <p>Acá ves a tus mascotas: sus vacunas, sus visitas y tus próximos turnos.</p>
-          <Link to="/turno" className="boton">
-            <CalendarPlus size={20} aria-hidden="true" /> Pedir turno
-          </Link>
+          {!datos?.suspendidoHasta && (
+            <Link to="/turno" className="boton">
+              <CalendarPlus size={20} aria-hidden="true" /> Pedir turno
+            </Link>
+          )}
         </div>
       </section>
+
+      {datos?.suspendidoHasta && (
+        <div className="tarjeta aviso-suspendido" role="status">
+          <Ban size={24} aria-hidden="true" />
+          <div>
+            <p>
+              <strong>Por ahora no podés sacar turnos por la web</strong> (hasta el {fechaCortaDe(datos.suspendidoHasta)}),
+              porque se cancelaron varios turnos seguidos. Escribinos y te damos un turno.
+            </p>
+            {whatsappClinica && (
+              <a
+                className="boton boton-whatsapp"
+                target="_blank"
+                rel="noreferrer"
+                href={enlaceWhatsapp(whatsappClinica, 'Hola, quiero pedir un turno.')}
+              >
+                <MessageCircle size={18} aria-hidden="true" /> Pedir turno por WhatsApp
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && <p className="mensaje-error">{error}</p>}
       {aviso && <p className="mensaje-exito">{aviso}</p>}
@@ -247,6 +287,11 @@ export function MiCuenta() {
             />
           ))}
         </div>
+      )}
+
+      {/* Guía de vacunas del primer año (antes estaba en el inicio) */}
+      {datos && sitio && (
+        <GuiaVacunas planes={sitio.planes} especies={datos.mascotas.map((m) => m.especie)} />
       )}
     </main>
   )

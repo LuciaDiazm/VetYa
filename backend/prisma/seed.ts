@@ -177,19 +177,12 @@ async function main() {
     "/fotos/manos-cachorro.webp": "/fotos/analisis.webp",
     "/fotos/dalmatas-durmiendo.webp": "/fotos/cirugia.webp",
     "/fotos/gatito-naranja.webp": "/fotos/gatito-vacuna.webp",
-    "/fotos/labrador-asomado.jpg": "/fotos/adopcion-canela.webp",
-    "/fotos/jack-russell.jpg": "/fotos/adopcion-tito.webp",
-    "/fotos/caniche-cachorro.jpg": "/fotos/caniche-blanco.webp",
-    "/fotos/gato-lengua.jpg": "/fotos/adopcion-michi.webp",
-    "/fotos/gatito-blanco.jpg": "/fotos/adopcion-nieve.webp",
-    "/fotos/siames.jpg": "/fotos/adopcion-luna.webp",
   };
   for (const [vieja, nueva] of Object.entries(fotosViejas)) {
     await prisma.servicio.updateMany({ where: { fotoUrl: vieja }, data: { fotoUrl: nueva } });
     await prisma.planSanitario.updateMany({ where: { fotoUrl: vieja }, data: { fotoUrl: nueva } });
-    await prisma.fotoAdopcion.updateMany({ where: { url: vieja }, data: { url: nueva } });
   }
-  // El caniche blanco sigue en adopción, pero el plan cachorro y la desparasitación pasaron al rottweiler.
+  // El plan cachorro y la desparasitación usaban la foto de un caniche: ahora usan la del rottweiler.
   await prisma.planSanitario.updateMany({
     where: { fotoUrl: "/fotos/caniche-blanco.webp" },
     data: { fotoUrl: "/fotos/rottweiler-cachorro.webp" },
@@ -275,57 +268,6 @@ async function main() {
         soloPrimeraAtencion: true,
         vigenteDesde: new Date("2026-10-01"),
         vigenteHasta: new Date("2026-12-31"),
-      },
-    });
-  }
-
-  // ---------- Animales en adopción (ficticios; la clínica sube sus propias fotos) ----------
-  if ((await prisma.animalAdopcion.count({ where: { clinicaId } })) === 0) {
-    const animales = [
-      {
-        nombre: "Canela", especie: "PERRO", sexo: "HEMBRA", edad: "JOVEN", tamano: "MEDIANO", color: "Dorado / caramelo",
-        historia: "La encontraron sola cerca del puerto. Es muy cariñosa y le encanta que le rasquen las orejas.",
-        tranquilo: true, buenoConChicos: true, conviveConPerros: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/adopcion-canela.webp"],
-      },
-      {
-        nombre: "Tito", especie: "PERRO", sexo: "MACHO", edad: "ADULTO", tamano: "CHICO", color: "Blanco y marrón",
-        historia: "Lo trajeron de la calle con una patita lastimada. Ya está sano y tiene muchísima energía.",
-        jugueton: true, buenoConChicos: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/adopcion-tito.webp"],
-      },
-      {
-        nombre: "Copito", especie: "PERRO", sexo: "MACHO", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
-        historia: "Tiene unos 3 meses. Es curioso, juguetón y aprende rápido.",
-        jugueton: true, buenoConChicos: true, conviveConPerros: true, conviveConGatos: true, vacunado: true, desparasitado: true,
-        fotos: ["/fotos/caniche-blanco.webp"],
-      },
-      {
-        nombre: "Michi", especie: "GATO", sexo: "MACHO", edad: "JOVEN", tamano: "CHICO", color: "Atigrado",
-        historia: "Un gato tranquilo y dormilón. Ideal para departamento.",
-        tranquilo: true, conviveConGatos: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/adopcion-michi.webp"],
-      },
-      {
-        nombre: "Nieve", especie: "GATO", sexo: "HEMBRA", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
-        historia: "Una gatita de 2 meses, muy mimosa. Busca una familia paciente.",
-        tranquilo: true, buenoConChicos: true, conviveConGatos: true, desparasitado: true,
-        fotos: ["/fotos/adopcion-nieve.webp"],
-      },
-    ] as const;
-
-    for (const { fotos, ...datos } of animales) {
-      await prisma.animalAdopcion.create({
-        data: { clinicaId, ...datos, fotos: { create: fotos.map((url, orden) => ({ url, orden })) } },
-      });
-    }
-
-    await prisma.animalAdopcion.create({
-      data: {
-        clinicaId, nombre: "Luna", especie: "GATO", sexo: "HEMBRA", edad: "ADULTO", tamano: "CHICO", color: "Crema",
-        historia: "Ya encontró una familia.", tranquilo: true, vacunado: true, desparasitado: true, castrado: true,
-        estado: "ADOPTADO", adoptadoEn: new Date("2026-09-28"),
-        fotos: { create: [{ url: "/fotos/adopcion-luna.webp", orden: 0 }] },
       },
     });
   }

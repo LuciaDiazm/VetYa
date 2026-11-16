@@ -1,9 +1,9 @@
-import { CalendarCheck, CircleCheck, Clock, MessageCircle, UserRound } from 'lucide-react'
+import { Ban, CalendarCheck, CircleCheck, Clock, MessageCircle, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPost, ErrorApi } from '../lib/api'
-import { diaAmigable, diaCorto, diaLargo } from '../lib/fechas'
+import { diaAmigable, diaCorto, diaLargo, fechaCortaDe } from '../lib/fechas'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import type { DatosMiCuenta, EspecieMascota, Servicio } from '../types'
 
@@ -94,6 +94,8 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
   const [confirmado, setConfirmado] = useState<{ dia: string; hora: string; servicio: string; mascota: string } | null>(
     null,
   )
+  // Si la clínica lo suspendió para turnos web, se avisa de entrada (no tiene sentido completar los pasos).
+  const [suspendidoHasta, setSuspendidoHasta] = useState<string | null>(null)
 
   const pasoDia = useRef<HTMLElement>(null)
   const pasoHora = useRef<HTMLElement>(null)
@@ -109,6 +111,9 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
         if (deLaCategoria.length === 1) elegirServicio(deLaCategoria[0])
       })
       .catch(() => setServicios([]))
+    apiGet<DatosMiCuenta>('/mi-cuenta')
+      .then((d) => setSuspendidoHasta(d.suspendidoHasta ?? null))
+      .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -127,6 +132,33 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
     if (!servicio) return
     setHora(null)
     setDisponibilidad(await apiGet<Disponibilidad>(`/publico/turnos/disponibilidad?servicioId=${servicio.id}`))
+  }
+
+  if (suspendidoHasta) {
+    return (
+      <main className="fondo-huellas">
+        <section className="contenedor seccion">
+          <div className="turno-listo turno-acceso">
+            <Ban size={56} aria-hidden="true" />
+            <h1>Por ahora, los turnos se piden por WhatsApp</h1>
+            <p className="turno-listo-detalle">
+              Como se cancelaron varios turnos seguidos, hasta el {fechaCortaDe(suspendidoHasta)} no podés sacar turnos
+              por la web. Escribinos y te damos uno.
+            </p>
+            {sitio && (
+              <a
+                href={enlaceWhatsapp(sitio.clinica.whatsapp, MENSAJE_TURNO)}
+                target="_blank"
+                rel="noreferrer"
+                className="boton boton-whatsapp boton-grande"
+              >
+                <MessageCircle size={22} aria-hidden="true" /> Pedir turno por WhatsApp
+              </a>
+            )}
+          </div>
+        </section>
+      </main>
+    )
   }
 
   if (confirmado) {

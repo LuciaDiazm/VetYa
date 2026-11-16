@@ -12,6 +12,10 @@ interface Formulario {
   email: string
   instagram: string
   horasCancelacion: string
+  limiteCancelaciones: string
+  diasCancelaciones: string
+  diasSuspension: string
+  maxTurnosOnline: string
   telefonoUrgencias: string
   horarioUrgencias: string
 }
@@ -25,6 +29,10 @@ function aFormulario(c: ClinicaConfig): Formulario {
     email: c.email ?? '',
     instagram: c.instagram ?? '',
     horasCancelacion: String(c.horasCancelacion),
+    limiteCancelaciones: String(c.limiteCancelaciones),
+    diasCancelaciones: String(c.diasCancelaciones),
+    diasSuspension: String(c.diasSuspension),
+    maxTurnosOnline: String(c.maxTurnosOnline),
     telefonoUrgencias: c.telefonoUrgencias ? formatearTelefono(c.telefonoUrgencias) : '',
     horarioUrgencias: c.horarioUrgencias ?? '',
   }
@@ -59,6 +67,10 @@ export function DatosClinica() {
       const c = await apiPut<ClinicaConfig>('/configuracion/clinica', {
         ...datos,
         horasCancelacion: Number(datos.horasCancelacion),
+        limiteCancelaciones: Number(datos.limiteCancelaciones),
+        diasCancelaciones: Number(datos.diasCancelaciones),
+        diasSuspension: Number(datos.diasSuspension),
+        maxTurnosOnline: Number(datos.maxTurnosOnline),
       })
       setDatos(aFormulario(c))
       setGuardado(true)
@@ -142,6 +154,62 @@ export function DatosClinica() {
           />
           <span className="ayuda">Con menos tiempo, el dueño tiene que avisar por WhatsApp.</span>
         </label>
+        <label className="campo campo-corto">
+          Turnos por la web que puede tener a la vez cada dueño
+          <input
+            type="number"
+            min={0}
+            max={20}
+            value={datos.maxTurnosOnline}
+            onChange={(e) => poner('maxTurnosOnline', e.target.value)}
+            required
+          />
+          <span className="ayuda">Con 0 no hay límite. Los turnos que dan ustedes no cuentan.</span>
+        </label>
+      </section>
+
+      <section className="tarjeta formulario">
+        <h2>Si cancelan muchos turnos</h2>
+        <p className="ayuda">
+          Si un dueño cancela por la web muchos turnos en pocos días, queda un tiempo sin poder sacar turnos por la web
+          (los puede pedir por WhatsApp). Les aparece un aviso en "Hoy" y ustedes deciden si lo mantienen o lo levantan.
+        </p>
+        <div className="fila-campos">
+          <label className="campo">
+            Cantidad de cancelaciones
+            <input
+              type="number"
+              min={0}
+              max={20}
+              value={datos.limiteCancelaciones}
+              onChange={(e) => poner('limiteCancelaciones', e.target.value)}
+              required
+            />
+            <span className="ayuda">Con 0 no se suspende a nadie solo.</span>
+          </label>
+          <label className="campo">
+            En cuántos días
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={datos.diasCancelaciones}
+              onChange={(e) => poner('diasCancelaciones', e.target.value)}
+              required
+            />
+          </label>
+          <label className="campo">
+            Días sin turnos web
+            <input
+              type="number"
+              min={1}
+              max={365}
+              value={datos.diasSuspension}
+              onChange={(e) => poner('diasSuspension', e.target.value)}
+              required
+            />
+          </label>
+        </div>
       </section>
 
       {error && (

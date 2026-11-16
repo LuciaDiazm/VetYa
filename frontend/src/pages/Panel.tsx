@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { apiGet } from '../lib/api'
 import { diaLargo, hoyArgentina } from '../lib/fechas'
 import type { ResumenRecordatorios, Turno } from '../types'
+import { AvisosSuspension } from '../components/AvisosSuspension'
 import { TarjetaTurno } from '../components/TarjetaTurno'
 
 // Inicio del panel: lo que hay que hacer hoy.
@@ -35,6 +36,8 @@ export function Panel() {
           <CalendarPlus size={22} aria-hidden="true" /> Dar turno
         </Link>
       </div>
+
+      <AvisosSuspension />
 
       <section className="tarjeta bloque-ficha">
         <div className="bloque-ficha-titulo">

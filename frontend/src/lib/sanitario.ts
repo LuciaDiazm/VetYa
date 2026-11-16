@@ -67,3 +67,8 @@ export function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
 export function vacunaNueva(): DatosAplicacion {
   return { tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: sumarMeses(hoyArgentina(), 12) }
 }
+
+// Edad de una dosis del calendario: 6 semanas → "6 semanas"; 16 semanas → "4 meses"
+export function edadDosis(semanas: number) {
+  return semanas >= 12 && semanas % 4 === 0 ? `${semanas / 4} meses` : `${semanas} semanas`
+}

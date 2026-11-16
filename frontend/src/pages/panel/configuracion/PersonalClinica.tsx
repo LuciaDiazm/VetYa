@@ -119,7 +119,7 @@ function FormularioPersona({
           <span className="ayuda">
             {datos.rol === 'ADMIN'
               ? 'Puede hacer todo, también cambiar esta configuración.'
-              : 'Agenda, clientes, historia clínica, recordatorios y adopciones.'}
+              : 'Agenda, clientes, historia clínica y recordatorios.'}
           </span>
         </label>
         {esNueva && (

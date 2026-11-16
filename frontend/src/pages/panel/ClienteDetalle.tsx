@@ -7,14 +7,15 @@ import { datosDeCliente, MASCOTA_VACIA, type DatosCliente, type DatosMascota } f
 import { apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
 import { edadTexto, ESPECIES, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
-import type { Cliente, Mascota } from '../../types'
+import { TurnosDelCliente } from '../../components/TurnosDelCliente'
+import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
 import { IconoEspecie } from './Clientes'
 
 // Ficha del dueño: sus datos, contacto rápido y sus mascotas.
 export function ClienteDetalle() {
   const { id } = useParams()
   const navegar = useNavigate()
-  const [cliente, setCliente] = useState<Cliente | null>(null)
+  const [cliente, setCliente] = useState<DatosClienteDetalle | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
   const [datos, setDatos] = useState<DatosCliente | null>(null)
@@ -26,7 +27,7 @@ export function ClienteDetalle() {
   const [claveLista, setClaveLista] = useState(false)
 
   const cargar = useCallback(() => {
-    apiGet<Cliente>(`/clientes/${id}`)
+    apiGet<DatosClienteDetalle>(`/clientes/${id}`)
       .then(setCliente)
       .catch(() => setError('No se encontró el cliente.'))
   }, [id])
@@ -170,6 +171,8 @@ export function ClienteDetalle() {
           </p>
         )}
       </section>
+
+      <TurnosDelCliente cliente={cliente} alCambiar={(cambios) => setCliente({ ...cliente, ...cambios })} />
 
       <section className="tarjeta bloque-ficha">
         <div className="bloque-ficha-titulo">
