@@ -112,7 +112,10 @@ export function Inicio() {
       {/* ---------- Portada ---------- */}
       <section className="contenedor portada" aria-labelledby="titulo-portada">
         <div className="portada-texto">
-          <h1 id="titulo-portada">Clínica veterinaria en Goya</h1>
+          <h1 id="titulo-portada" className="titulo-portada">
+            <span className="titulo-cursiva">Clínica veterinaria</span>
+            <span className="titulo-serif">en Goya</span>
+          </h1>
           <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
           <div className="portada-acciones">
             <Link to="/turno" className="boton boton-grande" ref={observarBotonPortada}>

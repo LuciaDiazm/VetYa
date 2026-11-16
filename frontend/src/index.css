@@ -689,9 +689,35 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
+/* Título de la portada: cursiva elegante arriba y letras altas con serifa abajo (estilo Canva) */
+.titulo-portada {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.titulo-cursiva {
+  font-family: 'Great Vibes', cursive;
+  font-weight: 400;
+  font-size: clamp(4rem, 8.5vw, 6.6rem);
+  line-height: 1;
+}
+
+.titulo-serif {
+  margin-top: 0.1em;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Bajada en letra redonda e inclinada, como la de la imagen de referencia */
 .portada-bajada {
   max-width: 30ch;
-  font-size: 1.3rem;
+  font-family: 'Poppins', var(--fuente);
+  font-style: italic;
+  font-size: 1.35rem;
   color: var(--gris);
 }
 
