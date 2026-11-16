@@ -33,7 +33,7 @@ export function Ingresar() {
   }
 
   return (
-    <DisenoAcceso foto="/fotos/labrador-asomado.jpg" frase="Sus vacunas, sus consultas y sus turnos, siempre a mano.">
+    <DisenoAcceso foto="/fotos/rottweiler-cachorro.webp" frase="Sus vacunas, sus consultas y sus turnos, siempre a mano.">
       <h1>Ingresar</h1>
       <p className="ayuda">Para dueños de mascotas y para el equipo de la clínica.</p>
       <form onSubmit={enviar} className="formulario">

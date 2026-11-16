@@ -44,9 +44,8 @@ export function Pie() {
         </div>
       </div>
       <div className="contenedor pie-legal">
-        Fotos de Unsplash (Alexander Mass, Judy Beth Morris, Sueda Güzeldere, Buddy AN, Alvan Nee, NordWood
-        Themes, Marios Gkortsilas, Victoria Fischer, FLOUFFY, ac dc, Slavy Darozhkin y Pedro Miguel Aires) y de
-        Pexels (Sam Lion). Video de Vũ Nguyễn en Pexels. Mapa © colaboradores de OpenStreetMap.
+        Sitio de ejemplo para un Trabajo Final: la clínica, el equipo y las fotos son ilustrativos. Mapa ©
+        colaboradores de OpenStreetMap.
       </div>
     </footer>
   )

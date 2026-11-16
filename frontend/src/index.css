@@ -146,7 +146,8 @@ svg {
 
 /* Huellitas de fondo */
 .fondo-huellas {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cg fill='%231C2D63' fill-opacity='0.06'%3E%3Cg transform='translate(50 60) rotate(-20)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(200 190) rotate(25)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='%231C2D63' fill-opacity='0.07'%3E%3Cg transform='translate(40 70) rotate(-30) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(85 40) rotate(-25) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(120 85) rotate(-35) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(165 55) rotate(-30) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(330 210) rotate(20) scale(1)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(250 330) rotate(-10) scale(0.7)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(70 300) rotate(40) scale(0.9)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(400 420) rotate(15) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(445 380) rotate(20) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(480 440) rotate(10) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  overflow-x: clip;
 }
 
 /* ---------- Logo ---------- */
@@ -676,7 +677,12 @@ html[data-turno-portada='visible'] .boton-turno {
   grid-template-columns: 1.15fr 1fr 0.8fr;
   align-items: center;
   gap: 24px;
-  padding-block: 40px 48px;
+  padding-block: 40px 0;
+}
+
+.portada-texto,
+.portada-ventajas {
+  padding-bottom: 48px;
 }
 
 .portada-texto h1 {
@@ -696,24 +702,22 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 28px;
 }
 
-/* Foto del perro doctor dentro de un círculo con un aro amarillo */
+/* Perrito parado sobre la cinta azul (como en la página de referencia) */
 .portada-foto {
-  position: relative;
+  align-self: end;
   justify-self: center;
   width: 100%;
-  max-width: 420px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--superficie);
-  overflow: hidden;
-  box-shadow: 0 0 0 14px var(--amarillo-suave);
+  max-width: 340px;
 }
 
 .portada-foto img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
+  height: auto;
+  /* La foto original tiene un fondo gris claro con degradé: se esfuman los bordes para que no se vea el recuadro. */
+  mask-image: radial-gradient(ellipse 56% 60% at 50% 45%, #000 72%, transparent 100%),
+    linear-gradient(to top, #000 10%, transparent 26%);
+  mask-composite: add;
 }
 
 .portada-ventajas {
@@ -863,6 +867,7 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .sobre-tarjetas {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -877,8 +882,12 @@ html[data-turno-portada='visible'] .boton-turno {
   min-height: 170px;
   padding: 28px;
   border-radius: var(--radio);
-  background: var(--superficie);
+  background: var(--superficie) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='170'%3E%3Cg fill='%231C2D63' fill-opacity='0.07'%3E%3Cg transform='translate(118 112) rotate(-18) scale(2.7)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(122 30) rotate(-30) scale(0.9)'%3E%3Crect x='-22' y='-6' width='44' height='12' rx='6'/%3E%3Ccircle cx='-22' cy='-7' r='8'/%3E%3Ccircle cx='-22' cy='7' r='8'/%3E%3Ccircle cx='22' cy='-7' r='8'/%3E%3Ccircle cx='22' cy='7' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat right bottom;
   color: var(--azul);
+}
+
+.tarjeta-dato.tarjeta-oscura {
+  background: var(--azul) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='170'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.1'%3E%3Cg transform='translate(118 112) rotate(-18) scale(2.7)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(122 30) rotate(-30) scale(0.9)'%3E%3Crect x='-22' y='-6' width='44' height='12' rx='6'/%3E%3Ccircle cx='-22' cy='-7' r='8'/%3E%3Ccircle cx='-22' cy='7' r='8'/%3E%3Ccircle cx='22' cy='-7' r='8'/%3E%3Ccircle cx='22' cy='7' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat right bottom;
 }
 
 .tarjeta-dato h3 {
@@ -895,19 +904,54 @@ html[data-turno-portada='visible'] .boton-turno {
   color: #ffffff;
 }
 
-/* ---------- Video ---------- */
+/* ---------- Animales que se asoman (decoración, sin fondo) ---------- */
 
-.video-marco {
-  overflow: hidden;
-  height: clamp(240px, 42vw, 460px);
-  border-radius: var(--radio-grande);
+.asomado {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
 }
 
-.video-mascotas {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 35% 80%;
+/* Gato de costado que espía desde el borde derecho de la pantalla */
+.sobre {
+  position: relative;
+}
+
+.asomado-costado {
+  right: calc((100% - 100vw) / 2);
+  bottom: 150px;
+  width: 110px;
+}
+
+@media (max-width: 1240px) {
+  .asomado-costado {
+    display: none;
+  }
+}
+
+/* Dálmata que espía desde el costado izquierdo de la pantalla */
+.servicios {
+  position: relative;
+}
+
+.asomado-dalmata {
+  top: 0;
+  left: calc((100% - 100vw) / 2);
+  width: 210px;
+}
+
+@media (max-width: 1240px) {
+  .asomado-dalmata {
+    display: none;
+  }
+}
+
+/* Fila de perros que se asoman sobre la tarjeta de adopción */
+.asomado-perros {
+  right: 50%;
+  bottom: calc(100% - 6px);
+  width: min(620px, 86%);
+  transform: translateX(50%);
 }
 
 /* ---------- Servicios en mosaico ---------- */
@@ -962,6 +1006,19 @@ html[data-turno-portada='visible'] .boton-turno {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.mosaico-recorte img {
+  align-self: end;
+  height: auto;
+  max-height: 300px;
+  padding: 20px 20px 0;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.mosaico-tarjeta:last-child:nth-child(odd) img {
+  object-position: center 30%;
 }
 
 .mosaico-enlace {
@@ -1073,10 +1130,13 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .plan-foto {
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 7;
-  object-fit: cover;
-  object-position: center 35%;
+  padding-top: 16px;
+  background: var(--fondo);
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 .plan-cuerpo {
@@ -1133,7 +1193,8 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .grilla-equipo {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+  justify-content: center;
   gap: 16px;
   margin: 28px 0 0;
   padding: 0;
@@ -1163,6 +1224,22 @@ html[data-turno-portada='visible'] .boton-turno {
   font-size: 2rem;
   font-weight: 600;
   object-fit: cover;
+}
+
+/* Con foto: ocupa todo el ancho de arriba de la tarjeta */
+.miembro:has(.miembro-foto) {
+  overflow: hidden;
+  padding-top: 0;
+}
+
+.miembro-foto {
+  width: calc(100% + 48px);
+  max-width: none;
+  margin: 0 -24px 18px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center top;
+  background: var(--celeste-suave);
 }
 
 .miembro h3 {
@@ -1255,12 +1332,21 @@ html[data-turno-portada='visible'] .boton-turno {
   color: #d7def0;
 }
 
+.preguntas-banda {
+  position: relative;
+  overflow: hidden;
+  background: var(--superficie);
+}
+
 .preguntas-foto {
-  width: 100%;
-  height: 100%;
-  min-height: 320px;
-  object-fit: cover;
-  border-radius: var(--radio);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: 92%;
+  max-width: 36%;
+  object-fit: contain;
+  object-position: right bottom;
 }
 
 /* ---------- ¿Te quedaron dudas? ---------- */
@@ -1290,9 +1376,13 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .dudas-foto {
+  align-self: end;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 520px;
+  padding: 32px 24px 0;
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 /* ---------- Contacto y mapa ---------- */
@@ -1488,6 +1578,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .acceso-foto {
   position: relative;
   min-height: 560px;
+  background: var(--celeste-suave);
 }
 
 .acceso-foto img {
@@ -1692,12 +1783,14 @@ html[data-turno-portada='visible'] .boton-turno {
     grid-template-columns: 1fr 1fr;
   }
 
-  .portada-ventajas {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 28px;
+  /* El perrito ocupa la columna derecha entera y sigue parado sobre la cinta */
+  .portada-foto {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .portada-texto {
+    padding-bottom: 8px;
   }
 
   .accesos {
@@ -1721,8 +1814,21 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .portada-foto {
-    max-width: 300px;
+    grid-column: auto;
+    grid-row: auto;
+    order: 3;
+    max-width: 260px;
   }
+
+  .portada-ventajas {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 28px;
+    padding-bottom: 8px;
+  }
+
+
 
   .sobre-tarjetas,
   .mosaico,
@@ -1745,7 +1851,8 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .dudas-foto {
-    height: 240px;
+    height: 260px;
+    padding-top: 20px;
     order: -1;
   }
 
@@ -1935,23 +2042,26 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .adopcion-invitacion {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  align-items: center;
-  gap: 40px;
-  overflow: hidden;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  position: relative;
+  margin-top: 110px;
+  text-align: center;
   border-radius: var(--radio-grande);
   background: var(--superficie);
 }
 
-.adopcion-invitacion img {
-  width: 100%;
-  height: 100%;
-  min-height: 320px;
-  object-fit: cover;
-}
 
 .adopcion-invitacion > div {
-  padding: 32px 40px 32px 0;
+  padding: 48px 40px;
+}
+
+.adopcion-invitacion .pastilla-izquierda {
+  margin-inline: auto;
+}
+
+.adopcion-invitacion p:not(.pastilla) {
+  margin-inline: auto;
 }
 
 .adopcion-invitacion h2 {
@@ -2771,13 +2881,12 @@ html[data-turno-portada='visible'] .boton-turno {
     grid-template-columns: 1fr;
   }
 
-  .adopcion-invitacion img {
-    min-height: 220px;
-    max-height: 280px;
+  .adopcion-invitacion {
+    margin-top: 72px;
   }
 
   .adopcion-invitacion > div {
-    padding: 0 24px 28px;
+    padding: 32px 20px;
   }
 
   .panel-animal {

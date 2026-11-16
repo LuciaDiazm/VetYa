@@ -89,5 +89,5 @@ export function enGenero(texto: string, animal: Pick<AnimalAdopcion, 'sexo'>) {
 }
 
 export function fotoPrincipal(animal: Pick<AnimalAdopcion, 'fotos' | 'especie'>) {
-  return animal.fotos[0]?.url ?? (animal.especie === 'GATO' ? '/fotos/gatito.jpg' : '/fotos/cachorro.jpg')
+  return animal.fotos[0]?.url ?? (animal.especie === 'GATO' ? '/fotos/adopcion-luna.webp' : '/fotos/rottweiler-cachorro.webp')
 }

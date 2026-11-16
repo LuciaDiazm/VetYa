@@ -20,25 +20,26 @@ import {
 import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Mapa } from '../components/Mapa'
-import { VideoMascotas } from '../components/VideoMascotas'
 import { agruparHorarios } from '../lib/horarios'
 import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { CategoriaServicio, DosisPlan } from '../types'
 
 // Cada tarjeta de servicios con su foto, su estilo y a dónde lleva.
+// "recorte": la foto es un animal sin fondo, que se apoya en el borde de abajo de la tarjeta.
 const TARJETAS: {
   clave: CategoriaServicio | 'LIMPIEZA'
   nombre: string
   foto: string
+  recorte?: boolean
   oscura: boolean
   enlace: string
   accion: string
 }[] = [
-  { clave: 'CLINICA', nombre: 'Consultas y vacunas', foto: '/fotos/caniche-cachorro.jpg', oscura: false, enlace: '/turno?categoria=CLINICA', accion: 'Pedir turno' },
-  { clave: 'DIAGNOSTICO', nombre: 'Análisis y ecografías', foto: '/fotos/gatito-blanco.jpg', oscura: true, enlace: '/turno?categoria=DIAGNOSTICO', accion: 'Pedir turno' },
-  { clave: 'CIRUGIA', nombre: 'Cirugías', foto: '/fotos/jack-russell.jpg', oscura: true, enlace: '/cirugias', accion: 'Cómo se coordinan' },
-  { clave: 'LIMPIEZA', nombre: 'Limpieza dental', foto: '/fotos/dental.jpg', oscura: false, enlace: '/limpieza-dental', accion: 'Cómo se coordina' },
-  { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/pug-buzo.jpg', oscura: false, enlace: '/turno?categoria=ESTETICA', accion: 'Pedir turno' },
+  { clave: 'CLINICA', nombre: 'Consultas y vacunas', foto: '/fotos/vacuna-gatito.webp', oscura: false, enlace: '/turno?categoria=CLINICA', accion: 'Pedir turno' },
+  { clave: 'DIAGNOSTICO', nombre: 'Análisis y ecografías', foto: '/fotos/analisis.webp', oscura: true, enlace: '/turno?categoria=DIAGNOSTICO', accion: 'Pedir turno' },
+  { clave: 'CIRUGIA', nombre: 'Cirugías', foto: '/fotos/cirugia.webp', oscura: true, enlace: '/cirugias', accion: 'Cómo se coordinan' },
+  { clave: 'LIMPIEZA', nombre: 'Limpieza dental', foto: '/fotos/limpieza-dental.webp', recorte: true, oscura: false, enlace: '/limpieza-dental', accion: 'Cómo se coordina' },
+  { clave: 'ESTETICA', nombre: 'Baño y peluquería', foto: '/fotos/perro-toalla.webp', oscura: false, enlace: '/turno?categoria=ESTETICA', accion: 'Pedir turno' },
 ]
 
 // Mientras se ve el botón grande de la portada, el de "Pedir turno" del encabezado se oculta (ver index.css).
@@ -125,7 +126,7 @@ export function Inicio() {
         </div>
 
         <div className="portada-foto">
-          <img src="/fotos/perro-doctor.jpg" alt="Un perrito con guardapolvo y estetoscopio" />
+          <img src="/fotos/perro-doctor.webp" alt="Un perrito con guardapolvo y estetoscopio" />
         </div>
 
         <ul className="portada-ventajas">
@@ -209,6 +210,7 @@ export function Inicio() {
 
       {/* ---------- Sobre nosotros ---------- */}
       <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
+        <img src="/fotos/gato-costado.webp" alt="" className="asomado asomado-costado" loading="lazy" />
         <p className="pastilla">Sobre nosotros</p>
         <h2 id="titulo-sobre" className="sobre-frase">
           Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}
@@ -230,15 +232,9 @@ export function Inicio() {
         </div>
       </section>
 
-      {/* ---------- Video ---------- */}
-      <section className="contenedor" aria-label="Video de mascotas descansando">
-        <div className="video-marco">
-          <VideoMascotas />
-        </div>
-      </section>
-
       {/* ---------- Servicios ---------- */}
-      <section id="servicios" className="contenedor seccion" aria-labelledby="titulo-servicios">
+      <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
+        <img src="/fotos/dalmata-espia.webp" alt="" className="asomado asomado-dalmata" loading="lazy" />
         <p className="pastilla">Servicios</p>
         <h2 id="titulo-servicios" className="titulo-centrado">
           Todo lo que tu mascota necesita
@@ -250,7 +246,10 @@ export function Inicio() {
             )
             if (lista.length === 0) return null
             return (
-              <article key={c.clave} className={`mosaico-tarjeta${c.oscura ? ' tarjeta-oscura' : ''}`}>
+              <article
+                key={c.clave}
+                className={`mosaico-tarjeta${c.oscura ? ' tarjeta-oscura' : ''}${c.recorte ? ' mosaico-recorte' : ''}`}
+              >
                 <div className="mosaico-texto">
                   <h3>{c.nombre}</h3>
                   <ul>
@@ -305,7 +304,7 @@ export function Inicio() {
       {/* ---------- Adopción ---------- */}
       <section className="contenedor seccion" aria-labelledby="titulo-adopcion">
         <div className="adopcion-invitacion">
-          <img src="/fotos/labrador-asomado.jpg" alt="" loading="lazy" />
+          <img src="/fotos/perros-asomados.webp" alt="" className="asomado asomado-perros" loading="lazy" />
           <div>
             <p className="pastilla pastilla-izquierda">Adopción</p>
             <h2 id="titulo-adopcion">Perros y gatos de Goya buscan familia</h2>
@@ -330,7 +329,7 @@ export function Inicio() {
             {equipo.map((m) => (
               <li key={m.id} className="miembro">
                 {m.fotoUrl ? (
-                  <img src={m.fotoUrl} alt="" className="miembro-avatar" />
+                  <img src={m.fotoUrl} alt="" className="miembro-foto" loading="lazy" />
                 ) : (
                   <span className="miembro-avatar" aria-hidden="true">
                     {iniciales(m.nombre, m.apellido)}
@@ -383,19 +382,22 @@ export function Inicio() {
 
       {/* ---------- Preguntas frecuentes ---------- */}
       {preguntas.length > 0 && (
-        <section id="preguntas" className="contenedor seccion preguntas-seccion" aria-labelledby="titulo-preguntas">
-          <div>
-            <h2 id="titulo-preguntas">Preguntas frecuentes</h2>
-            <div className="preguntas">
-              {preguntas.map((p) => (
-                <details key={p.id}>
-                  <summary>{p.pregunta}</summary>
-                  <p>{p.respuesta}</p>
-                </details>
-              ))}
+        // Franja blanca de lado a lado; el perro espía desde el borde derecho.
+        <section id="preguntas" className="preguntas-banda" aria-labelledby="titulo-preguntas">
+          <div className="contenedor seccion preguntas-seccion">
+            <div>
+              <h2 id="titulo-preguntas">Preguntas frecuentes</h2>
+              <div className="preguntas">
+                {preguntas.map((p) => (
+                  <details key={p.id}>
+                    <summary>{p.pregunta}</summary>
+                    <p>{p.respuesta}</p>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
-          <img src="/fotos/gato-lengua.jpg" alt="" className="preguntas-foto" loading="lazy" />
+          <img src="/fotos/perro-lengua.webp" alt="" className="preguntas-foto" loading="lazy" />
         </section>
       )}
 
@@ -504,7 +506,7 @@ function Dudas({ whatsapp }: { whatsapp: string }) {
           </button>
         </form>
       </div>
-      <img src="/fotos/siames.jpg" alt="" className="dudas-foto" loading="lazy" />
+      <img src="/fotos/gato-choca.webp" alt="" className="dudas-foto" loading="lazy" />
     </div>
   )
 }

@@ -10,7 +10,7 @@
 //   martin.sosa@vetya.test  / vetya-vet-2026     (VETERINARIO)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
-// Las fotos son de Unsplash (ver frontend/public/fotos/CREDITOS.md).
+// Las fotos están en frontend/public/fotos (ver CREDITOS.md).
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -56,15 +56,15 @@ async function main() {
   // ---------- Servicios (se crean si faltan y se les agrega la foto) ----------
   const DESCRIPCION_PELUQUERIA = "Solo perros chicos y medianos, con turno previo. Baño, secado, limpieza de oídos, corte de uñas y peinado.";
   const servicios = [
-    { nombre: "Consulta y control", categoria: "CLINICA", duracionMin: 20, fotoUrl: "/fotos/gatito-control.jpg", descripcion: "Examen físico general, orientación diagnóstica y controles de rutina." },
-    { nombre: "Vacunación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/vacunacion.jpg", descripcion: "Plan de vacunación para perros y gatos, con registro en el carnet digital." },
-    { nombre: "Desparasitación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/cachorro.jpg", descripcion: "Desparasitación interna y externa." },
-    { nombre: "Análisis de sangre y orina", categoria: "DIAGNOSTICO", duracionMin: 20, fotoUrl: "/fotos/gato-consulta.jpg", descripcion: "Extracción de muestras para análisis clínicos." },
-    { nombre: "Electrocardiograma", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/perro-doctor.jpg", descripcion: "Estudio del corazón, por ejemplo antes de una cirugía o en mascotas mayores." },
-    { nombre: "Ecografía", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/ecografia.jpg", descripcion: "Estudio por imágenes para detectar problemas a tiempo." },
-    { nombre: "Castración / esterilización", categoria: "CIRUGIA", duracionMin: 120, reservableOnline: false, fotoUrl: "/fotos/cirugia.jpg", descripcion: "Cirugía programada. Se coordina con la clínica." },
-    { nombre: "Limpieza dental", categoria: "CIRUGIA", duracionMin: 60, reservableOnline: false, fotoUrl: "/fotos/dental.jpg", descripcion: "Eliminación de sarro y placa bacteriana." },
-    { nombre: "Baño y peluquería", categoria: "ESTETICA", duracionMin: 90, fotoUrl: "/fotos/peluqueria.jpg", descripcion: DESCRIPCION_PELUQUERIA },
+    { nombre: "Consulta y control", categoria: "CLINICA", duracionMin: 20, fotoUrl: "/fotos/analisis.webp", descripcion: "Examen físico general, orientación diagnóstica y controles de rutina." },
+    { nombre: "Vacunación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/vacuna-gatito.webp", descripcion: "Plan de vacunación para perros y gatos, con registro en el carnet digital." },
+    { nombre: "Desparasitación", categoria: "CLINICA", duracionMin: 15, fotoUrl: "/fotos/rottweiler-cachorro.webp", descripcion: "Desparasitación interna y externa." },
+    { nombre: "Análisis de sangre y orina", categoria: "DIAGNOSTICO", duracionMin: 20, fotoUrl: "/fotos/analisis.webp", descripcion: "Extracción de muestras para análisis clínicos." },
+    { nombre: "Electrocardiograma", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/analisis.webp", descripcion: "Estudio del corazón, por ejemplo antes de una cirugía o en mascotas mayores." },
+    { nombre: "Ecografía", categoria: "DIAGNOSTICO", duracionMin: 30, fotoUrl: "/fotos/analisis.webp", descripcion: "Estudio por imágenes para detectar problemas a tiempo." },
+    { nombre: "Castración / esterilización", categoria: "CIRUGIA", duracionMin: 120, reservableOnline: false, fotoUrl: "/fotos/cirugia.webp", descripcion: "Cirugía programada. Se coordina con la clínica." },
+    { nombre: "Limpieza dental", categoria: "CIRUGIA", duracionMin: 60, reservableOnline: false, fotoUrl: "/fotos/limpieza-dental.webp", descripcion: "Eliminación de sarro y placa bacteriana." },
+    { nombre: "Baño y peluquería", categoria: "ESTETICA", duracionMin: 90, fotoUrl: "/fotos/perro-toalla.webp", descripcion: DESCRIPCION_PELUQUERIA },
   ] as const;
 
   // La peluquería es solo para perros chicos y medianos: se corrige el texto si quedó el de antes.
@@ -152,6 +152,53 @@ async function main() {
     },
   });
 
+  // Foto de cada profesional, solo si todavía no tiene una (si la clínica subió otra, se respeta).
+  for (const [email, fotoUrl] of [
+    ["veterinario@vetya.test", "/fotos/equipo-laura.webp"],
+    ["martin.sosa@vetya.test", "/fotos/equipo-martin.webp"],
+  ]) {
+    await prisma.usuario.updateMany({ where: { email, fotoUrl: null }, data: { fotoUrl } });
+  }
+
+  // Las fotos de ejemplo se cambiaron en noviembre: se actualizan las rutas viejas que hayan quedado guardadas.
+  const fotosViejas: Record<string, string> = {
+    "/fotos/gatito-control.jpg": "/fotos/analisis.webp",
+    "/fotos/vacunacion.jpg": "/fotos/vacuna-gatito.webp",
+    "/fotos/gato-consulta.jpg": "/fotos/analisis.webp",
+    "/fotos/perro-doctor.jpg": "/fotos/analisis.webp",
+    "/fotos/ecografia.jpg": "/fotos/analisis.webp",
+    "/fotos/cirugia.jpg": "/fotos/cirugia.webp",
+    "/fotos/dental.jpg": "/fotos/limpieza-dental.webp",
+    "/fotos/peluqueria.jpg": "/fotos/perro-toalla.webp",
+    "/fotos/cachorro.jpg": "/fotos/rottweiler-cachorro.webp",
+    "/fotos/gatito.jpg": "/fotos/gatito-vacuna.webp",
+    // Nombres de una primera prueba que ya no están.
+    "/fotos/revision-pata.webp": "/fotos/analisis.webp",
+    "/fotos/manos-cachorro.webp": "/fotos/analisis.webp",
+    "/fotos/dalmatas-durmiendo.webp": "/fotos/cirugia.webp",
+    "/fotos/gatito-naranja.webp": "/fotos/gatito-vacuna.webp",
+    "/fotos/labrador-asomado.jpg": "/fotos/adopcion-canela.webp",
+    "/fotos/jack-russell.jpg": "/fotos/adopcion-tito.webp",
+    "/fotos/caniche-cachorro.jpg": "/fotos/caniche-blanco.webp",
+    "/fotos/gato-lengua.jpg": "/fotos/adopcion-michi.webp",
+    "/fotos/gatito-blanco.jpg": "/fotos/adopcion-nieve.webp",
+    "/fotos/siames.jpg": "/fotos/adopcion-luna.webp",
+  };
+  for (const [vieja, nueva] of Object.entries(fotosViejas)) {
+    await prisma.servicio.updateMany({ where: { fotoUrl: vieja }, data: { fotoUrl: nueva } });
+    await prisma.planSanitario.updateMany({ where: { fotoUrl: vieja }, data: { fotoUrl: nueva } });
+    await prisma.fotoAdopcion.updateMany({ where: { url: vieja }, data: { url: nueva } });
+  }
+  // El caniche blanco sigue en adopción, pero el plan cachorro y la desparasitación pasaron al rottweiler.
+  await prisma.planSanitario.updateMany({
+    where: { fotoUrl: "/fotos/caniche-blanco.webp" },
+    data: { fotoUrl: "/fotos/rottweiler-cachorro.webp" },
+  });
+  await prisma.servicio.updateMany({
+    where: { fotoUrl: "/fotos/caniche-blanco.webp" },
+    data: { fotoUrl: "/fotos/rottweiler-cachorro.webp" },
+  });
+
   // ---------- Opiniones de ejemplo (ficticias) ----------
   if ((await prisma.opinion.count({ where: { clinicaId } })) === 0) {
     await prisma.opinion.createMany({
@@ -182,7 +229,7 @@ async function main() {
         clinicaId,
         nombre: "Plan cachorro",
         especie: "PERRO",
-        fotoUrl: "/fotos/cachorro.jpg",
+        fotoUrl: "/fotos/rottweiler-cachorro.webp",
         descripcion: "Las vacunas y desparasitaciones del primer año, en el orden recomendado. Te avisamos por WhatsApp antes de cada una.",
         dosis: {
           create: [
@@ -202,7 +249,7 @@ async function main() {
         clinicaId,
         nombre: "Plan gatito",
         especie: "GATO",
-        fotoUrl: "/fotos/gatito.jpg",
+        fotoUrl: "/fotos/gatito-vacuna.webp",
         descripcion: "Los controles del primer año de tu gato, para que crezca sano y protegido.",
         dosis: {
           create: [
@@ -239,31 +286,31 @@ async function main() {
         nombre: "Canela", especie: "PERRO", sexo: "HEMBRA", edad: "JOVEN", tamano: "MEDIANO", color: "Dorado / caramelo",
         historia: "La encontraron sola cerca del puerto. Es muy cariñosa y le encanta que le rasquen las orejas.",
         tranquilo: true, buenoConChicos: true, conviveConPerros: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/labrador-asomado.jpg"],
+        fotos: ["/fotos/adopcion-canela.webp"],
       },
       {
         nombre: "Tito", especie: "PERRO", sexo: "MACHO", edad: "ADULTO", tamano: "CHICO", color: "Blanco y marrón",
         historia: "Lo trajeron de la calle con una patita lastimada. Ya está sano y tiene muchísima energía.",
         jugueton: true, buenoConChicos: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/jack-russell.jpg"],
+        fotos: ["/fotos/adopcion-tito.webp"],
       },
       {
         nombre: "Copito", especie: "PERRO", sexo: "MACHO", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
         historia: "Tiene unos 3 meses. Es curioso, juguetón y aprende rápido.",
         jugueton: true, buenoConChicos: true, conviveConPerros: true, conviveConGatos: true, vacunado: true, desparasitado: true,
-        fotos: ["/fotos/caniche-cachorro.jpg"],
+        fotos: ["/fotos/caniche-blanco.webp"],
       },
       {
         nombre: "Michi", especie: "GATO", sexo: "MACHO", edad: "JOVEN", tamano: "CHICO", color: "Atigrado",
         historia: "Un gato tranquilo y dormilón. Ideal para departamento.",
         tranquilo: true, conviveConGatos: true, vacunado: true, desparasitado: true, castrado: true,
-        fotos: ["/fotos/gato-lengua.jpg"],
+        fotos: ["/fotos/adopcion-michi.webp"],
       },
       {
         nombre: "Nieve", especie: "GATO", sexo: "HEMBRA", edad: "CACHORRO", tamano: "CHICO", color: "Blanco",
         historia: "Una gatita de 2 meses, muy mimosa. Busca una familia paciente.",
         tranquilo: true, buenoConChicos: true, conviveConGatos: true, desparasitado: true,
-        fotos: ["/fotos/gatito-blanco.jpg"],
+        fotos: ["/fotos/adopcion-nieve.webp"],
       },
     ] as const;
 
@@ -278,7 +325,7 @@ async function main() {
         clinicaId, nombre: "Luna", especie: "GATO", sexo: "HEMBRA", edad: "ADULTO", tamano: "CHICO", color: "Crema",
         historia: "Ya encontró una familia.", tranquilo: true, vacunado: true, desparasitado: true, castrado: true,
         estado: "ADOPTADO", adoptadoEn: new Date("2026-09-28"),
-        fotos: { create: [{ url: "/fotos/siames.jpg", orden: 0 }] },
+        fotos: { create: [{ url: "/fotos/adopcion-luna.webp", orden: 0 }] },
       },
     });
   }
