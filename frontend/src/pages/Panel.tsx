@@ -37,7 +37,8 @@ export function Panel() {
         </Link>
       </div>
 
-      <AvisosSuspension />
+      {/* Decidir sobre una suspensión le toca al administrador */}
+      {usuario?.rol === 'ADMIN' && <AvisosSuspension />}
 
       <section className="tarjeta bloque-ficha">
         <div className="bloque-ficha-titulo">

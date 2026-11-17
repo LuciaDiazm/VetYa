@@ -125,8 +125,8 @@ clientesRouter.post("/", async (req, res) => {
   res.status(201).json(cliente);
 });
 
-// Clientes que el sistema suspendió solo (canceló muchos turnos web seguidos) y la clínica todavía no revisó.
-clientesRouter.get("/suspensiones", async (req, res) => {
+// Clientes que el sistema suspendió solo (canceló muchos turnos web seguidos) y el administrador todavía no revisó.
+clientesRouter.get("/suspensiones", requiereRol("ADMIN"), async (req, res) => {
   const clientes = await prisma.cliente.findMany({
     where: { clinicaId: req.usuario!.clinicaId, suspensionRevisada: false, suspendidoHasta: { gt: new Date() } },
     select: { id: true, nombre: true, apellido: true, telefono: true, suspendidoHasta: true, suspensionMotivo: true },
@@ -164,11 +164,45 @@ clientesRouter.get("/:id", async (req, res) => {
     res.status(404).json({ error: "Cliente no encontrado" });
     return;
   }
-  res.json({ ...cliente, suspendidoHasta: suspensionVigente(cliente), resumenTurnos: await resumenTurnos(cliente.id) });
+  const { maxTurnosOnline: maxTurnosOnlineClinica } = await prisma.clinica.findUniqueOrThrow({
+    where: { id: cliente.clinicaId },
+    select: { maxTurnosOnline: true },
+  });
+  res.json({
+    ...cliente,
+    suspendidoHasta: suspensionVigente(cliente),
+    resumenTurnos: await resumenTurnos(cliente.id),
+    maxTurnosOnlineClinica,
+  });
 });
 
-// La clínica decide: mantener la suspensión automática, levantarla o suspender a mano.
-clientesRouter.patch("/:id/suspension", async (req, res) => {
+// Solo el administrador: cuántos turnos web puede tener a la vez este cliente (null = el de la clínica).
+clientesRouter.patch("/:id/limite-turnos", requiereRol("ADMIN"), async (req, res) => {
+  const resultado = z
+    .object({
+      maxTurnosOnline: z
+        .number()
+        .int()
+        .min(0, "El número no puede ser negativo")
+        .max(30, "Como máximo, 30 turnos")
+        .nullable(),
+    })
+    .safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: primerError(resultado.error) });
+    return;
+  }
+  const id = Number(req.params.id);
+  if (!(await prisma.cliente.findFirst({ where: { id, clinicaId: req.usuario!.clinicaId } }))) {
+    res.status(404).json({ error: "Cliente no encontrado" });
+    return;
+  }
+  const cliente = await prisma.cliente.update({ where: { id }, data: resultado.data });
+  res.json({ maxTurnosOnline: cliente.maxTurnosOnline });
+});
+
+// Solo el administrador decide: mantener la suspensión automática, levantarla o suspender a mano.
+clientesRouter.patch("/:id/suspension", requiereRol("ADMIN"), async (req, res) => {
   const resultado = z.object({ accion: z.enum(["mantener", "levantar", "suspender"]) }).safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: "Acción inválida" });

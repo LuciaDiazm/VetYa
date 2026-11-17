@@ -7,7 +7,7 @@
 // Usuarios de prueba (solo para desarrollo, no usar en producción):
 //   admin@vetya.test        / vetya-admin-2026   (ADMIN)
 //   veterinario@vetya.test  / vetya-vet-2026     (VETERINARIO)
-//   martin.sosa@vetya.test  / vetya-vet-2026     (VETERINARIO)
+//   martin.rodriguez@vetya.test / vetya-vet-2026 (VETERINARIO)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
 // Las fotos están en frontend/public/fotos (ver CREDITOS.md).
@@ -135,14 +135,19 @@ async function main() {
     },
   });
 
-  await prisma.usuario.upsert({
+  // En noviembre el veterinario de ejemplo pasó de "Martín Sosa" a "Martín Rodríguez": se corrige si quedó el viejo.
+  await prisma.usuario.updateMany({
     where: { email: "martin.sosa@vetya.test" },
+    data: { apellido: "Rodríguez", email: "martin.rodriguez@vetya.test" },
+  });
+  await prisma.usuario.upsert({
+    where: { email: "martin.rodriguez@vetya.test" },
     update: {},
     create: {
       clinicaId,
       nombre: "Martín",
-      apellido: "Sosa",
-      email: "martin.sosa@vetya.test",
+      apellido: "Rodríguez",
+      email: "martin.rodriguez@vetya.test",
       passwordHash: await bcrypt.hash("vetya-vet-2026", 10),
       rol: "VETERINARIO",
       visibleEnWeb: true,
@@ -155,7 +160,7 @@ async function main() {
   // Foto de cada profesional, solo si todavía no tiene una (si la clínica subió otra, se respeta).
   for (const [email, fotoUrl] of [
     ["veterinario@vetya.test", "/fotos/equipo-laura.webp"],
-    ["martin.sosa@vetya.test", "/fotos/equipo-martin.webp"],
+    ["martin.rodriguez@vetya.test", "/fotos/equipo-martin.webp"],
   ]) {
     await prisma.usuario.updateMany({ where: { email, fotoUrl: null }, data: { fotoUrl } });
   }

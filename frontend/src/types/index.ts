@@ -160,6 +160,8 @@ export interface ClienteDetalle extends Cliente {
   suspendidoHasta: string | null
   suspensionMotivo: string | null
   resumenTurnos: { atendidos: number; ausentes: number; canceladosPorElDueno: number }
+  maxTurnosOnline: number | null
+  maxTurnosOnlineClinica: number
 }
 
 export interface ClienteSuspendido {

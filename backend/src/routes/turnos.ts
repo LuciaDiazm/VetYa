@@ -127,10 +127,12 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
     return;
   }
 
-  const { maxTurnosOnline } = await prisma.clinica.findUniqueOrThrow({
+  // El administrador puede darle a un cliente un límite propio (por ejemplo, alguien con muchos animales).
+  const clinica = await prisma.clinica.findUniqueOrThrow({
     where: { id: CLINICA_ID },
     select: { maxTurnosOnline: true },
   });
+  const maxTurnosOnline = cliente.maxTurnosOnline ?? clinica.maxTurnosOnline;
 
   let turno;
   try {

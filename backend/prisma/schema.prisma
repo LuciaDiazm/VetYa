@@ -150,6 +150,8 @@ model Cliente {
   suspendidoHasta    DateTime? @map("suspendido_hasta")
   suspensionMotivo   String?   @map("suspension_motivo")
   suspensionRevisada Boolean   @default(true) @map("suspension_revisada")
+  // Turnos web a la vez para este cliente (lo da el administrador). Vacío = el de la clínica.
+  maxTurnosOnline    Int?      @map("max_turnos_online")
 
   clinica       Clinica        @relation(fields: [clinicaId], references: [id])
   usuario       Usuario?       @relation(fields: [usuarioId], references: [id])
