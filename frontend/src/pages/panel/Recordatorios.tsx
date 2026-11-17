@@ -1,6 +1,6 @@
-import { CalendarClock, Check, HeartPulse, MessageCircle, Phone, Syringe } from 'lucide-react'
+import { CalendarClock, Check, HeartPulse, MessageCircle, Phone, Syringe, type LucideIcon } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { apiGet, apiPost } from '../../lib/api'
 import { diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
 import { formatearTelefono } from '../../lib/mascotas'
@@ -8,6 +8,33 @@ import { avisarCambioRecordatorios, mensajeDosis, mensajeRecupero, mensajeTurnoM
 import { enlaceWhatsapp, useSitio } from '../../lib/sitio'
 import type { Pendientes } from '../../types'
 import { IconoEspecie } from './Clientes'
+
+// Las tres listas de avisos. Cada una tiene su tarjeta arriba y se ve por separado.
+type Lista = 'manana' | 'vacunas' | 'recuperar'
+const LISTAS: { id: Lista; icono: LucideIcon; titulo: string; explicacion: string; vacio: string }[] = [
+  {
+    id: 'manana',
+    icono: CalendarClock,
+    titulo: 'Turnos de mañana',
+    explicacion: 'Personas con turno para mañana a las que todavía no se les recordó.',
+    vacio: 'No hay turnos para mañana que recordar.',
+  },
+  {
+    id: 'vacunas',
+    icono: Syringe,
+    titulo: 'Vacunas y desparasitaciones',
+    explicacion: 'Dosis que tocan en los próximos 7 días o que vencieron hace menos de un mes.',
+    vacio: 'No hay vacunas ni desparasitaciones por vencer.',
+  },
+  {
+    id: 'recuperar',
+    icono: HeartPulse,
+    titulo: 'Clientes para recuperar',
+    explicacion:
+      'Mascotas que no vienen hace más de 6 meses o con una dosis vencida hace más de un mes (ya pasaron de "por vencer").',
+    vacio: 'No hay clientes para recuperar.',
+  },
+]
 
 interface Aviso {
   tipo: 'TURNO' | 'VACUNA' | 'DESPARASITACION' | 'RECUPERO'
@@ -79,6 +106,7 @@ function ItemAviso({
 
 export function Recordatorios() {
   const { datos: sitio } = useSitio()
+  const { hash } = useLocation()
   const [pendientes, setPendientes] = useState<Pendientes | null>(null)
   const [hechos, setHechos] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
@@ -111,30 +139,51 @@ export function Recordatorios() {
   if (!pendientes) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
 
   const { turnosManana, dosis, recuperar } = pendientes
-  const nada = turnosManana.length + dosis.length + recuperar.length === 0
+  const cantidades: Record<Lista, number> = { manana: turnosManana.length, vacunas: dosis.length, recuperar: recuperar.length }
+  // La lista que se ve sale del enlace (#manana, #vacunas, #recuperar); si no dice, la primera que tenga avisos.
+  const pedida = LISTAS.find((l) => `#${l.id}` === hash)?.id
+  const elegida: Lista = pedida ?? LISTAS.find((l) => cantidades[l.id] > 0)?.id ?? 'manana'
+  const lista = LISTAS.find((l) => l.id === elegida)!
 
   return (
     <>
       <div className="panel-encabezado">
-        <h1>Recordatorios</h1>
-        <p>A quién hay que avisarle hoy. Cada botón abre WhatsApp con el mensaje listo: solo tenés que enviarlo.</p>
+        <h1>Notificaciones</h1>
+        <p>A quién hay que avisarle. Elegí una tarjeta: cada botón abre WhatsApp con el mensaje listo.</p>
       </div>
       {error && <p className="mensaje-error">{error}</p>}
 
-      {nada && (
-        <div className="tarjeta">
-          <p className="vacio">¡Todo al día! No hay avisos pendientes por hoy.</p>
+      {/* Las tres tarjetas: la elegida queda marcada y abajo se ve solo su lista */}
+      <nav className="grilla-resumen" aria-label="Tipos de aviso">
+        {LISTAS.map(({ id, icono: Icono, titulo }) => (
+          <Link
+            key={id}
+            to={`#${id}`}
+            replace
+            className={`tarjeta resumen-numero${id === elegida ? ' elegida' : ''}`}
+            aria-current={id === elegida ? 'true' : undefined}
+          >
+            <span className="icono-circulo">
+              <Icono size={22} aria-hidden="true" />
+            </span>
+            <span>
+              <strong>{cantidades[id]}</strong> {titulo}
+            </span>
+          </Link>
+        ))}
+      </nav>
+
+      <section className="tarjeta bloque-ficha">
+        <div className="bloque-ficha-titulo">
+          <h2>
+            <lista.icono size={22} aria-hidden="true" /> {lista.titulo} ({cantidades[elegida]})
+          </h2>
         </div>
-      )}
+        <p className="ayuda">{lista.explicacion}</p>
+        {cantidades[elegida] === 0 && <p className="vacio">{lista.vacio}</p>}
 
       {/* ---------- Turnos de mañana ---------- */}
-      {turnosManana.length > 0 && (
-        <section className="tarjeta bloque-ficha">
-          <div className="bloque-ficha-titulo">
-            <h2>
-              <CalendarClock size={22} aria-hidden="true" /> Turnos de mañana ({turnosManana.length})
-            </h2>
-          </div>
+      {elegida === 'manana' && turnosManana.length > 0 && (
           <ul className="lista-avisos">
             {turnosManana.map((t) => {
               const clave = `turno-${t.id}`
@@ -156,17 +205,10 @@ export function Recordatorios() {
               )
             })}
           </ul>
-        </section>
       )}
 
       {/* ---------- Vacunas y desparasitaciones ---------- */}
-      {dosis.length > 0 && (
-        <section className="tarjeta bloque-ficha">
-          <div className="bloque-ficha-titulo">
-            <h2>
-              <Syringe size={22} aria-hidden="true" /> Vacunas y desparasitaciones ({dosis.length})
-            </h2>
-          </div>
+      {elegida === 'vacunas' && dosis.length > 0 && (
           <ul className="lista-avisos">
             {dosis.map((d) => {
               const clave = `dosis-${d.id}`
@@ -203,18 +245,10 @@ export function Recordatorios() {
               )
             })}
           </ul>
-        </section>
       )}
 
       {/* ---------- Clientes para recuperar ---------- */}
-      {recuperar.length > 0 && (
-        <section className="tarjeta bloque-ficha">
-          <div className="bloque-ficha-titulo">
-            <h2>
-              <HeartPulse size={22} aria-hidden="true" /> Clientes para recuperar ({recuperar.length})
-            </h2>
-          </div>
-          <p className="ayuda">Mascotas que no vienen hace más de 6 meses o que tienen vacunas vencidas hace más de un mes.</p>
+      {elegida === 'recuperar' && recuperar.length > 0 && (
           <ul className="lista-avisos">
             {recuperar.map((r) => {
               const clave = `recupero-${r.mascota.id}`
@@ -237,8 +271,8 @@ export function Recordatorios() {
               )
             })}
           </ul>
-        </section>
       )}
+      </section>
     </>
   )
 }

@@ -80,3 +80,11 @@ export function problemaDePeriodo(desde: string, hasta: string) {
   if ((Date.parse(hasta) - Date.parse(desde)) / 86_400_000 + 1 > 400) return 'Elegí un período de hasta 13 meses.'
   return null
 }
+
+// Saludo según la hora en Argentina: "Buenos días" (5 a 12), "Buenas tardes" (12 a 20) o "Buenas noches".
+export function saludoSegunHora() {
+  const hora = Number(new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hour12: false, timeZone: ZONA }).format(new Date()))
+  if (hora >= 5 && hora < 12) return 'Buenos días'
+  if (hora >= 12 && hora < 20) return 'Buenas tardes'
+  return 'Buenas noches'
+}

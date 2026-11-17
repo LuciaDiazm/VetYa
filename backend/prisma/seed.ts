@@ -369,6 +369,80 @@ async function main() {
     });
   }
 
+  // ---------- Más casos para Notificaciones (17/11) ----------
+  // Tres clientes para recuperar y tres dosis por vencer. Las fechas son relativas al día en que se
+  // corre el seed; cada cliente se crea una sola vez (se reconoce por el teléfono).
+  {
+    const fecha = (dias: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() + dias);
+      return new Date(`${d.toISOString().slice(0, 10)}T00:00:00.000Z`);
+    };
+    type Caso = {
+      nombre: string; apellido: string; telefono: string;
+      mascota: { nombre: string; especie: "PERRO" | "GATO"; sexo: "MACHO" | "HEMBRA"; raza?: string; color: string; castrado: boolean; fechaNacimiento: Date };
+      visitaHace: number; pesoKg: number; motivo: string;
+      dosis: { tipo: "VACUNA" | "DESPARASITACION"; producto: string; proximaEn: number };
+    };
+    const casos: Caso[] = [
+      // Para recuperar: no vienen hace más de 6 meses y la dosis ya venció hace más de un mes.
+      {
+        nombre: "Roberto", apellido: "Giménez", telefono: "5493777301001",
+        mascota: { nombre: "Rocky", especie: "PERRO", sexo: "MACHO", raza: "Mestizo", color: "Negro y fuego", castrado: true, fechaNacimiento: new Date("2018-05-02") },
+        visitaHace: 230, pesoKg: 24.1, motivo: "Control y vacunación",
+        dosis: { tipo: "VACUNA", producto: "Antirrábica", proximaEn: -50 },
+      },
+      {
+        nombre: "Carmen", apellido: "López", telefono: "5493777301002",
+        mascota: { nombre: "Mishi", especie: "GATO", sexo: "HEMBRA", color: "Gris", castrado: true, fechaNacimiento: new Date("2020-09-14") },
+        visitaHace: 280, pesoKg: 3.8, motivo: "Vacunación anual",
+        dosis: { tipo: "VACUNA", producto: "Triple felina", proximaEn: -90 },
+      },
+      {
+        nombre: "Hugo", apellido: "Benítez", telefono: "5493777301003",
+        mascota: { nombre: "Bruno", especie: "PERRO", sexo: "MACHO", raza: "Labrador", color: "Dorado", castrado: false, fechaNacimiento: new Date("2022-02-20") },
+        visitaHace: 200, pesoKg: 30.5, motivo: "Desparasitación y control",
+        dosis: { tipo: "DESPARASITACION", producto: "Desparasitación interna", proximaEn: -110 },
+      },
+      // Por vencer: la dosis toca en los próximos días (o venció hace poco).
+      {
+        nombre: "Ana", apellido: "Romero", telefono: "5493777302001",
+        mascota: { nombre: "Luna", especie: "PERRO", sexo: "HEMBRA", raza: "Caniche", color: "Blanco", castrado: true, fechaNacimiento: new Date("2021-06-08") },
+        visitaHace: 363, pesoKg: 6.2, motivo: "Vacunación anual",
+        dosis: { tipo: "VACUNA", producto: "Antirrábica", proximaEn: 2 },
+      },
+      {
+        nombre: "Pablo", apellido: "Torres", telefono: "5493777302002",
+        mascota: { nombre: "Pelusa", especie: "GATO", sexo: "HEMBRA", color: "Tricolor", castrado: true, fechaNacimiento: new Date("2022-11-30") },
+        visitaHace: 85, pesoKg: 4.0, motivo: "Desparasitación",
+        dosis: { tipo: "DESPARASITACION", producto: "Desparasitación interna", proximaEn: 5 },
+      },
+      {
+        nombre: "Graciela", apellido: "Ruiz", telefono: "5493777302003",
+        mascota: { nombre: "Toby", especie: "PERRO", sexo: "MACHO", raza: "Beagle", color: "Tricolor", castrado: true, fechaNacimiento: new Date("2019-04-17") },
+        visitaHace: 370, pesoKg: 13.4, motivo: "Control y vacunación",
+        dosis: { tipo: "VACUNA", producto: "Séxtuple", proximaEn: -4 },
+      },
+    ];
+    for (const c of casos) {
+      if (await prisma.cliente.findFirst({ where: { clinicaId, telefono: c.telefono } })) continue;
+      const cliente = await prisma.cliente.create({
+        data: { clinicaId, nombre: c.nombre, apellido: c.apellido, telefono: c.telefono, mascotas: { create: c.mascota } },
+        include: { mascotas: true },
+      });
+      const mascotaId = cliente.mascotas[0].id;
+      await prisma.consulta.create({
+        data: {
+          mascotaId, veterinarioId: vet.id, fecha: fecha(-c.visitaHace), motivo: c.motivo, pesoKg: c.pesoKg,
+          diagnostico: "Buen estado general",
+          aplicaciones: {
+            create: { mascotaId, tipo: c.dosis.tipo, producto: c.dosis.producto, fechaAplicacion: fecha(-c.visitaHace), fechaProximaDosis: fecha(c.dosis.proximaEn) },
+          },
+        },
+      });
+    }
+  }
+
   // ---------- Historial de turnos de ejemplo (para la pantalla de estadísticas) ----------
   // Turnos ya pasados de los últimos 10 meses, con estados y orígenes variados. Solo se crean si
   // todavía no hay ningún turno pasado. No generan consultas, así no cambian los casos de los recordatorios.

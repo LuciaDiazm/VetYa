@@ -2076,67 +2076,173 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .panel {
   display: grid;
-  grid-template-columns: 248px 1fr;
+  grid-template-columns: 104px 1fr;
   min-height: 100vh;
   background: var(--fondo);
 }
 
+/* Barra azul angosta, redondeada y separada del borde; queda fija mientras se baja la página */
 .panel-menu {
+  position: sticky;
+  top: 16px;
+  z-index: 20;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 20px 16px;
-  background: var(--superficie);
-  border-right: 1px solid var(--borde);
+  align-items: center;
+  gap: 28px;
+  height: calc(100vh - 32px);
+  margin: 16px 0 16px 16px;
+  padding: 22px 0 18px;
+  border-radius: 24px;
+  background: var(--azul);
+  color: #ffffff;
+  box-shadow: 0 16px 36px rgba(28, 45, 99, 0.25);
+}
+
+/* Logo en blanco: el dibujo arriba y el nombre abajo, chiquito */
+.panel-menu .enlace-logo {
+  color: #ffffff;
 }
 
 .panel-menu .logo {
-  padding: 4px 8px;
+  flex-direction: column;
+  gap: 2px;
+  color: #ffffff;
+}
+
+.panel-menu .logo-marca {
+  width: 56px;
+  height: 28px;
+}
+
+.panel-menu .logo-texto {
+  font-size: 1rem;
+  color: #ffffff;
 }
 
 .panel-navegacion {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
+/* Cada sección es un cuadradito con su ícono */
 .panel-enlace {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 12px;
-  border-radius: var(--radio-chico);
-  color: var(--tinta);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 16px;
+  background: none;
+  color: rgba(255, 255, 255, 0.78);
   text-decoration: none;
-  font-weight: 500;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .panel-enlace:hover {
-  background: var(--azul-suave);
-}
-
-.panel-enlace.active {
-  background: var(--azul);
+  background: rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
 
-.panel-usuario {
+.panel-enlace.active {
+  background: #ffffff;
+  color: var(--azul);
+  box-shadow: 0 6px 16px rgba(9, 22, 48, 0.25);
+}
+
+.panel-enlace:focus-visible {
+  outline: 3px solid var(--amarillo);
+  outline-offset: 2px;
+}
+
+.panel-salir {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 72px;
+  height: auto;
+  min-height: 64px;
   margin-top: auto;
-  padding: 12px;
-  border-radius: var(--radio-chico);
-  background: var(--fondo);
+  padding: 8px 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
 }
 
-.panel-usuario strong {
-  display: block;
-}
-
-.panel-usuario span {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--gris);
+/* "Salir" va siempre escrito, para que se encuentre sin pasar el mouse */
+.panel-salir-texto {
   font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* El nombre de la sección: un cartelito a la derecha del ícono, al pasar el mouse o con el teclado */
+.panel-enlace-nombre {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  z-index: 30;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--azul-oscuro);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(9, 22, 48, 0.25);
+  opacity: 0;
+  transform: translate(-6px, -50%);
+  pointer-events: none;
+  transition:
+    opacity 150ms var(--curva-salida),
+    transform 150ms var(--curva-salida);
+}
+
+/* La flechita del cartel, apuntando al ícono */
+.panel-enlace-nombre::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.panel-enlace:hover .panel-enlace-nombre,
+.panel-enlace:focus-visible .panel-enlace-nombre {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* Con "reducir movimiento" el cartel aparece sin deslizarse */
+@media (prefers-reduced-motion: reduce) {
+  .panel-enlace-nombre,
+  .panel-enlace:hover .panel-enlace-nombre,
+  .panel-enlace:focus-visible .panel-enlace-nombre {
+    transform: translateY(-50%);
+  }
+}
+
+/* El globito de avisos va en la esquina del ícono */
+.panel-enlace .globo {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0 6px;
+  border: 2px solid var(--azul);
+  font-size: 0.75rem;
 }
 
 .panel-contenido {
@@ -2156,6 +2262,353 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-encabezado p {
   margin: 0;
   color: var(--gris);
+}
+
+/* Hoy: contenido a la izquierda y una columna angosta con el perfil y la semana */
+.hoy-grilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 24px;
+}
+
+.hoy-principal {
+  display: grid;
+  gap: 20px;
+}
+
+.hoy-principal > * {
+  margin: 0;
+}
+
+.hoy-saludo {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 32px 30px;
+  border-radius: 24px;
+  background: linear-gradient(120deg, var(--azul) 0%, #2b4596 100%);
+  color: #ffffff;
+  box-shadow: 0 16px 36px rgba(28, 45, 99, 0.22);
+}
+
+.hoy-saludo > :not(.hoy-saludo-dibujos) {
+  position: relative;
+  z-index: 1;
+}
+
+.hoy-saludo-fecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 500;
+}
+
+.hoy-saludo h1 {
+  margin: 18px 0 4px;
+  color: #ffffff;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.hoy-saludo p {
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+}
+
+/* Dibujitos de la clínica, quietos y muy suaves, del lado derecho */
+.hoy-saludo-dibujos {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 45%;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.14);
+}
+
+.hoy-saludo-dibujos svg {
+  position: absolute;
+}
+
+.hoy-saludo-dibujos svg:nth-child(1) {
+  top: 18%;
+  right: 12%;
+  transform: rotate(-18deg);
+}
+
+.hoy-saludo-dibujos svg:nth-child(2) {
+  bottom: 14%;
+  right: 30%;
+  transform: rotate(10deg);
+}
+
+.hoy-saludo-dibujos svg:nth-child(3) {
+  top: 12%;
+  right: 42%;
+  transform: rotate(30deg);
+}
+
+.hoy-saludo-dibujos svg:nth-child(4) {
+  bottom: 12%;
+  right: 6%;
+}
+
+.hoy-costado {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 20px;
+}
+
+/* Tarjetas de la columna: título en una franja azul, como en la referencia */
+.hoy-tarjeta {
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+}
+
+.hoy-tarjeta-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 16px 20px;
+  background: var(--azul);
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hoy-tarjeta-titulo span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hoy-perfil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+}
+
+.hoy-perfil > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hoy-perfil strong {
+  font-size: 1.15rem;
+  color: var(--azul);
+}
+
+.hoy-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--amarillo-suave);
+  color: var(--azul);
+  font-family: var(--fuente-titulos);
+  font-size: 1.4rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 4px #ffffff, 0 0 0 6px var(--amarillo);
+}
+
+.hoy-perfil-rol {
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hoy-perfil-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  color: var(--gris);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Veterinarios: uno debajo del otro */
+.hoy-equipo {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.hoy-equipo .hoy-perfil + .hoy-perfil {
+  border-top: 1px solid var(--borde);
+}
+
+img.hoy-avatar {
+  object-fit: cover;
+}
+
+.hoy-perfil-dato {
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.hoy-vacio {
+  margin: 0;
+  padding: 20px;
+  color: var(--gris);
+}
+
+/* Aviso de notificaciones dentro del saludo azul */
+.hoy-saludo-avisos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 14px;
+  color: #ffffff;
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+.hoy-saludo-avisos:hover {
+  color: var(--amarillo);
+}
+
+/* Calendario del mes: siete columnas de lunes a domingo; hoy resaltado en azul */
+.hoy-mes-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 0;
+}
+
+.hoy-mes-encabezado strong {
+  color: var(--azul);
+  font-size: 1.05rem;
+}
+
+.hoy-mes-flecha {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--azul);
+  cursor: pointer;
+}
+
+.hoy-mes-flecha:hover {
+  background: var(--azul-suave);
+}
+
+.hoy-mes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin: 0;
+  padding: 10px 10px 8px;
+  list-style: none;
+}
+
+.hoy-mes-nombre {
+  padding: 4px 0;
+  color: var(--gris);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.hoy-mes-dia {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 1px;
+  min-height: 44px;
+  padding: 5px 0 4px;
+  border-radius: 10px;
+  color: var(--tinta);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.hoy-mes-dia:hover {
+  background: var(--azul-suave);
+}
+
+.hoy-mes-dia.otro-mes {
+  color: var(--gris);
+  opacity: 0.55;
+}
+
+.hoy-mes-dia.es-hoy {
+  background: var(--azul);
+  color: #ffffff;
+  opacity: 1;
+}
+
+.hoy-mes-cantidad {
+  min-width: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--amarillo-suave);
+  color: var(--azul);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.hoy-mes-dia.es-hoy .hoy-mes-cantidad {
+  background: var(--amarillo);
+}
+
+.hoy-semana-ayuda {
+  margin: 0;
+  padding: 0 20px 18px;
+  color: var(--gris);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1280px) {
+  .hoy-grilla {
+    grid-template-columns: 1fr;
+  }
+
+  .hoy-costado {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .hoy-saludo {
+    padding: 22px 20px 24px;
+  }
+
+  .hoy-saludo .boton {
+    width: 100%;
+  }
+
+  .hoy-costado {
+    grid-template-columns: 1fr;
+  }
 }
 
 .grilla-resumen {
@@ -2340,32 +2793,58 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .panel-menu {
+    position: static;
+    flex-direction: row;
+    align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    border-right: none;
-    border-bottom: 1px solid var(--borde);
+    height: auto;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 0;
   }
 
   .panel-navegacion {
+    flex: 1;
+    min-width: 0;
     flex-direction: row;
+    gap: 4px;
     overflow-x: auto;
   }
 
+  /* En pantallas táctiles no hay "pasar el mouse": el nombre va escrito debajo del ícono */
   .panel-enlace {
-    white-space: nowrap;
+    width: auto;
+    min-width: 76px;
+    height: auto;
+    min-height: 58px;
+    padding: 6px 8px;
+    gap: 2px;
   }
 
-  .panel-usuario {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 0;
-    padding: 8px 12px;
+  .panel-enlace-nombre,
+  .panel-enlace:hover .panel-enlace-nombre,
+  .panel-enlace:focus-visible .panel-enlace-nombre {
+    position: static;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    color: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 1;
+    transform: none;
   }
 
-  .panel-usuario span {
+  .panel-enlace-nombre::before {
     display: none;
+  }
+
+  .panel-salir {
+    width: auto;
+    min-width: 76px;
+    min-height: 58px;
+    margin-top: 0;
+    padding: 6px 8px;
   }
 
   .panel-contenido {
@@ -3946,6 +4425,12 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .resumen-numero:hover {
   border-color: var(--azul);
+}
+
+/* En Notificaciones: la tarjeta cuya lista se está viendo */
+.resumen-numero.elegida {
+  border: 2px solid var(--azul);
+  background: var(--azul-suave);
 }
 
 .resumen-numero strong {
