@@ -2444,6 +2444,40 @@ html[data-turno-portada='visible'] .boton-turno {
   white-space: nowrap;
 }
 
+/* Aviso de turnos de días anteriores sin marcar */
+.sin-marcar {
+  border: 2px solid var(--amarillo);
+  background: #fffaf0;
+}
+
+.sin-marcar-aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.sin-marcar-aviso > svg {
+  flex: none;
+  color: #8a5a00;
+}
+
+.sin-marcar-aviso p {
+  flex: 1 1 260px;
+  margin: 0;
+}
+
+.sin-marcar-aviso .boton {
+  min-height: 48px;
+  background: #ffffff;
+}
+
+.sin-marcar-dia h3 {
+  margin: 24px 0 0;
+  color: var(--azul);
+  font-size: 1.15rem;
+}
+
 /* Veterinarios: uno debajo del otro */
 .hoy-equipo {
   margin: 0;

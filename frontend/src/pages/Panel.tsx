@@ -1,9 +1,10 @@
-import { Bell, CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, HeartPulse, PawPrint, Stethoscope, Syringe } from 'lucide-react'
+import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, HeartPulse, PawPrint, Stethoscope, Syringe } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet } from '../lib/api'
-import { diaDe, diaLargo, hoyArgentina, lunesDe, primeroDeMes, saludoSegunHora, sumarDias } from '../lib/fechas'
+import { diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, primeroDeMes, saludoSegunHora, sumarDias } from '../lib/fechas'
+import { useHoraActual } from '../lib/horaActual'
 import { useSitio } from '../lib/sitio'
 import type { ResumenRecordatorios, Turno } from '../types'
 import { AvisosSuspension } from '../components/AvisosSuspension'
@@ -34,6 +35,7 @@ export function Panel() {
   const [saludo] = useState(saludoSegunHora)
   const [turnos, setTurnos] = useState<Turno[] | null>(null)
   const [resumen, setResumen] = useState<ResumenRecordatorios | null>(null)
+  const ahora = useHoraActual()
 
   useEffect(() => {
     apiGet<Turno[]>(`/turnos?desde=${hoy}&hasta=${hoy}`)
@@ -86,6 +88,9 @@ export function Panel() {
         {/* Decidir sobre una suspensión le toca al administrador */}
         {usuario?.rol === 'ADMIN' && <AvisosSuspension />}
 
+        {/* Turnos de días anteriores que quedaron sin marcar (nadie dijo si vino o no) */}
+        <TurnosSinMarcar hoy={hoy} />
+
         <section className="tarjeta bloque-ficha">
           <div className="bloque-ficha-titulo">
             <h2>
@@ -111,6 +116,8 @@ export function Panel() {
                 <TarjetaTurno
                   key={t.id}
                   turno={t}
+                  // Igual que en la Agenda: si ya pasó la hora y sigue confirmado, pregunta "¿vino?"
+                  marca={t.estado === 'CONFIRMADO' && horaDe(t.fechaHoraFin) <= ahora ? 'pasado' : undefined}
                   alCambiar={(nuevo) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)}
                 />
               ))}
@@ -155,6 +162,72 @@ export function Panel() {
         <CalendarioMes hoy={hoy} />
       </aside>
     </div>
+  )
+}
+
+// Cuántos días para atrás se buscan turnos sin marcar.
+const DIAS_PARA_ATRAS = 60
+
+// Aviso de turnos viejos sin marcar. Al tocar "Ver y marcar" se abren, agrupados por día,
+// con las mismas tarjetas de siempre para decir si vino o no.
+function TurnosSinMarcar({ hoy }: { hoy: string }) {
+  const [turnos, setTurnos] = useState<Turno[] | null>(null)
+  const [abierto, setAbierto] = useState(false)
+
+  useEffect(() => {
+    apiGet<Turno[]>(`/turnos?desde=${sumarDias(hoy, -DIAS_PARA_ATRAS)}&hasta=${sumarDias(hoy, -1)}`)
+      // Se guardan solo los que estaban sin marcar; si después se marcan, siguen a la vista hasta recargar.
+      .then((t) => setTurnos(t.filter((x) => x.estado === 'CONFIRMADO' || x.estado === 'PENDIENTE')))
+      .catch(() => setTurnos([]))
+  }, [hoy])
+
+  if (!turnos || turnos.length === 0) return null
+  const faltan = turnos.filter((t) => t.estado === 'CONFIRMADO' || t.estado === 'PENDIENTE').length
+
+  // Agrupados por día, del más reciente al más viejo.
+  const dias = [...new Set(turnos.map((t) => diaDe(t.fechaHoraInicio)))].sort().reverse()
+
+  return (
+    <section className="tarjeta sin-marcar">
+      <div className="sin-marcar-aviso">
+        <CircleAlert size={26} aria-hidden="true" />
+        <p>
+          {faltan === 0 ? (
+            <strong>¡Listo! Ya marcaste todos los turnos anteriores.</strong>
+          ) : (
+            <>
+              <strong>
+                {faltan === 1
+                  ? 'Quedó 1 turno de días anteriores sin marcar.'
+                  : `Quedaron ${faltan} turnos de días anteriores sin marcar.`}
+              </strong>{' '}
+              Contá si vinieron o no, así las estadísticas quedan bien.
+            </>
+          )}
+        </p>
+        <button type="button" className="boton boton-contorno" aria-expanded={abierto} onClick={() => setAbierto((a) => !a)}>
+          {abierto ? 'Cerrar' : 'Ver y marcar'}
+        </button>
+      </div>
+      {abierto &&
+        dias.map((d) => (
+          <div key={d} className="sin-marcar-dia">
+            <h3>{diaLargo(d)}</h3>
+            <ul className="lista-turnos">
+              {turnos
+                .filter((t) => diaDe(t.fechaHoraInicio) === d)
+                .map((t) => (
+                  <TarjetaTurno
+                    key={t.id}
+                    turno={t}
+                    marca={t.estado === 'CONFIRMADO' ? 'pasado' : undefined}
+                    alCambiar={(nuevo) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)}
+                  />
+                ))}
+            </ul>
+          </div>
+        ))}
+    </section>
   )
 }
 

@@ -3,14 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { TarjetaTurno } from '../../components/TarjetaTurno'
 import { apiGet } from '../../lib/api'
-import { diaAmigable, diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, sumarDias, ZONA } from '../../lib/fechas'
+import { diaAmigable, diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, sumarDias } from '../../lib/fechas'
+import { useHoraActual } from '../../lib/horaActual'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, huecosLibres, type Hueco } from '../../lib/turnos'
 import type { Turno } from '../../types'
 
 const DIA_SEMANA = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
 const NUMERO_DIA = new Intl.DateTimeFormat('es-AR', { day: 'numeric', timeZone: 'UTC' })
-const HORA_ACTUAL = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: ZONA })
 
 interface DiaCerrado {
   fecha: string
@@ -22,16 +22,6 @@ type Renglon =
   | { tipo: 'turno'; hora: string; turno: Turno }
   | { tipo: 'libre'; hora: string; hueco: Hueco }
   | { tipo: 'ahora'; hora: string }
-
-// Hora actual ("HH:MM"), actualizada cada minuto.
-function useHoraActual() {
-  const [hora, setHora] = useState(() => HORA_ACTUAL.format(new Date()))
-  useEffect(() => {
-    const intervalo = window.setInterval(() => setHora(HORA_ACTUAL.format(new Date())), 60_000)
-    return () => window.clearInterval(intervalo)
-  }, [])
-  return hora
-}
 
 function plural(cantidad: number, uno: string, varios: string) {
   return `${cantidad} ${cantidad === 1 ? uno : varios}`
