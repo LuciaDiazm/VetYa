@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPost } from '../../../lib/api'
 import { diaLargoConAnio, hoyArgentina } from '../../../lib/fechas'
 import type { TurnoAfectado } from '../../../types'
 import { TurnosAfectados } from './TurnosAfectados'
+import { Cargando } from '../../../components/Cargando'
 
 interface DiaCerrado {
   id: number
@@ -103,7 +104,7 @@ export function DiasCerrados() {
       <section className="tarjeta">
         <h2>Próximos días cerrados</h2>
         {!dias ? (
-          <p className="cargando">Cargando…</p>
+          <Cargando />
         ) : dias.length === 0 ? (
           <p className="vacio">No hay días cerrados por delante.</p>
         ) : (

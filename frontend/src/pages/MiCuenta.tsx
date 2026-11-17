@@ -10,6 +10,7 @@ import { estadoDosis, ultimasPorProducto } from '../lib/sanitario'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 import type { DatosMiCuenta, MascotaDelDueno } from '../types'
 import { IconoEspecie } from './panel/Clientes'
+import { Cargando } from '../components/Cargando'
 
 const CONSULTAS_A_LA_VISTA = 3
 
@@ -305,7 +306,7 @@ Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a pod
         {aviso && <p className="mensaje-exito">{aviso}</p>}
 
         {!datos ? (
-          !error && <p className="cargando">Cargando…</p>
+          !error && <Cargando />
         ) : datos.mascotas.length === 0 ? (
           <div className="tarjeta mi-cuenta-vacia">
             <h2>Todavía no vemos mascotas en tu cuenta</h2>

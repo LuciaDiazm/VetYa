@@ -12,6 +12,7 @@ import { estadoDosis, ultimasPorProducto } from '../../lib/sanitario'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import type { AplicacionSanitaria, ConsultaResumen, FichaMascota } from '../../types'
 import { IconoEspecie } from './Clientes'
+import { Cargando } from '../../components/Cargando'
 
 // "subió 0,4 kg" / "bajó 1,2 kg" respecto de la consulta anterior con peso.
 function cambioDePeso(consultas: ConsultaResumen[], indice: number) {
@@ -73,7 +74,7 @@ export function MascotaDetalle() {
   }
 
   if (!mascota) {
-    return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+    return error ? <p className="mensaje-error">{error}</p> : <Cargando />
   }
 
   const { cliente } = mascota

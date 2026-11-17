@@ -4,6 +4,7 @@ import { apiGet, apiPut } from '../../../lib/api'
 import { olvidarSitio } from '../../../lib/sitio'
 import type { HorarioAtencion, TurnoAfectado } from '../../../types'
 import { TurnosAfectados } from './TurnosAfectados'
+import { Cargando } from '../../../components/Cargando'
 
 // De lunes a domingo (en la base, 0 = domingo).
 const DIAS = [
@@ -39,7 +40,7 @@ export function Horarios() {
       .catch(() => setError('No se pudieron cargar los horarios.'))
   }, [])
 
-  if (!semana) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+  if (!semana) return error ? <p className="mensaje-error">{error}</p> : <Cargando />
 
   function cambiar(dia: number, tramos: Tramo[]) {
     setSemana((s) => (s ? { ...s, [dia]: tramos } : s))

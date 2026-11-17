@@ -3,6 +3,7 @@ import { apiGet, apiPut } from '../../../lib/api'
 import { formatearTelefono } from '../../../lib/mascotas'
 import { olvidarSitio } from '../../../lib/sitio'
 import type { ClinicaConfig } from '../../../types'
+import { Cargando } from '../../../components/Cargando'
 
 interface Formulario {
   nombre: string
@@ -51,7 +52,7 @@ export function DatosClinica() {
       .catch(() => setError('No se pudieron cargar los datos de la clínica.'))
   }, [])
 
-  if (!datos) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+  if (!datos) return error ? <p className="mensaje-error">{error}</p> : <Cargando />
 
   const poner = (clave: keyof Formulario, valor: string) => {
     setDatos({ ...datos, [clave]: valor })

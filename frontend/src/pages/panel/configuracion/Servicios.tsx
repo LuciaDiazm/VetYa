@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { apiGet, apiPatch, apiPost, apiPut } from '../../../lib/api'
 import { olvidarSitio } from '../../../lib/sitio'
 import type { CategoriaServicio, ServicioConfig } from '../../../types'
+import { Cargando } from '../../../components/Cargando'
 
 const CATEGORIAS: Record<CategoriaServicio, string> = {
   CLINICA: 'Clínica',
@@ -146,7 +147,7 @@ export function Servicios() {
     }
   }
 
-  if (!servicios) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+  if (!servicios) return error ? <p className="mensaje-error">{error}</p> : <Cargando />
 
   return (
     <section className="tarjeta">

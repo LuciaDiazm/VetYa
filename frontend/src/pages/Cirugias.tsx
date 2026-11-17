@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { apiGet } from '../lib/api'
 import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { Cirugia } from '../types'
+import { Cargando } from '../components/Cargando'
 
 const PASOS = [
   ['Llamanos', 'Nos contás qué necesita tu mascota y acordamos el día.'],
@@ -39,7 +40,7 @@ export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
       </main>
     )
   }
-  if (!cirugias) return <p className="cargando">Cargando…</p>
+  if (!cirugias) return <Cargando />
 
   const lista = cirugias.filter((c) => esLimpiezaDental(c) === (tipo === 'limpieza'))
   // En la página de limpieza, el título ya dice de qué servicio se trata.

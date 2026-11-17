@@ -6,6 +6,7 @@ import { apiGet, apiPost, ErrorApi } from '../lib/api'
 import { diaAmigable, diaCorto, diaLargo, fechaCortaDe } from '../lib/fechas'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import type { DatosMiCuenta, EspecieMascota, Servicio } from '../types'
+import { Cargando } from '../components/Cargando'
 
 // Por día, todos los horarios de atención: los ocupados se muestran tachados.
 type Disponibilidad = Record<string, { hora: string; libre: boolean }[]>
@@ -24,7 +25,7 @@ export function SacarTurno() {
     return (
       <main className="fondo-huellas">
         <section className="contenedor seccion">
-          <p className="cargando">Cargando…</p>
+          <Cargando />
         </section>
       </main>
     )
@@ -205,7 +206,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
             <span className="paso-numero">1</span> ¿Qué necesita tu mascota?
           </h2>
           {servicios === null ? (
-            <p className="cargando">Cargando…</p>
+            <Cargando />
           ) : (
             <div className="opciones-servicio">
               {serviciosVisibles.map((s) => (
@@ -426,7 +427,7 @@ function FormularioDatos({
     }
   }
 
-  if (mascotas === null) return <p className="cargando">Cargando…</p>
+  if (mascotas === null) return <Cargando />
 
   return (
     <form className="formulario" onSubmit={enviar}>

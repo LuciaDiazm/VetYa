@@ -2,13 +2,14 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
 import type { Rol } from '../types'
+import { Cargando } from './Cargando'
 
 // Solo deja ver la página a usuarios con sesión iniciada y con alguno de los roles indicados.
 export function RutaProtegida({ roles, children }: { roles: Rol[]; children: ReactNode }) {
   const { usuario, cargando } = useAuth()
   const ubicacion = useLocation()
 
-  if (cargando) return <main className="contenedor"><p>Cargando…</p></main>
+  if (cargando) return <main className="contenedor"><Cargando /></main>
 
   if (!usuario) return <Navigate to="/ingresar" replace state={{ desde: ubicacion.pathname + ubicacion.search }} />
 

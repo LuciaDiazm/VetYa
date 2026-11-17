@@ -125,10 +125,55 @@ svg {
   color: var(--gris);
 }
 
+/* Cargando: ocho puntitos en ronda que se encienden uno tras otro y parecen girar */
 .cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   padding: 64px 16px;
-  text-align: center;
   color: var(--gris);
+  text-align: center;
+}
+
+.cargando-puntos {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.cargando-puntos span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--azul);
+  opacity: 0.18;
+  transform: rotate(calc(var(--i) * 45deg)) translateY(-19px);
+  animation: cargando-punto 960ms linear infinite;
+  animation-delay: calc(var(--i) * 120ms - 960ms);
+}
+
+/* Cada punto se enciende (azul fuerte) y se va apagando: la luz da la vuelta */
+@keyframes cargando-punto {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.18;
+  }
+}
+
+/* Con "reducir movimiento" no hay nada que se mueva, solo cambia el color, más despacio */
+@media (prefers-reduced-motion: reduce) {
+  .cargando-puntos span {
+    animation-duration: 2400ms;
+    animation-delay: calc(var(--i) * 300ms - 2400ms);
+  }
 }
 
 .sin-corte {

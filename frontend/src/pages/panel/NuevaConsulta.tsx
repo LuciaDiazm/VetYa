@@ -7,6 +7,7 @@ import { fechaCortaDe } from '../../lib/fechas'
 import { edadTexto, ESPECIES } from '../../lib/mascotas'
 import { vacunaNueva } from '../../lib/sanitario'
 import type { FichaMascota } from '../../types'
+import { Cargando } from '../../components/Cargando'
 
 
 // "12,5" o "12.5" → 12.5; vacío → null
@@ -76,7 +77,7 @@ export function NuevaConsulta() {
     }
   }
 
-  if (!mascota) return <p className="cargando">Cargando…</p>
+  if (!mascota) return <Cargando />
 
   const ultimoPeso = mascota.consultas.find((c) => c.pesoKg)
   const turno = mascota.turnos.find((t) => t.id === turnoId)

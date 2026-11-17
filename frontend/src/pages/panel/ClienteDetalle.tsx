@@ -10,6 +10,7 @@ import { enlaceWhatsapp } from '../../lib/sitio'
 import { TurnosDelCliente } from '../../components/TurnosDelCliente'
 import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
 import { IconoEspecie } from './Clientes'
+import { Cargando } from '../../components/Cargando'
 
 // Ficha del dueño: sus datos, contacto rápido y sus mascotas.
 export function ClienteDetalle() {
@@ -78,7 +79,7 @@ export function ClienteDetalle() {
   }
 
   if (!cliente) {
-    return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+    return error ? <p className="mensaje-error">{error}</p> : <Cargando />
   }
 
   const activas = cliente.mascotas.filter((m) => m.activo)

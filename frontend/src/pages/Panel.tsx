@@ -9,6 +9,7 @@ import { useSitio } from '../lib/sitio'
 import type { ResumenRecordatorios, Turno } from '../types'
 import { AvisosSuspension } from '../components/AvisosSuspension'
 import { TarjetaTurno } from '../components/TarjetaTurno'
+import { Cargando } from '../components/Cargando'
 
 const NOMBRE_MES = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 const DIAS_SEMANA = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']
@@ -107,7 +108,7 @@ export function Panel() {
             )}
           </div>
           {turnos === null ? (
-            <p className="cargando">Cargando…</p>
+            <Cargando />
           ) : activos.length === 0 ? (
             <p className="vacio">No hay turnos para hoy.</p>
           ) : (

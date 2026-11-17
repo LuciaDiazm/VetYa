@@ -7,6 +7,7 @@ import { diaDe, horaDe, hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, 
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, ORIGENES } from '../../lib/turnos'
 import type { EstadoTurno, OrigenTurno } from '../../types'
+import { Cargando } from '../../components/Cargando'
 
 interface TurnoInforme {
   id: number
@@ -203,7 +204,7 @@ export function InformeTurnos() {
 
       {problema && <p className="mensaje-error">{problema}</p>}
       {error && <p className="mensaje-error">{error}</p>}
-      {!problema && !turnos && !error && <p className="cargando">Cargando…</p>}
+      {!problema && !turnos && !error && <Cargando />}
 
       {!problema && turnos && (
         <>

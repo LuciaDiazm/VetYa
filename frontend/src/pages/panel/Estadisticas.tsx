@@ -5,6 +5,7 @@ import { ElegirFechas } from '../../components/ElegirFechas'
 import { Barras, Columnas, type Dato } from '../../components/Graficos'
 import { apiGet } from '../../lib/api'
 import { hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, sumarDias } from '../../lib/fechas'
+import { Cargando } from '../../components/Cargando'
 
 interface Resumen {
   turnos: number
@@ -209,7 +210,7 @@ export function Estadisticas() {
       {problema && <p className="mensaje-error">{problema}</p>}
       {error && <p className="mensaje-error">{error}</p>}
       {problema ? null : !datos ? (
-        !error && <p className="cargando">Cargando…</p>
+        !error && <Cargando />
       ) : (
         <div className={`estadisticas${cargando ? ' recargando' : ''}`} aria-busy={cargando}>
           {/* ---------- Indicadores ---------- */}

@@ -5,6 +5,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPut, apiSubir } from '../../..
 import { formatearTelefono } from '../../../lib/mascotas'
 import { olvidarSitio } from '../../../lib/sitio'
 import type { Personal } from '../../../types'
+import { Cargando } from '../../../components/Cargando'
 
 const ROLES = { VETERINARIO: 'Veterinaria/o', ADMIN: 'Administración' } as const
 
@@ -303,7 +304,7 @@ export function PersonalClinica() {
     }
   }
 
-  if (!personal) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+  if (!personal) return error ? <p className="mensaje-error">{error}</p> : <Cargando />
 
   return (
     <section className="tarjeta">

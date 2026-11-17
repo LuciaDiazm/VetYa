@@ -8,6 +8,7 @@ import { useHoraActual } from '../../lib/horaActual'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, huecosLibres, type Hueco } from '../../lib/turnos'
 import type { Turno } from '../../types'
+import { Cargando } from '../../components/Cargando'
 
 const DIA_SEMANA = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
 const NUMERO_DIA = new Intl.DateTimeFormat('es-AR', { day: 'numeric', timeZone: 'UTC' })
@@ -187,7 +188,7 @@ export function Agenda() {
 
       {/* ---------- Línea del día ---------- */}
       {turnosSemana === null ? (
-        <p className="cargando">Cargando…</p>
+        <Cargando />
       ) : renglones.length === 0 ? (
         <div className="tarjeta vacio-con-accion">
           <p className="vacio">{dia < hoy ? 'Ese día no hubo turnos.' : 'No hay turnos para este día.'}</p>

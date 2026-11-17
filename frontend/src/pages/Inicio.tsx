@@ -21,6 +21,7 @@ import { Mapa } from '../components/Mapa'
 import { revelarAlBajar } from '../lib/revelar'
 import { agruparHorarios } from '../lib/horarios'
 import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
+import { Cargando } from '../components/Cargando'
 
 // Cada tarjeta de servicios (todas blancas) con su ícono y a dónde lleva.
 const TARJETAS: {
@@ -130,7 +131,7 @@ export function Inicio() {
       </main>
     )
   }
-  if (!datos) return <p className="cargando">Cargando…</p>
+  if (!datos) return <Cargando />
 
   const { clinica, servicios, equipo, opiniones, formasPago, preguntas } = datos
   const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`

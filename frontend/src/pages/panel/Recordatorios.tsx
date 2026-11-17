@@ -8,6 +8,7 @@ import { avisarCambioRecordatorios, mensajeDosis, mensajeRecupero, mensajeTurnoM
 import { enlaceWhatsapp, useSitio } from '../../lib/sitio'
 import type { Pendientes } from '../../types'
 import { IconoEspecie } from './Clientes'
+import { Cargando } from '../../components/Cargando'
 
 // Las tres listas de avisos. Cada una tiene su tarjeta arriba y se ve por separado.
 type Lista = 'manana' | 'vacunas' | 'recuperar'
@@ -136,7 +137,7 @@ export function Recordatorios() {
     }
   }
 
-  if (!pendientes) return error ? <p className="mensaje-error">{error}</p> : <p className="cargando">Cargando…</p>
+  if (!pendientes) return error ? <p className="mensaje-error">{error}</p> : <Cargando />
 
   const { turnosManana, dosis, recuperar } = pendientes
   const cantidades: Record<Lista, number> = { manana: turnosManana.length, vacunas: dosis.length, recuperar: recuperar.length }
