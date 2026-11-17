@@ -13,6 +13,13 @@ const SECCIONES = [
   { ruta: '/#contacto', nombre: 'Horarios y dirección' },
 ]
 
+// Dentro de Mi cuenta el menú lleva a las partes de la cuenta, no a las del inicio.
+const SECCIONES_CUENTA = [
+  { ruta: '/mi-cuenta#turnos', nombre: 'Mis turnos' },
+  { ruta: '/mi-cuenta#vacunas', nombre: 'Vacunas y carnet' },
+  { ruta: '/mi-cuenta#visitas', nombre: 'Visitas' },
+]
+
 // Encabezado de la parte pública. Pocas opciones y bien grandes:
 // lo más buscado (pedir turno y urgencias) siempre queda a la vista.
 export function BarraNavegacion() {
@@ -20,7 +27,11 @@ export function BarraNavegacion() {
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
   // En Ingresar el encabezado queda despejado: solo el logo y el menú redondo de tres rayitas.
-  const soloMenu = useLocation().pathname === '/ingresar'
+  const { pathname } = useLocation()
+  const soloMenu = pathname === '/ingresar'
+  // En Mi cuenta el único "Pedir turno" es el azul del saludo: el del encabezado se oculta.
+  const enCuenta = pathname === '/mi-cuenta'
+  const secciones: { ruta: string; nombre: string; soloMenu?: boolean }[] = enCuenta ? SECCIONES_CUENTA : SECCIONES
 
   function cerrarSesion() {
     // React Router navega dentro de una transición. Si la sesión se borrara por fuera de ella,
@@ -57,14 +68,14 @@ export function BarraNavegacion() {
   )
 
   return (
-    <header className={`encabezado${soloMenu ? ' encabezado-solo-menu' : ''}`}>
+    <header className={`encabezado${soloMenu ? ' encabezado-solo-menu' : ''}${enCuenta ? ' encabezado-cuenta' : ''}`}>
       <div className="contenedor barra-interior">
         <Link to="/" className="enlace-logo" aria-label="VetYa, ir al inicio" onClick={cerrarMenu}>
           <Logo />
         </Link>
 
         <nav className="menu-principal" aria-label="Secciones del sitio">
-          {SECCIONES.filter((s) => !s.soloMenu).map((s) => (
+          {secciones.filter((s) => !s.soloMenu).map((s) => (
             <Link key={s.ruta} to={s.ruta} className="barra-enlace">
               {s.nombre}
             </Link>
@@ -112,7 +123,7 @@ export function BarraNavegacion() {
 
       {menuAbierto && (
         <nav id="menu-movil" className="menu-movil" aria-label="Menú">
-          {SECCIONES.map((s) => (
+          {secciones.map((s) => (
             <Link key={s.ruta} to={s.ruta} className="barra-enlace" onClick={cerrarMenu}>
               {s.nombre}
             </Link>
