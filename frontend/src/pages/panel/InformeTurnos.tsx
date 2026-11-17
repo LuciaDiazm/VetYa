@@ -8,6 +8,7 @@ import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, ORIGENES } from '../../lib/turnos'
 import type { EstadoTurno, OrigenTurno } from '../../types'
 import { Cargando } from '../../components/Cargando'
+import { Paginacion } from '../../components/Paginacion'
 
 interface TurnoInforme {
   id: number
@@ -51,6 +52,8 @@ const aFecha = (f: string) => new Date(`${f}T12:00:00Z`)
 const fechaCorta = (f: string) => `${SEMANA.format(aFecha(f)).replace('.', '')} ${f.slice(8)}/${f.slice(5, 7)}`
 const nombreVet = (v: TurnoInforme['veterinario']) => (v ? `${v.nombre} ${v.apellido}` : 'Sin asignar')
 
+const TURNOS_POR_PAGINA = 20
+
 // Informe de turnos: todos los turnos entre dos fechas, con filtros, totales y para imprimir.
 export function InformeTurnos() {
   const { datos: sitio } = useSitio()
@@ -62,10 +65,14 @@ export function InformeTurnos() {
   const estado = parametros.get('estado') ?? ''
   const servicio = parametros.get('servicio') ?? ''
   const veterinario = parametros.get('veterinario') ?? ''
+  const pagina = Math.max(1, Number(parametros.get('pagina')) || 1)
   const problema = problemaDePeriodo(desde, hasta)
 
-  const [turnos, setTurnos] = useState<TurnoInforme[] | null>(null)
+  // Se guarda para qué fechas es cada respuesta: si no coinciden con las elegidas, se está consultando.
+  const [resultado, setResultado] = useState<{ periodo: string; turnos: TurnoInforme[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const turnos = resultado?.turnos ?? null
+  const consultando = !problema && !error && resultado !== null && resultado.periodo !== `${desde}|${hasta}`
 
   useEffect(() => {
     if (problema) return
@@ -73,7 +80,7 @@ export function InformeTurnos() {
     apiGet<TurnoInforme[]>(`/estadisticas/turnos?desde=${desde}&hasta=${hasta}`)
       .then((t) => {
         if (!vigente) return
-        setTurnos(t)
+        setResultado({ periodo: `${desde}|${hasta}`, turnos: t })
         setError(null)
       })
       .catch(() => vigente && setError('No se pudo cargar el informe.'))
@@ -83,13 +90,22 @@ export function InformeTurnos() {
   }, [desde, hasta, problema])
 
   // Cambia un filtro y mantiene los demás (quedan en la dirección, así se puede recargar o imprimir igual).
+  // Cualquier filtro nuevo vuelve a la página 1.
   function cambiar(valores: Record<string, string>) {
     const nuevos = new URLSearchParams(parametros)
+    nuevos.delete('pagina')
     for (const [clave, valor] of Object.entries(valores)) {
       if (valor) nuevos.set(clave, valor)
       else nuevos.delete(clave)
     }
     setParametros(nuevos, { replace: true })
+  }
+
+  function irAPagina(nueva: number) {
+    const nuevos = new URLSearchParams(parametros)
+    nuevos.set('pagina', String(nueva))
+    setParametros(nuevos)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   // Opciones de los filtros: solo lo que aparece en el período.
@@ -111,6 +127,8 @@ export function InformeTurnos() {
       (!servicio || String(t.servicio.id) === servicio) &&
       (!veterinario || (t.veterinario ? String(t.veterinario.id) : 'sin') === veterinario),
   )
+  // Si la página de la dirección ya no existe (por ejemplo, después de filtrar), se muestra la última.
+  const paginaReal = Math.min(pagina, Math.max(1, Math.ceil(filtrados.length / TURNOS_POR_PAGINA)))
   const cuenta = (condicion: (t: TurnoInforme) => boolean) => filtrados.filter(condicion).length
   const totales = [
     ['Turnos', filtrados.length],
@@ -208,6 +226,13 @@ export function InformeTurnos() {
 
       {!problema && turnos && (
         <>
+          {/* Al cambiar las fechas: el anillo flota sobre el informe anterior, más tenue */}
+          {consultando && (
+            <div className="cargando-flotante">
+              <Cargando texto="Consultando…" />
+            </div>
+          )}
+          <div className={consultando ? 'recargando' : undefined} aria-busy={consultando}>
           <ul className="informe-totales">
             {totales.map(([texto, valor]) => (
               <li key={texto} className="tarjeta">
@@ -235,10 +260,12 @@ export function InformeTurnos() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtrados.map((t) => {
+                  {filtrados.map((t, i) => {
                     const Icono = ICONOS_ESTADO[t.estado]
+                    // En pantalla se ven de a 20; al imprimir salen todos (ver .fuera-de-pagina)
+                    const enLaPagina = i >= (paginaReal - 1) * TURNOS_POR_PAGINA && i < paginaReal * TURNOS_POR_PAGINA
                     return (
-                      <tr key={t.id}>
+                      <tr key={t.id} className={enLaPagina ? undefined : 'fuera-de-pagina'}>
                         <td className="informe-fecha">{fechaCorta(diaDe(t.fechaHoraInicio))}</td>
                         <td>{horaDe(t.fechaHoraInicio)}</td>
                         <td data-etiqueta="Mascota">{t.mascota.nombre}</td>
@@ -259,7 +286,15 @@ export function InformeTurnos() {
                 </tbody>
               </table>
             )}
+            <Paginacion
+              pagina={paginaReal}
+              total={filtrados.length}
+              porPagina={TURNOS_POR_PAGINA}
+              queSeCuenta="turnos"
+              alCambiar={irAPagina}
+            />
           </section>
+          </div>
         </>
       )}
     </>

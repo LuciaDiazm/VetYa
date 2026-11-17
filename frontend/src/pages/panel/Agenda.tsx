@@ -36,7 +36,9 @@ export function Agenda() {
   const lunes = lunesDe(dia)
   const ahora = useHoraActual()
   const { datos: sitio } = useSitio()
-  const [turnosSemana, setTurnosSemana] = useState<Turno[] | null>(null)
+  // Turnos de la semana, junto con el lunes al que corresponden: si no es la semana que se mira, se está consultando.
+  const [semana, setSemana] = useState<{ lunes: string; turnos: Turno[] } | null>(null)
+  const turnosSemana = semana?.lunes === lunes ? semana.turnos : null
   const [cerrados, setCerrados] = useState<DiaCerrado[]>([])
   const [verCancelados, setVerCancelados] = useState(false)
   const [anuncio, setAnuncio] = useState('')
@@ -44,8 +46,8 @@ export function Agenda() {
   const cargar = useCallback(() => {
     const hasta = sumarDias(lunes, 6)
     apiGet<Turno[]>(`/turnos?desde=${lunes}&hasta=${hasta}`)
-      .then(setTurnosSemana)
-      .catch(() => setTurnosSemana([]))
+      .then((turnos) => setSemana({ lunes, turnos }))
+      .catch(() => setSemana({ lunes, turnos: [] }))
     apiGet<DiaCerrado[]>(`/turnos/dias-cerrados?desde=${lunes}&hasta=${hasta}`)
       .then(setCerrados)
       .catch(() => setCerrados([]))
@@ -83,7 +85,7 @@ export function Agenda() {
   const yaPaso = (t: Turno) => t.estado === 'CONFIRMADO' && (dia < hoy || (esHoy && horaDe(t.fechaHoraFin) <= ahora))
 
   function reemplazar(t: Turno) {
-    setTurnosSemana((lista) => lista?.map((x) => (x.id === t.id ? t : x)) ?? null)
+    setSemana((s) => (s ? { ...s, turnos: s.turnos.map((x) => (x.id === t.id ? t : x)) } : s))
     setAnuncio(`Turno de ${t.mascota.nombre}: ${ESTADOS_TURNO[t.estado].toLowerCase()}.`)
   }
 

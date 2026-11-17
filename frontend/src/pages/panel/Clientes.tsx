@@ -1,6 +1,8 @@
 import { Cat, Dog, PawPrint, Plus, Search, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { Cargando } from '../../components/Cargando'
+import { Paginacion } from '../../components/Paginacion'
 import { apiGet } from '../../lib/api'
 import { formatearTelefono } from '../../lib/mascotas'
 import type { Cliente, EspecieMascota } from '../../types'
@@ -11,26 +13,56 @@ export function IconoEspecie({ especie, size = 18 }: { especie: EspecieMascota; 
   return <PawPrint size={size} aria-hidden="true" />
 }
 
+interface PaginaClientes {
+  clientes: Cliente[]
+  total: number
+  pagina: number
+  porPagina: number
+}
+
 // Buscador de clientes: por nombre, apellido, DNI, teléfono o nombre de la mascota.
+// Los resultados vienen de a 10 por página desde el servidor.
 export function Clientes() {
   const [parametros, setParametros] = useSearchParams()
   const [texto, setTexto] = useState(parametros.get('q') ?? '')
-  const [clientes, setClientes] = useState<Cliente[] | null>(null)
+  // Lo que se buscó y la página quedan en la dirección: se puede volver atrás o recargar igual.
+  const q = parametros.get('q') ?? ''
+  const pagina = Math.max(1, Number(parametros.get('pagina')) || 1)
+  const clave = `${q}|${pagina}`
+  const [resultado, setResultado] = useState<(PaginaClientes & { clave: string }) | null>(null)
   const [error, setError] = useState(false)
 
-  // Busca mientras se escribe, esperando un momento para no consultar en cada tecla.
+  // Mientras se escribe, espera un momento para no consultar en cada tecla. Una búsqueda nueva vuelve a la página 1.
   useEffect(() => {
+    if (texto.trim() === q) return
     const espera = window.setTimeout(() => {
-      apiGet<Cliente[]>(`/clientes?q=${encodeURIComponent(texto.trim())}`)
-        .then((r) => {
-          setClientes(r)
-          setError(false)
-        })
-        .catch(() => setError(true))
       setParametros(texto.trim() ? { q: texto.trim() } : {}, { replace: true })
     }, 300)
     return () => window.clearTimeout(espera)
-  }, [texto, setParametros])
+  }, [texto, q, setParametros])
+
+  // La consulta al servidor: cada vez que cambia lo buscado o la página.
+  useEffect(() => {
+    let vigente = true
+    apiGet<PaginaClientes>(`/clientes?q=${encodeURIComponent(q)}&pagina=${pagina}`)
+      .then((r) => {
+        if (!vigente) return
+        setResultado({ ...r, clave })
+        setError(false)
+      })
+      .catch(() => vigente && setError(true))
+    return () => {
+      vigente = false
+    }
+  }, [q, pagina, clave])
+
+  const buscando = !error && (resultado?.clave !== clave || texto.trim() !== q)
+  const clientes = resultado?.clientes ?? []
+
+  function irAPagina(nueva: number) {
+    setParametros(q ? { q, pagina: String(nueva) } : { pagina: String(nueva) })
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
 
   return (
     <>
@@ -58,9 +90,9 @@ export function Clientes() {
 
       {error && <p className="mensaje-error">No se pudo buscar. Revisá la conexión y probá de nuevo.</p>}
 
-      {clientes === null ? (
-        <p className="cargando">Buscando…</p>
-      ) : clientes.length === 0 ? (
+      {resultado === null ? (
+        !error && <Cargando texto="Buscando…" />
+      ) : clientes.length === 0 && !buscando ? (
         <div className="tarjeta vacio-con-accion">
           <p className="vacio">
             {texto.trim() ? `No encontramos a nadie con “${texto.trim()}”.` : 'Todavía no hay clientes cargados.'}
@@ -71,8 +103,14 @@ export function Clientes() {
         </div>
       ) : (
         <>
-          {!texto.trim() && <p className="subtitulo-lista">Últimos clientes cargados</p>}
-          <ul className="lista-clientes">
+          {/* Mientras llega la búsqueda nueva, el anillo flota sobre la lista anterior, más tenue */}
+          {buscando && (
+            <div className="cargando-flotante">
+              <Cargando texto="Buscando…" />
+            </div>
+          )}
+          {!q && <p className="subtitulo-lista">Últimos clientes cargados</p>}
+          <ul className={`lista-clientes${buscando ? ' recargando' : ''}`} aria-busy={buscando}>
             {clientes.map((c) => (
               <li key={c.id}>
                 <Link to={`/panel/clientes/${c.id}`} className="cliente-fila">
@@ -100,6 +138,13 @@ export function Clientes() {
               </li>
             ))}
           </ul>
+          <Paginacion
+            pagina={resultado.pagina}
+            total={resultado.total}
+            porPagina={resultado.porPagina}
+            queSeCuenta="clientes"
+            alCambiar={irAPagina}
+          />
         </>
       )}
     </>

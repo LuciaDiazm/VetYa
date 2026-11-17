@@ -84,14 +84,29 @@ clientesRouter.get("/", async (req, res) => {
       ]
     : undefined;
 
-  const clientes = await prisma.cliente.findMany({
-    where: { clinicaId: req.usuario!.clinicaId, ...(filtros ? { OR: filtros } : {}) },
-    include: { mascotas: { where: { activo: true }, orderBy: { nombre: "asc" } } },
-    orderBy: texto ? [{ apellido: "asc" }, { nombre: "asc" }] : { creadoEn: "desc" },
-    take: 30,
-  });
-  res.json(clientes);
+  const donde = { clinicaId: req.usuario!.clinicaId, ...(filtros ? { OR: filtros } : {}) };
+  const consulta = {
+    where: donde,
+    include: { mascotas: { where: { activo: true }, orderBy: { nombre: "asc" as const } } },
+    orderBy: texto ? [{ apellido: "asc" as const }, { nombre: "asc" as const }] : { creadoEn: "desc" as const },
+  };
+
+  // Con "?pagina=N" responde por páginas (la pantalla Clientes). Sin ese dato, como antes:
+  // los primeros 30 (lo usa el buscador de "Dar turno").
+  if (req.query.pagina !== undefined) {
+    const pagina = Math.max(1, Math.floor(Number(req.query.pagina)) || 1);
+    const [total, clientes] = await Promise.all([
+      prisma.cliente.count({ where: donde }),
+      prisma.cliente.findMany({ ...consulta, skip: (pagina - 1) * CLIENTES_POR_PAGINA, take: CLIENTES_POR_PAGINA }),
+    ]);
+    res.json({ clientes, total, pagina, porPagina: CLIENTES_POR_PAGINA });
+    return;
+  }
+
+  res.json(await prisma.cliente.findMany({ ...consulta, take: 30 }));
 });
+
+const CLIENTES_POR_PAGINA = 10;
 
 clientesRouter.post("/", async (req, res) => {
   const resultado = esquemaAltaRapida.safeParse(req.body);

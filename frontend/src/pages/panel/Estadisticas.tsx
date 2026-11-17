@@ -215,7 +215,7 @@ export function Estadisticas() {
         <>
         {/* Al cambiar el período: el ícono flota sobre los gráficos anteriores, que quedan más tenues */}
         {cargando && (
-          <div className="estadisticas-cargando">
+          <div className="cargando-flotante">
             <Cargando texto="Actualizando…" />
           </div>
         )}

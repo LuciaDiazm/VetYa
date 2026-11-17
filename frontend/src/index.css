@@ -5281,12 +5281,58 @@ form.campo-en-linea {
 }
 
 /* Al cambiar de período se mantiene lo anterior, más tenue, hasta que llegan los datos nuevos */
-.estadisticas.recargando {
+.estadisticas.recargando,
+.panel-contenido .recargando {
   opacity: 0.55;
+  transition: opacity 160ms ease;
 }
 
-/* El ícono de cargando flota sobre los gráficos sin correr nada: el contenedor no ocupa lugar */
-.estadisticas-cargando {
+/* Paginación: Anterior y Siguiente grandes, con la página escrita en el medio */
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.paginacion .boton {
+  min-height: 48px;
+  background: #ffffff;
+}
+
+.paginacion .boton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.paginacion-texto {
+  display: grid;
+  margin: 0;
+  color: var(--gris);
+  text-align: center;
+}
+
+.paginacion-texto strong {
+  color: var(--azul);
+  font-size: 1.05rem;
+}
+
+/* Informe: las filas de otras páginas no se ven en pantalla, pero sí salen al imprimir */
+.informe-tabla tr.fuera-de-pagina {
+  display: none;
+}
+
+@media print {
+  .informe-tabla tr.fuera-de-pagina {
+    display: table-row;
+  }
+}
+
+/* El anillo de cargando flota sobre lo anterior sin correr nada: el contenedor no ocupa lugar.
+   Se usa al consultar de nuevo (Estadísticas, Clientes, Informe de turnos) */
+.cargando-flotante {
   position: sticky;
   top: 35vh;
   z-index: 5;
@@ -5297,7 +5343,7 @@ form.campo-en-linea {
   overflow: visible;
 }
 
-.estadisticas-cargando .cargando {
+.cargando-flotante .cargando {
   padding: 22px 32px;
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: var(--radio);
