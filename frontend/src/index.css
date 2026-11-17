@@ -144,9 +144,9 @@ svg {
   color: var(--gris);
 }
 
-/* Huellitas de fondo */
+/* Fondo de huesitos y pescaditos (el nombre de la clase quedó de cuando eran huellitas) */
 .fondo-huellas {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='%231C2D63' fill-opacity='0.07'%3E%3Cg transform='translate(40 70) rotate(-30) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(85 40) rotate(-25) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(120 85) rotate(-35) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(165 55) rotate(-30) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(330 210) rotate(20) scale(1)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(250 330) rotate(-10) scale(0.7)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(70 300) rotate(40) scale(0.9)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(400 420) rotate(15) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(445 380) rotate(20) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3Cg transform='translate(480 440) rotate(10) scale(0.8)'%3E%3Cellipse cx='0' cy='14' rx='13' ry='11'/%3E%3Ccircle cx='-14' cy='-2' r='5'/%3E%3Ccircle cx='-5' cy='-11' r='5'/%3E%3Ccircle cx='6' cy='-11' r='5'/%3E%3Ccircle cx='14' cy='-2' r='5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='540'%3E%3Cg fill='%231C2D63' fill-opacity='0.06'%3E%3Cg transform='translate%2860 70%29 rotate%28-25%29 scale%280.9%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28190 45%29 rotate%2812%29 scale%280.85%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%28330 95%29 rotate%2835%29 scale%280.75%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28460 60%29 rotate%28-18%29 scale%280.8%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%2895 210%29 rotate%2828%29 scale%280.75%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%28250 230%29 rotate%28-8%29 scale%280.95%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28410 220%29 rotate%28-30%29 scale%280.9%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%2830 360%29 rotate%2850%29 scale%280.7%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28170 380%29 rotate%28-12%29 scale%280.95%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%28330 370%29 rotate%2818%29 scale%280.8%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28470 350%29 rotate%2825%29 scale%280.7%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%28110 480%29 rotate%28-40%29 scale%280.75%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3Cg transform='translate%28270 490%29 rotate%288%29 scale%280.8%29'%3E%3Cpath fill-rule='evenodd' d='M-14 0 C-8 -9 6 -9 12 0 C6 9 -8 9 -14 0 Z M-7 -2.2 a1.8 1.8 0 1 0 0.01 0 Z'/%3E%3Cpath d='M10 0 L21 -8 Q18 0 21 8 Z'/%3E%3C/g%3E%3Cg transform='translate%28430 470%29 rotate%28-15%29 scale%280.85%29'%3E%3Crect x='-13' y='-3.5' width='26' height='7' rx='3'/%3E%3Ccircle cx='-14' cy='-4.5' r='5'/%3E%3Ccircle cx='-14' cy='4.5' r='5'/%3E%3Ccircle cx='14' cy='-4.5' r='5'/%3E%3Ccircle cx='14' cy='4.5' r='5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   overflow-x: clip;
 }
 
@@ -301,6 +301,22 @@ svg {
   align-items: center;
   gap: 2px;
   margin-inline: auto;
+}
+
+/* En pantallas anchas el menú queda justo en el medio, sin importar el ancho del logo o de los botones */
+@media (min-width: 1081px) {
+  .barra-interior {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .menu-principal {
+    margin-inline: 0;
+  }
+
+  .barra-acciones {
+    justify-self: end;
+  }
 }
 
 .barra-enlace {
@@ -641,18 +657,6 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
-/* Etiqueta azul tipo pastilla que encabeza cada sección */
-.pastilla {
-  width: fit-content;
-  margin: 0 auto 14px;
-  padding: 6px 18px;
-  border-radius: 999px;
-  background: var(--azul);
-  color: #ffffff;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
 .seccion {
   padding-block: 64px;
 }
@@ -707,16 +711,18 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
+/* Texto y huella juntos en el centro, sin un hueco grande entre los dos */
 .portada {
   display: grid;
-  grid-template-columns: 1.15fr 1fr 0.8fr;
+  grid-template-columns: auto minmax(0, 460px);
+  justify-content: center;
   align-items: center;
-  gap: 24px;
+  gap: 24px clamp(40px, 7vw, 110px);
   padding-block: 40px 0;
 }
 
-.portada-texto,
-.portada-ventajas {
+.portada-texto {
+  max-width: 520px; /* "Clínica" y "veterinaria" en dos renglones */
   padding-bottom: 48px;
 }
 
@@ -763,30 +769,51 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 28px;
 }
 
-/* Foto del perrito con estetoscopio dentro de un círculo con un aro amarillo */
-.portada-foto {
-  align-self: center;
-  justify-self: center;
+/* Lado derecho: la huella con el perrito y, debajo, las ventajas */
+.portada-lado {
+  display: flex;
+  flex-direction: column;
+  justify-self: end;
+  width: min(100%, 460px);
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 40px;
+}
+
+.huella-recorte {
+  position: absolute;
+}
+
+/* Foto recortada con forma de huella (la forma está en el SVG de Inicio.tsx).
+   La sombra va en el contenedor porque el recorte también cortaría una sombra propia. */
+.portada-lado .portada-foto-sombra {
+  display: flex;
+  justify-content: center;
   width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
-  margin-bottom: 48px;
-  border-radius: 50%;
+  filter: drop-shadow(0 18px 28px rgba(28, 45, 99, 0.18));
+}
+
+.portada-foto {
+  width: 100%;
+  aspect-ratio: 1 / 1.1;
   overflow: hidden;
-  background: var(--superficie);
-  box-shadow: 0 0 0 14px var(--amarillo-suave);
+  clip-path: url(#forma-huella);
+  background: #b9976a;
 }
 
 .portada-foto img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 }
 
 .portada-ventajas {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  width: max-content;
+  max-width: 100vw;
+  gap: 14px 28px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -795,13 +822,19 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .portada-ventajas li {
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.portada-ventajas svg {
-  color: var(--azul);
+/* Puntito azul en lugar de huellas (ya hay muchas en la página) */
+.punto {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--azul);
 }
 
 /* ---------- Cinta en movimiento ---------- */
@@ -819,10 +852,17 @@ html[data-turno-portada='visible'] .boton-turno {
   animation: cinta 120s linear infinite; /* 3 veces más largo, misma velocidad */
 }
 
+.cinta-punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amarillo);
+}
+
 .cinta-grupo {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 22px;
   padding-right: 18px;
   font-size: 1.05rem;
   white-space: nowrap;
@@ -851,33 +891,6 @@ html[data-turno-portada='visible'] .boton-turno {
 .sobre-frase strong {
   color: var(--azul);
   font-weight: 700;
-}
-
-/* Etiquetas chicas debajo de la frase */
-.sobre-etiquetas {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sobre-etiquetas li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-chico);
-  background: var(--superficie);
-  font-weight: 500;
-}
-
-.sobre-etiquetas svg {
-  flex-shrink: 0;
-  color: var(--azul);
 }
 
 /* Equipo dentro de "Quiénes somos": manchas de color detrás para que el vidrio de las tarjetas se note */
@@ -935,19 +948,29 @@ html[data-turno-portada='visible'] .boton-turno {
   pointer-events: none;
 }
 
-/* Gato de costado que espía desde el borde derecho de la pantalla */
+/* Un perro espía desde el borde izquierdo y un gato desde el derecho, a la misma altura */
 .sobre {
   position: relative;
 }
 
-.asomado-costado {
-  top: 24px;
-  right: calc((100% - 100vw) / 2);
+.asomado-costado,
+.asomado-izquierda {
+  top: 32px;
   width: 150px;
 }
 
+.asomado-costado {
+  right: calc((100% - 100vw) / 2);
+}
+
+.asomado-izquierda {
+  left: calc((100% - 100vw) / 2);
+  width: 96px;
+}
+
 @media (max-width: 1240px) {
-  .asomado-costado {
+  .asomado-costado,
+  .asomado-izquierda {
     display: none;
   }
 }
@@ -978,6 +1001,18 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
+/* Como un cartel pegado: fondo blanco, borde blanco grueso y una sombra suave */
+.difusion-cartel {
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin-block: 32px;
+  padding: 22px 28px;
+  border: 6px solid #fff;
+  border-radius: 20px;
+  background: #fffdf9;
+  box-shadow: 0 0 0 1px var(--borde), 0 14px 32px rgba(28, 45, 99, 0.1);
+}
+
 /* ---------- Servicios en mosaico ---------- */
 
 .mosaico {
@@ -987,65 +1022,57 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 28px;
 }
 
+/* Tarjetas blancas y compactas: ícono en un circulito amarillo suave, arriba del texto */
 .mosaico-tarjeta {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px 28px;
   overflow: hidden;
   border-radius: var(--radio);
   background: var(--superficie);
+  border: 1px solid var(--borde);
 }
 
 /* Si la cantidad de tarjetas es impar, la última ocupa todo el ancho y no queda un hueco. */
-.mosaico-tarjeta:last-child:nth-child(odd) img {
-  max-height: 340px;
-}
-
 .mosaico-tarjeta:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
+.mosaico-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fdf0c4; /* amarillo suave */
+  color: var(--azul);
+}
+
+.mosaico-icono svg {
+  stroke-width: 1.6;
+}
+
 .mosaico-texto {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 28px;
 }
 
 .mosaico-texto h3 {
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   color: var(--azul);
 }
 
 .mosaico-texto ul {
   flex: 1;
-  margin: 4px 0 16px;
+  margin: 4px 0 14px;
   padding-left: 20px;
 }
 
 .mosaico-texto li + li {
   margin-top: 4px;
-}
-
-.mosaico-tarjeta img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Degradé: el borde de la foto que toca el texto se desvanece en el color de la tarjeta */
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 38%);
-  mask-image: linear-gradient(to right, transparent, #000 38%);
-}
-
-.mosaico-recorte img {
-  align-self: end;
-  height: auto;
-  max-height: 300px;
-  padding: 20px 20px 0;
-  object-fit: contain;
-  object-position: center bottom;
-}
-
-.mosaico-tarjeta:last-child:nth-child(odd) img {
-  object-position: center 30%;
 }
 
 .mosaico-enlace {
@@ -1054,16 +1081,6 @@ html[data-turno-portada='visible'] .boton-turno {
   gap: 6px;
   font-weight: 700;
   text-decoration: none;
-}
-
-.mosaico-tarjeta.tarjeta-oscura {
-  background: var(--azul);
-  color: #ffffff;
-}
-
-.mosaico-tarjeta.tarjeta-oscura h3,
-.mosaico-tarjeta.tarjeta-oscura .mosaico-enlace {
-  color: var(--amarillo);
 }
 
 /* Toda la tarjeta es el enlace: el ::after del enlace la cubre entera */
@@ -1094,7 +1111,7 @@ html[data-turno-portada='visible'] .boton-turno {
   transition: opacity 200ms var(--curva-salida);
 }
 
-.mosaico-tarjeta img,
+.mosaico-icono,
 .mosaico-enlace svg {
   transition: transform 250ms var(--curva-salida);
 }
@@ -1117,8 +1134,8 @@ html[data-turno-portada='visible'] .boton-turno {
     opacity: 1;
   }
 
-  .mosaico-tarjeta:hover img {
-    transform: scale(1.04);
+  .mosaico-tarjeta:hover .mosaico-icono {
+    transform: scale(1.06) rotate(-4deg);
   }
 
   .mosaico-tarjeta:hover .mosaico-enlace svg {
@@ -1128,14 +1145,14 @@ html[data-turno-portada='visible'] .boton-turno {
 
 @media (prefers-reduced-motion: reduce) {
   .mosaico-tarjeta,
-  .mosaico-tarjeta img,
+  .mosaico-icono,
   .mosaico-enlace svg {
     transition: none;
   }
 
   .mosaico-tarjeta:hover,
   .mosaico-tarjeta:active,
-  .mosaico-tarjeta:hover img,
+  .mosaico-tarjeta:hover .mosaico-icono,
   .mosaico-tarjeta:hover .mosaico-enlace svg {
     transform: none;
   }
@@ -1415,10 +1432,24 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .preguntas summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   padding: 18px 22px;
   font-weight: 500;
   font-size: 1.05rem;
   cursor: pointer;
+  list-style: none;
+}
+
+.preguntas summary::-webkit-details-marker {
+  display: none;
+}
+
+.pregunta-flecha {
+  flex-shrink: 0;
+  color: var(--amarillo);
 }
 
 .preguntas details p {
@@ -1446,16 +1477,19 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* ---------- ¿Te quedaron dudas? ---------- */
 
+.dudas-banda {
+  margin-top: 32px;
+  background: var(--superficie);
+  border-block: 1px solid var(--borde);
+}
+
 .dudas {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  overflow: hidden;
-  border-radius: var(--radio-grande);
-  background: var(--superficie);
 }
 
 .dudas-texto {
-  padding: 40px;
+  padding: 48px 0;
 }
 
 .dudas-texto h2 {
@@ -1482,6 +1516,52 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* ---------- Contacto y mapa ---------- */
 
+/* Pegado a "¿Te quedaron dudas?", sin espacio, y hasta el pie de página */
+.contacto-escena {
+  position: relative;
+  isolation: isolate;
+}
+
+.contacto-escena::before,
+.contacto-escena::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.contacto-escena::before {
+  top: 10%;
+  left: 4%;
+  width: 38%;
+  height: 70%;
+  background: rgba(28, 45, 99, 0.2); /* azul */
+}
+
+.contacto-escena::after {
+  right: 6%;
+  bottom: 10%;
+  width: 40%;
+  height: 70%;
+  background: rgba(246, 195, 67, 0.4); /* amarillo */
+}
+
+.contacto-vidrio {
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .contacto-vidrio {
+    background: rgba(255, 255, 255, 0.85);
+  }
+}
+
 .contacto {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
@@ -1489,14 +1569,22 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 28px;
 }
 
+/* Tarjeta de vidrio esmerilado (como las del equipo), con huellitas que la cruzan */
 .contacto-tarjeta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 20px;
   padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radio-grande);
-  background: var(--azul);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 16px 40px rgba(28, 45, 99, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  color: var(--texto);
 }
 
 .dato-contacto {
@@ -1506,17 +1594,18 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .dato-contacto svg {
   margin-top: 3px;
-  color: var(--amarillo);
+  color: var(--azul);
 }
 
 .dato-contacto h3 {
   margin-bottom: 2px;
   font-size: 1.1rem;
+  color: var(--azul);
 }
 
 .dato-contacto p {
   margin: 0;
-  color: #d7def0;
+  color: var(--gris);
 }
 
 .contacto-botones {
@@ -1878,12 +1967,6 @@ html[data-turno-portada='visible'] .boton-turno {
     grid-template-columns: 1fr 1fr;
   }
 
-  /* El perrito ocupa la columna derecha entera y sigue parado sobre la cinta */
-  .portada-foto {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-  }
-
   .portada-texto {
     padding-bottom: 8px;
   }
@@ -1909,19 +1992,16 @@ html[data-turno-portada='visible'] .boton-turno {
     justify-content: center;
   }
 
+  .portada-lado {
+    justify-self: center;
+  }
+
   .portada-foto {
-    grid-column: auto;
-    grid-row: auto;
-    max-width: 280px;
-    margin-bottom: 8px;
+    width: min(100%, 300px);
   }
 
   .portada-ventajas {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 28px;
-    padding-bottom: 40px;
+    gap: 12px 24px;
   }
 
 
@@ -1948,7 +2028,7 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .dudas-texto {
-    padding: 28px 24px;
+    padding: 8px 0 36px;
   }
 
   .mapa {
@@ -2059,22 +2139,13 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .portada-ventajas {
-    flex-direction: column;
-    align-items: flex-start;
-    width: fit-content;
-    margin-inline: auto;
+    grid-template-columns: auto;
+    justify-content: center;
+    text-align: left;
   }
 
   .mosaico-tarjeta {
-    grid-template-columns: 1fr;
-  }
-
-  .mosaico-tarjeta img {
-    height: 200px;
-    order: -1;
-    /* En el celular la foto va arriba: se desvanece hacia el texto de abajo */
-    -webkit-mask-image: linear-gradient(to top, transparent, #000 40%);
-    mask-image: linear-gradient(to top, transparent, #000 40%);
+    padding: 22px;
   }
 
   .linea-tiempo li {
@@ -4547,5 +4618,334 @@ form.campo-en-linea {
 @media (max-width: 560px) {
   .aviso-acciones-fila {
     grid-column: 1 / -1;
+  }
+}
+
+.limite-cliente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borde, #e7e1d6);
+}
+
+.limite-cliente > .ayuda {
+  margin: 0;
+}
+
+.limite-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+
+/* ================= Movimientos de la página de presentación =================
+   Solo en el inicio (turnos, Mi cuenta y el panel quedan serios).
+   Todos se apagan si la persona pidió "menos movimiento" en su compu o celular.
+   Los que aparecen al bajar usan revelarAlBajar (lib/revelar.ts), que agrega la clase "visible". */
+
+/* Para poder animar la altura de las preguntas hasta "auto" (Chrome y Edge; en otros se abre sin animación) */
+:root {
+  interpolate-size: allow-keywords;
+}
+
+.palabra {
+  display: inline-block;
+}
+
+.preguntas details::details-content {
+  block-size: 0;
+  overflow: hidden;
+}
+
+.preguntas details[open]::details-content {
+  block-size: auto;
+}
+
+.huellitas-cruzan {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.huellitas-cruzan svg {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  fill: var(--azul);
+  opacity: 0;
+  /* Los dedos miran hacia donde camina (arriba a la derecha) */
+  transform: rotate(55deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Portada: la huella con el perrito aparece con un "pop" */
+  .portada-foto-sombra {
+    animation: huella-pop 700ms var(--curva-salida) 150ms backwards;
+  }
+
+  /* Título: cada palabra sube apenas después de la anterior */
+  .palabra {
+    animation: palabra-sube 600ms var(--curva-salida) backwards;
+    animation-delay: calc(var(--orden) * 110ms);
+  }
+
+  /* Botones de la portada: se hunden un poquito al apretarlos */
+  .portada-acciones .boton {
+    transition:
+      background-color 0.15s,
+      transform 160ms var(--curva-salida);
+  }
+
+  .portada-acciones .boton:active {
+    transform: scale(0.96);
+  }
+
+  /* Equipo: las tarjetas suben y aparecen al llegar */
+  .revelar-subir:not(.visible) > * {
+    opacity: 0;
+  }
+
+  .revelar-subir.visible > * {
+    animation: aparece-subiendo 650ms var(--curva-salida) backwards;
+  }
+
+  .revelar-subir.visible > :nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .revelar-subir.visible > :nth-child(3) {
+    animation-delay: 240ms;
+  }
+
+  /* Servicios: entran desde los costados (izquierda y derecha, como están en la grilla) */
+  .revelar-costados:not(.visible) > * {
+    opacity: 0;
+  }
+
+  .revelar-costados.visible > :nth-child(odd) {
+    animation: entra-izquierda 700ms var(--curva-salida) backwards;
+  }
+
+  .revelar-costados.visible > :nth-child(even) {
+    animation: entra-derecha 700ms var(--curva-salida) 100ms backwards;
+  }
+
+  .revelar-costados.visible > :nth-child(n + 3) {
+    animation-delay: 200ms;
+  }
+
+  .revelar-costados.visible > :nth-child(n + 5) {
+    animation-delay: 300ms;
+  }
+
+  /* Preguntas: se abren suave y la flechita gira */
+  .preguntas details::details-content {
+    transition:
+      block-size 350ms var(--curva-salida),
+      content-visibility 350ms allow-discrete;
+  }
+
+  .pregunta-flecha {
+    transition: transform 300ms var(--curva-salida);
+  }
+
+  .preguntas details[open] .pregunta-flecha {
+    transform: rotate(180deg);
+  }
+
+  /* Contacto: las huellitas cruzan la tarjeta una vez */
+  .contacto.visible .huellitas-cruzan svg {
+    animation: huellita-pisa 2400ms ease-out backwards;
+    animation-delay: calc(300ms + var(--orden) * 180ms);
+  }
+
+  /* Mapa: el marcador cae y rebota (usa "translate" para no pisar el giro del marcador) */
+  .contacto:not(.visible) .mapa-marcador span {
+    opacity: 0;
+  }
+
+  .contacto.visible .mapa-marcador span {
+    animation: pin-cae 900ms 400ms backwards;
+  }
+}
+
+/* Botón con brillo: un reflejo cruza "Pedir turno" de la portada */
+.boton-brillo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.boton-brillo::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-160%) skewX(-20deg);
+  pointer-events: none;
+}
+
+/* Onda del marcador del mapa: escondida salvo en el inicio */
+.pin-onda {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Huella "sellada": aparece la palma con el perrito y después cada dedito, de izquierda a derecha, una sola vez */
+  .dedo {
+    animation: dedo-sella 450ms cubic-bezier(0.34, 1.4, 0.64, 1) backwards;
+    animation-delay: calc(550ms + var(--orden) * 120ms);
+  }
+
+  /* El brillo pasa una vez, cuando termina de aparecer la portada */
+  .boton-brillo::after {
+    animation: brillo-cruza 900ms ease-out 1300ms;
+  }
+
+  /* Después de caer, el marcador "late": sale una onda cada tanto */
+  .contacto.visible .pin-onda {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    border: 2px solid var(--azul);
+    border-radius: 50%;
+    opacity: 0;
+    animation: pin-onda 2600ms ease-out 1400ms infinite;
+  }
+}
+
+/* Con mouse: el brillo vuelve a pasar cada vez que se pasa por encima */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .boton-brillo:hover::after {
+    animation: brillo-cruza-otra-vez 800ms ease-out;
+  }
+}
+
+@keyframes brillo-cruza {
+  to {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+/* Mismo movimiento con otro nombre, para que se repita al pasar el mouse */
+@keyframes brillo-cruza-otra-vez {
+  to {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+@keyframes dedo-sella {
+  from {
+    rx: 0;
+    ry: 0;
+  }
+}
+
+@keyframes pin-onda {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.6, 0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.2, 1.6);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 860px) {
+  /* En celular la grilla de servicios es de una columna: todas entran desde abajo */
+  .revelar-costados.visible > :nth-child(odd),
+  .revelar-costados.visible > :nth-child(even) {
+    animation-name: aparece-subiendo;
+  }
+}
+
+@keyframes huella-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes palabra-sube {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+
+@keyframes aparece-subiendo {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+@keyframes entra-izquierda {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+}
+
+@keyframes entra-derecha {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+
+@keyframes huellita-pisa {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  55% {
+    opacity: 0.16;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pin-cae {
+  0% {
+    opacity: 0;
+    translate: 0 -70px;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  55% {
+    opacity: 1;
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  72% {
+    translate: 0 -12px;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  86% {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  93% {
+    translate: 0 -3px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
   }
 }
