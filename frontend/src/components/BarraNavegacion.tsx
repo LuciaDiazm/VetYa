@@ -31,7 +31,10 @@ export function BarraNavegacion() {
   const soloMenu = pathname === '/ingresar'
   // En Mi cuenta el único "Pedir turno" es el azul del saludo: el del encabezado se oculta.
   const enCuenta = pathname === '/mi-cuenta'
-  const secciones: { ruta: string; nombre: string; soloMenu?: boolean }[] = enCuenta ? SECCIONES_CUENTA : SECCIONES
+  // Con la sesión de un dueño iniciada, el menú de la cuenta se mantiene en todas las páginas
+  // (Urgencias, Pedir turno, Cirugías…) salvo en el inicio, que muestra las secciones del sitio.
+  const menuDeCuenta = usuario?.rol === 'DUENIO' && pathname !== '/'
+  const secciones: { ruta: string; nombre: string; soloMenu?: boolean }[] = menuDeCuenta ? SECCIONES_CUENTA : SECCIONES
 
   function cerrarSesion() {
     // React Router navega dentro de una transición. Si la sesión se borrara por fuera de ella,
