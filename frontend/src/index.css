@@ -433,6 +433,54 @@ svg {
   text-align: left;
 }
 
+/* Encabezado de Ingresar: solo el logo y, a la derecha, el menú de siempre (un círculo con tres rayitas) */
+.encabezado-solo-menu .menu-principal,
+.encabezado-solo-menu .boton-turno,
+.encabezado-solo-menu .urgencias-chica,
+.encabezado-solo-menu .cuenta-compu {
+  display: none;
+}
+
+/* (en pantallas anchas la barra es una grilla de 3 columnas: acá alcanza con logo y botón) */
+.encabezado-solo-menu .barra-interior {
+  display: flex;
+  justify-content: space-between;
+}
+
+.encabezado-solo-menu .boton-menu {
+  display: inline-flex;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+/* La palabra "Menú" queda solo para los lectores de pantalla */
+.encabezado-solo-menu .boton-menu span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* El menú se abre como una tarjeta a la derecha, debajo del botón */
+.encabezado-solo-menu {
+  position: sticky;
+}
+
+.encabezado-solo-menu .menu-movil {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: max(16px, calc((100% - 1200px) / 2 + 24px));
+  width: min(320px, calc(100% - 32px));
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: 0 18px 40px rgba(17, 28, 64, 0.22);
+}
+
 /* "Pedir turno" del encabezado: no se repite mientras se ve el de la portada o el de "Dónde estamos" */
 
 html[data-turno-portada='visible'] .boton-turno {
@@ -1801,7 +1849,148 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 8px;
 }
 
-/* ---------- Ingreso y registro ---------- */
+/* ---------- Ingresar ---------- */
+
+/* El fondo pasa del azul de VetYa al mismo verde azulado de la foto, así no se nota el borde.
+   Una mancha amarilla suave queda detrás de la tarjeta. */
+.ingreso {
+  display: flex;
+  justify-content: center;
+  min-height: calc(100dvh - 81px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(246, 195, 67, 0.32), transparent 30%),
+    linear-gradient(105deg, var(--azul) 0%, #1a4a6c 22%, #196370 42%);
+}
+
+/* Tarjeta y foto juntas en el centro: la tarjeta se apoya apenas sobre el borde de la foto */
+.ingreso-interior {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(1040px, 100%);
+  padding-inline: 24px;
+}
+
+.acceso-formulario.ingreso-tarjeta {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 480px;
+  max-width: 480px;
+  margin: 40px -56px 40px 0;
+  padding: 44px 44px 32px;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 28px 60px rgba(9, 22, 48, 0.38);
+}
+
+.ingreso-foto {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  height: min(calc(100dvh - 81px), 760px);
+  width: auto;
+  /* El borde izquierdo de la foto se desvanece en el fondo */
+  mask-image: linear-gradient(to right, transparent, #000 22%);
+}
+
+.ingreso-tarjeta h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.ingreso-tarjeta .formulario {
+  margin: 22px 0 18px;
+}
+
+.ingreso-tarjeta .campo {
+  color: var(--gris);
+  font-size: 0.95rem;
+}
+
+/* Campos grises y redondeados, con el ícono adentro a la derecha */
+.campo-con-icono {
+  position: relative;
+  display: block;
+}
+
+.ingreso-tarjeta .campo input {
+  min-height: 58px;
+  padding: 12px 58px 12px 24px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #f1f3f6;
+  font-size: 1.05rem;
+}
+
+.ingreso-tarjeta .campo input:focus {
+  background: #ffffff;
+}
+
+.campo-con-icono svg {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  color: #8a96ad;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.ingreso-tarjeta .boton-texto {
+  align-self: flex-start;
+  margin: -4px 0 0 12px;
+  font-size: 0.95rem;
+}
+
+/* Botón centrado, con una sombra suave debajo */
+.acceso-formulario .boton.ingreso-boton {
+  align-self: center;
+  width: auto;
+  min-width: 230px;
+  margin-top: 10px;
+  box-shadow: 0 14px 28px rgba(28, 45, 99, 0.32);
+}
+
+.ingreso-registro {
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  /* En el celular la foto va arriba y la tarjeta se apoya encima, un poco superpuesta */
+  .ingreso {
+    background: linear-gradient(180deg, #196370 0%, #196370 300px, #1a4a6c 62%, var(--azul) 100%);
+  }
+
+  .ingreso-interior {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 16px 40px;
+  }
+
+  .ingreso-foto {
+    order: -1;
+    align-self: center;
+    width: calc(100% + 32px);
+    max-width: none;
+    height: 330px;
+    object-fit: cover;
+    object-position: center 22%;
+    mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  }
+
+  .acceso-formulario.ingreso-tarjeta {
+    flex: none;
+    max-width: none;
+    margin: -28px 0 0;
+    padding: 30px 20px 24px;
+  }
+
+  .ingreso-tarjeta h1 {
+    font-size: 2rem;
+  }
+}
+
+/* ---------- Registro ---------- */
 
 .acceso {
   display: grid;

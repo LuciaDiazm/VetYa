@@ -1,6 +1,6 @@
 import { LogOut, Menu, UserRound, X } from 'lucide-react'
 import { startTransition, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
 import { IconoSirena } from './IconoSirena'
 import { Logo } from './Logo'
@@ -19,6 +19,8 @@ export function BarraNavegacion() {
   const { usuario, cargando, salir } = useAuth()
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
+  // En Ingresar el encabezado queda despejado: solo el logo y el menú redondo de tres rayitas.
+  const soloMenu = useLocation().pathname === '/ingresar'
 
   function cerrarSesion() {
     // React Router navega dentro de una transición. Si la sesión se borrara por fuera de ella,
@@ -55,7 +57,7 @@ export function BarraNavegacion() {
   )
 
   return (
-    <header className="encabezado">
+    <header className={`encabezado${soloMenu ? ' encabezado-solo-menu' : ''}`}>
       <div className="contenedor barra-interior">
         <Link to="/" className="enlace-logo" aria-label="VetYa, ir al inicio" onClick={cerrarMenu}>
           <Logo />
