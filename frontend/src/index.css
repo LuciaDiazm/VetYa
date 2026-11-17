@@ -3873,16 +3873,15 @@ img.hoy-avatar {
   list-style: none;
 }
 
-/* Tarjeta de turno: la barra de la izquierda repite el color del estado */
+/* Tarjeta de turno: toda celeste clarito; el estado se lee en la etiqueta (ícono + texto) */
 .turno {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  gap: 16px;
-  padding: 16px 18px 16px 14px;
-  border: 1px solid var(--borde);
-  border-left: 6px solid var(--azul);
-  border-radius: var(--radio-chico);
-  background: var(--superficie);
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid #cfe2f3;
+  border-radius: var(--radio);
+  background: #eaf4fc;
   transition: opacity 160ms var(--curva-salida);
 }
 
@@ -3890,23 +3889,12 @@ img.hoy-avatar {
   opacity: 0.7;
 }
 
-.turno-PENDIENTE {
-  border-left-color: var(--amarillo);
-}
-
-.turno-ATENDIDO {
-  border-left-color: #1e7a4c;
-}
-
-.turno-AUSENTE,
-.turno-CANCELADO {
-  border-left-color: var(--rojo);
-}
-
+/* Los que ya terminaron (atendidos, ausentes, cancelados) quedan más apagados */
 .turno-ATENDIDO,
 .turno-AUSENTE,
 .turno-CANCELADO {
-  background: #fcfaf6;
+  border-color: var(--borde);
+  background: #f5f7fa;
 }
 
 .turno-CANCELADO .turno-titulo a,
@@ -3919,8 +3907,7 @@ img.hoy-avatar {
 }
 
 .turno-pasado {
-  border-color: var(--amarillo);
-  border-left-color: var(--amarillo);
+  border: 2px solid var(--amarillo);
 }
 
 .turno-hora {
@@ -3931,7 +3918,7 @@ img.hoy-avatar {
 
 .turno-hora strong {
   font-family: var(--fuente-titulos);
-  font-size: 1.5rem;
+  font-size: 2.2rem;
   line-height: 1.2;
   color: var(--azul);
   font-variant-numeric: tabular-nums;
@@ -3939,7 +3926,7 @@ img.hoy-avatar {
 
 .turno-hora > span {
   color: var(--gris);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3968,32 +3955,66 @@ img.hoy-avatar {
 
 .turno-cuerpo .turno-titulo {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 12px;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
   margin: 0;
+  color: var(--azul);
 }
 
 .turno-titulo a {
-  font-size: 1.25rem;
+  font-family: var(--fuente-titulos);
+  font-size: 1.6rem;
   font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
   overflow-wrap: anywhere;
 }
 
-.turno-servicio {
-  font-weight: 500;
+.turno-titulo a:hover {
+  text-decoration: underline;
 }
 
-.turno-dueno,
-.turno-observaciones {
+.turno-cuerpo .turno-motivo {
+  margin: 2px 0 10px;
+  font-size: 1.15rem;
+}
+
+.turno-motivo strong {
+  color: var(--azul);
+}
+
+.turno-cuerpo .turno-persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--gris);
 }
 
-.turno-telefono {
-  color: inherit;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+/* Botón redondo de WhatsApp junto al nombre de quien trae la mascota */
+.turno-whatsapp {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1f8a4c;
+  color: #ffffff;
+  transition: background-color 0.15s;
+}
+
+.turno-whatsapp:hover {
+  background: #176b3a;
+}
+
+.turno-whatsapp:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+.turno-observaciones {
+  color: var(--gris);
 }
 
 .turno-origen {
@@ -4084,15 +4105,25 @@ img.hoy-avatar {
   opacity: 0.6;
 }
 
-.turno-acciones .boton-texto {
-  min-height: 44px;
-  padding: 6px 8px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.turno-acciones .boton-contorno {
+  background: #ffffff;
 }
 
+.turno-acciones .boton-contorno:hover {
+  background: var(--azul-suave);
+}
+
+/* "Cancelar turno": botón con borde rojo, aparte a la derecha */
 .turno-acciones .turno-cancelar {
   margin-left: auto;
+  border: 2px solid var(--rojo);
+  background: #ffffff;
+  color: var(--rojo);
+}
+
+.turno-acciones .turno-cancelar:hover {
+  background: var(--rojo-suave);
+  color: var(--rojo-hover);
 }
 
 .turno-cuerpo .turno-error {

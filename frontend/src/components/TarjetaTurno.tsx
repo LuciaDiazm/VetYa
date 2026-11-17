@@ -1,9 +1,8 @@
-import { MessageCircle, Stethoscope, Undo2, UserX } from 'lucide-react'
+import { MessageCircle, PawPrint, Stethoscope, Undo2, UserX, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiPatch } from '../lib/api'
 import { horaDe } from '../lib/fechas'
-import { formatearTelefono } from '../lib/mascotas'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, mensajeConfirmacion, ORIGENES } from '../lib/turnos'
 import type { EstadoTurno, Turno } from '../types'
@@ -41,6 +40,7 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
     }
   }
 
+  const mensajeDueno = `Hola ${cliente.nombre}, te escribimos de ${nombreClinica} por el turno de ${turno.mascota.nombre}.`
   const avisoAusente = `Hola ${cliente.nombre}, hoy te esperábamos con ${turno.mascota.nombre} a las ${horaDe(turno.fechaHoraInicio)} en ${nombreClinica}. ¿Querés que te demos otro turno?`
 
   return (
@@ -55,19 +55,31 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
       </div>
 
       <div className="turno-cuerpo">
+        {/* Lo más importante, grande: la mascota y a qué viene */}
         <div className="turno-encabezado">
           <p className="turno-titulo">
+            <PawPrint size={22} aria-hidden="true" />
             <Link to={`/panel/mascotas/${turno.mascota.id}`}>{turno.mascota.nombre}</Link>
-            <span className="turno-servicio">{turno.servicio.nombre}</span>
           </p>
           <span className={`estado-turno estado-${turno.estado}`}>
             <IconoEstado size={16} aria-hidden="true" /> {ESTADOS_TURNO[turno.estado]}
           </span>
         </div>
-        <p className="turno-dueno">
-          {cliente.nombre} {cliente.apellido} ·{' '}
-          <a href={`tel:+${cliente.telefono}`} className="turno-telefono">
-            {formatearTelefono(cliente.telefono)}
+        <p className="turno-motivo">
+          Viene por: <strong>{turno.servicio.nombre}</strong>
+        </p>
+        {/* Quién la trae, sin el número a la vista: el ícono abre su WhatsApp */}
+        <p className="turno-persona">
+          La trae {cliente.nombre} {cliente.apellido}
+          <a
+            href={enlaceWhatsapp(cliente.telefono, mensajeDueno)}
+            target="_blank"
+            rel="noreferrer"
+            className="turno-whatsapp"
+            aria-label={`Escribirle por WhatsApp a ${cliente.nombre} ${cliente.apellido}`}
+            title="Escribirle por WhatsApp"
+          >
+            <MessageCircle size={20} aria-hidden="true" />
           </a>
         </p>
         {turno.observaciones && <p className="turno-observaciones">“{turno.observaciones}”</p>}
@@ -94,16 +106,16 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
             >
               <MessageCircle size={18} aria-hidden="true" /> Confirmar por WhatsApp
             </a>
-            <button type="button" className="boton-texto" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
+            <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
               Ya le confirmé por teléfono
             </button>
             <button
               type="button"
-              className="boton-texto texto-peligro turno-cancelar"
+              className="boton turno-cancelar"
               disabled={cambiando}
               onClick={() => cambiar('CANCELADO')}
             >
-              Cancelar turno
+              <X size={18} aria-hidden="true" /> Cancelar turno
             </button>
           </div>
         )}
@@ -116,16 +128,16 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
             <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('AUSENTE')}>
               <UserX size={18} aria-hidden="true" /> No vino
             </button>
-            <button type="button" className="boton-texto" disabled={cambiando} onClick={() => cambiar('ATENDIDO')}>
+            <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('ATENDIDO')}>
               Atendido sin consulta
             </button>
             <button
               type="button"
-              className="boton-texto texto-peligro turno-cancelar"
+              className="boton turno-cancelar"
               disabled={cambiando}
               onClick={() => cambiar('CANCELADO')}
             >
-              Cancelar turno
+              <X size={18} aria-hidden="true" /> Cancelar turno
             </button>
           </div>
         )}
@@ -142,7 +154,7 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
               </Link>
             )}
             {!turno.consulta && (
-              <button type="button" className="boton-texto" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
+              <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
                 <Undo2 size={16} aria-hidden="true" /> Deshacer
               </button>
             )}
@@ -159,7 +171,7 @@ export function TarjetaTurno({ turno, alCambiar, marca }: Props) {
             >
               <MessageCircle size={18} aria-hidden="true" /> Ofrecerle otro turno
             </a>
-            <button type="button" className="boton-texto" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
+            <button type="button" className="boton boton-contorno" disabled={cambiando} onClick={() => cambiar('CONFIRMADO')}>
               <Undo2 size={16} aria-hidden="true" /> Deshacer
             </button>
           </div>
