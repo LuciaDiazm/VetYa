@@ -5285,6 +5285,28 @@ form.campo-en-linea {
   opacity: 0.55;
 }
 
+/* El ícono de cargando flota sobre los gráficos sin correr nada: el contenedor no ocupa lugar */
+.estadisticas-cargando {
+  position: sticky;
+  top: 35vh;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 0;
+  overflow: visible;
+}
+
+.estadisticas-cargando .cargando {
+  padding: 22px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radio);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 32px rgba(28, 45, 99, 0.12);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
 .indicadores {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));

@@ -212,6 +212,13 @@ export function Estadisticas() {
       {problema ? null : !datos ? (
         !error && <Cargando />
       ) : (
+        <>
+        {/* Al cambiar el período: el ícono flota sobre los gráficos anteriores, que quedan más tenues */}
+        {cargando && (
+          <div className="estadisticas-cargando">
+            <Cargando texto="Actualizando…" />
+          </div>
+        )}
         <div className={`estadisticas${cargando ? ' recargando' : ''}`} aria-busy={cargando}>
           {/* ---------- Indicadores ---------- */}
           <ul className="indicadores">
@@ -343,6 +350,7 @@ export function Estadisticas() {
             </p>
           </section>
         </div>
+        </>
       )}
     </>
   )
