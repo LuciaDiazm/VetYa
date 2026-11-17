@@ -1056,31 +1056,42 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* ---------- Servicios en mosaico ---------- */
 
+/* Tres por fila en compu (la última fila queda centrada), dos en tablet y una en celular */
 .mosaico {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
   margin-top: 28px;
 }
 
-/* Tarjetas blancas y compactas: ícono en un circulito amarillo suave, arriba del texto */
+/* Tarjetas blancas y compactas: ícono en un circulito amarillo suave, al lado del texto */
 .mosaico-tarjeta {
+  flex: 0 0 calc((100% - 32px) / 3);
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 26px 28px;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 24px;
   overflow: hidden;
   border-radius: var(--radio);
   background: var(--superficie);
   border: 1px solid var(--borde);
 }
 
-/* Si la cantidad de tarjetas es impar, la última ocupa todo el ancho y no queda un hueco. */
-.mosaico-tarjeta:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
+@media (max-width: 1000px) {
+  .mosaico-tarjeta {
+    flex-basis: calc((100% - 16px) / 2);
+  }
+}
+
+@media (max-width: 640px) {
+  .mosaico-tarjeta {
+    flex-basis: 100%;
+  }
 }
 
 .mosaico-icono {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1097,12 +1108,15 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .mosaico-texto {
   flex: 1;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .mosaico-texto h3 {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
+  line-height: 1.25;
   color: var(--azul);
 }
 
@@ -1116,12 +1130,21 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 4px;
 }
 
+/* "Pedir turno" resaltado: una pastilla celeste suave */
 .mosaico-enlace {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--azul-suave);
+  color: var(--azul);
   font-weight: 700;
+  white-space: nowrap;
   text-decoration: none;
+  transition: background-color 200ms var(--curva-salida);
 }
 
 /* Toda la tarjeta es el enlace: el ::after del enlace la cubre entera */
@@ -1181,6 +1204,10 @@ html[data-turno-portada='visible'] .boton-turno {
 
   .mosaico-tarjeta:hover .mosaico-enlace svg {
     transform: translateX(4px);
+  }
+
+  .mosaico-tarjeta:hover .mosaico-enlace {
+    background: #dde3f3;
   }
 }
 
@@ -2186,7 +2213,8 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .mosaico-tarjeta {
-    padding: 22px;
+    padding: 20px;
+    gap: 14px;
   }
 
   .linea-tiempo li {
@@ -4765,25 +4793,29 @@ form.campo-en-linea {
     animation-delay: 240ms;
   }
 
-  /* Servicios: entran desde los costados (izquierda y derecha, como están en la grilla) */
+  /* Servicios: entran de a una desde el costado, en orden, sin apuro */
   .revelar-costados:not(.visible) > * {
     opacity: 0;
   }
 
-  .revelar-costados.visible > :nth-child(odd) {
-    animation: entra-izquierda 700ms var(--curva-salida) backwards;
+  .revelar-costados.visible > * {
+    animation: entra-izquierda 900ms var(--curva-salida) backwards;
   }
 
-  .revelar-costados.visible > :nth-child(even) {
-    animation: entra-derecha 700ms var(--curva-salida) 100ms backwards;
-  }
-
-  .revelar-costados.visible > :nth-child(n + 3) {
+  .revelar-costados.visible > :nth-child(2) {
     animation-delay: 200ms;
   }
 
-  .revelar-costados.visible > :nth-child(n + 5) {
-    animation-delay: 300ms;
+  .revelar-costados.visible > :nth-child(3) {
+    animation-delay: 400ms;
+  }
+
+  .revelar-costados.visible > :nth-child(4) {
+    animation-delay: 600ms;
+  }
+
+  .revelar-costados.visible > :nth-child(5) {
+    animation-delay: 800ms;
   }
 
   /* Preguntas: se abren suave y la flechita gira */
@@ -4909,8 +4941,7 @@ form.campo-en-linea {
 
 @media (prefers-reduced-motion: no-preference) and (max-width: 860px) {
   /* En celular la grilla de servicios es de una columna: todas entran desde abajo */
-  .revelar-costados.visible > :nth-child(odd),
-  .revelar-costados.visible > :nth-child(even) {
+  .revelar-costados.visible > * {
     animation-name: aparece-subiendo;
   }
 }
@@ -4940,13 +4971,6 @@ form.campo-en-linea {
   from {
     opacity: 0;
     transform: translateX(-48px);
-  }
-}
-
-@keyframes entra-derecha {
-  from {
-    opacity: 0;
-    transform: translateX(48px);
   }
 }
 
