@@ -14,7 +14,7 @@ import {
   Star,
   Syringe,
 } from 'lucide-react'
-import { Fragment, useEffect, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
+import { Fragment, useEffect, type CSSProperties, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { IconoDiente } from '../components/IconoDiente'
 import { Mapa } from '../components/Mapa'
@@ -332,7 +332,7 @@ export function Inicio() {
         </section>
       )}
 
-      {/* ---------- ¿Te quedaron dudas? ---------- */}
+      {/* ---------- ¿Tenés dudas? ---------- */}
       {/* Franja blanca de borde a borde */}
       <section className="dudas-banda" aria-labelledby="titulo-dudas">
         <div className="contenedor">
@@ -386,7 +386,7 @@ export function Inicio() {
                   </div>
                 )}
                 <div className="contacto-botones">
-                  <Link to="/turno" className="boton boton-secundario">
+                  <Link to="/turno" className="boton boton-amarillo-claro boton-brillo">
                     <CalendarCheck size={20} aria-hidden="true" />
                     Pedir turno
                   </Link>
@@ -414,36 +414,22 @@ export function Inicio() {
   )
 }
 
-// Formulario corto que arma un mensaje de WhatsApp con la consulta: no hace falta cuenta ni email.
+// Invitación corta a escribir por WhatsApp: el mensaje ya va escrito, sin formulario.
 function Dudas({ whatsapp }: { whatsapp: string }) {
-  const [nombre, setNombre] = useState('')
-  const [pregunta, setPregunta] = useState('')
-
-  function enviar(e: FormEvent) {
-    e.preventDefault()
-    const mensaje = `Hola, soy ${nombre.trim()}. Tengo una consulta: ${pregunta.trim()}`
-    window.open(enlaceWhatsapp(whatsapp, mensaje), '_blank', 'noreferrer')
-  }
-
   return (
     <div className="dudas">
       <div className="dudas-texto">
-        <h2 id="titulo-dudas">¿Te quedaron dudas?</h2>
-        <p>Escribí tu pregunta. Te responde una persona de la clínica por WhatsApp.</p>
-        <form className="formulario" onSubmit={enviar}>
-          <label className="campo">
-            Tu nombre
-            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required autoComplete="given-name" />
-          </label>
-          <label className="campo">
-            Tu pregunta
-            <textarea value={pregunta} onChange={(e) => setPregunta(e.target.value)} required rows={3} />
-          </label>
-          <button type="submit" className="boton boton-grande">
-            <MessageCircle size={22} aria-hidden="true" />
-            Enviar por WhatsApp
-          </button>
-        </form>
+        <h2 id="titulo-dudas">¿Tenés dudas?</h2>
+        <p>Escribinos por WhatsApp. Te responde una persona de la clínica.</p>
+        <a
+          href={enlaceWhatsapp(whatsapp, 'Hola, tengo una consulta sobre mi mascota.')}
+          target="_blank"
+          rel="noreferrer"
+          className="boton boton-grande boton-whatsapp"
+        >
+          <MessageCircle size={22} aria-hidden="true" />
+          Escribir por WhatsApp
+        </a>
       </div>
       <img src="/fotos/gatito-papel.webp" alt="" className="dudas-foto" loading="lazy" />
     </div>

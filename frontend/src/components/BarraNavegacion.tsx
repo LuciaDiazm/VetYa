@@ -75,7 +75,7 @@ export function BarraNavegacion() {
 
         <div className="barra-acciones">
           {/* Va primero: cuando se oculta en la portada, el hueco queda junto al menú y nada se corre. */}
-          <Link to="/turno" className="boton boton-secundario boton-turno">
+          <Link to="/turno" className="boton boton-amarillo-claro boton-brillo boton-turno">
             Pedir turno
           </Link>
           {/* En pantallas chicas el menú de vidrio se oculta: Urgencias queda siempre a la vista acá */}

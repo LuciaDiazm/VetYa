@@ -225,6 +225,16 @@ svg {
   background: var(--amarillo-hover);
 }
 
+/* "Pedir turno" del sitio público: un amarillo más claro (va con brillo, ver .boton-brillo) */
+.boton-amarillo-claro {
+  background: #fdd970;
+  color: var(--azul-oscuro);
+}
+
+.boton-amarillo-claro:hover {
+  background: #fbcd4f;
+}
+
 .boton-whatsapp {
   background: var(--verde-whatsapp);
 }
@@ -1516,7 +1526,7 @@ html[data-turno-portada='visible'] .boton-turno {
   transform: translateY(-50%);
 }
 
-/* ---------- ¿Te quedaron dudas? ---------- */
+/* ---------- ¿Tenés dudas? ---------- */
 
 .dudas-banda {
   margin-top: 32px;
@@ -1530,34 +1540,32 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .dudas-texto {
-  padding: 48px 0;
+  align-self: center;
+  padding: 40px 0;
 }
 
 .dudas-texto h2 {
   color: var(--azul);
 }
 
-.dudas-texto .formulario {
-  margin-top: 20px;
-}
-
-.dudas-texto .boton {
-  align-self: flex-start;
+.dudas-texto p {
+  margin: 8px 0 22px;
+  font-size: 1.15rem;
 }
 
 .dudas-foto {
   align-self: end;
   width: 100%;
   height: 100%;
-  max-height: 520px;
-  padding: 32px 24px 0;
+  max-height: 300px;
+  padding: 24px 24px 0;
   object-fit: contain;
   object-position: center bottom;
 }
 
 /* ---------- Contacto y mapa ---------- */
 
-/* Pegado a "¿Te quedaron dudas?", sin espacio, y hasta el pie de página */
+/* Pegado a "¿Tenés dudas?", sin espacio, y hasta el pie de página */
 .contacto-escena {
   position: relative;
   isolation: isolate;
@@ -1846,6 +1854,24 @@ html[data-turno-portada='visible'] .boton-turno {
   margin: 24px 0;
 }
 
+/* Ingresar y crear cuenta: el campo donde se escribe se ilumina (borde azul y un halo amarillo suave) */
+.acceso-formulario .campo input {
+  transition:
+    border-color 200ms var(--curva-salida),
+    box-shadow 300ms var(--curva-salida);
+}
+
+.acceso-formulario .campo input:focus {
+  border-color: var(--azul);
+  box-shadow:
+    0 0 0 4px rgba(246, 195, 67, 0.45),
+    0 0 22px rgba(246, 195, 67, 0.55);
+}
+
+.acceso-formulario .campo:focus-within {
+  color: var(--azul);
+}
+
 .acceso-formulario .boton {
   width: 100%;
   min-height: 56px;
@@ -2063,7 +2089,7 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .dudas-foto {
-    height: 260px;
+    height: 200px;
     padding-top: 20px;
     order: -1;
   }
@@ -4806,10 +4832,19 @@ form.campo-en-linea {
     transform: rotate(180deg);
   }
 
-  /* Contacto: las huellitas cruzan la tarjeta una vez */
+  /* Contacto: las huellitas cruzan la tarjeta y vuelven a pasar cada 5 segundos */
   .contacto.visible .huellitas-cruzan svg {
-    animation: huellita-pisa 2400ms ease-out backwards;
+    animation: huellita-pisa 5000ms ease-out infinite backwards;
     animation-delay: calc(300ms + var(--orden) * 180ms);
+  }
+
+  /* "Pedir turno" de Dónde estamos: el brillo pasa al aparecer y después cada 6 segundos */
+  .contacto .boton-brillo::after {
+    animation: none;
+  }
+
+  .contacto.visible .boton-brillo::after {
+    animation: brillo-repite 6000ms ease-out 1200ms infinite;
   }
 
   /* Mapa: el marcador cae y rebota (usa "translate" para no pisar el giro del marcador) */
@@ -4876,13 +4911,25 @@ form.campo-en-linea {
 
 /* Con mouse: el brillo vuelve a pasar cada vez que se pasa por encima */
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  .boton-brillo:hover::after {
+  .boton-brillo:hover::after,
+  .contacto.visible .boton-brillo:hover::after {
     animation: brillo-cruza-otra-vez 800ms ease-out;
   }
 }
 
 @keyframes brillo-cruza {
   to {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+/* El reflejo cruza en el primer 15 % y después espera quieto hasta la próxima vuelta */
+@keyframes brillo-repite {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  15%,
+  100% {
     transform: translateX(320%) skewX(-20deg);
   }
 }
@@ -4947,14 +4994,16 @@ form.campo-en-linea {
   }
 }
 
+/* Cada huellita se ve un rato largo y se apaga antes de la próxima vuelta */
 @keyframes huellita-pisa {
   0% {
     opacity: 0;
   }
-  15%,
-  55% {
-    opacity: 0.16;
+  8%,
+  50% {
+    opacity: 0.2;
   }
+  70%,
   100% {
     opacity: 0;
   }
