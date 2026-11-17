@@ -29,7 +29,6 @@ export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    window.scrollTo(0, 0)
     apiGet<Cirugia[]>('/publico/cirugias').then(setCirugias).catch(() => setError(true))
   }, [])
 

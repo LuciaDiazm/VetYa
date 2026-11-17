@@ -4,6 +4,7 @@ import { BotonArriba } from './components/BotonArriba'
 import { Pie } from './components/Pie'
 import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
+import { VolverArriba } from './components/VolverArriba'
 import { AuthProvider } from './context/AuthContext'
 import { Cirugias } from './pages/Cirugias'
 import { Configuracion } from './pages/panel/configuracion/Configuracion'
@@ -41,6 +42,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <VolverArriba />
         <Routes>
           <Route element={<DisenoPublico />}>
             <Route path="/" element={<Inicio />} />
