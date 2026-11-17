@@ -1,7 +1,8 @@
-import { LogOut, Menu, Siren, UserRound, X } from 'lucide-react'
+import { LogOut, Menu, UserRound, X } from 'lucide-react'
 import { startTransition, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
+import { IconoSirena } from './IconoSirena'
 import { Logo } from './Logo'
 import { MenuCuenta } from './MenuCuenta'
 
@@ -66,6 +67,10 @@ export function BarraNavegacion() {
               {s.nombre}
             </Link>
           ))}
+          <Link to="/urgencias" className="barra-enlace enlace-urgencias">
+            <IconoSirena size={20} aria-hidden="true" className="icono-sirena" />
+            Urgencias
+          </Link>
         </nav>
 
         <div className="barra-acciones">
@@ -73,8 +78,9 @@ export function BarraNavegacion() {
           <Link to="/turno" className="boton boton-secundario boton-turno">
             Pedir turno
           </Link>
-          <Link to="/urgencias" className="enlace-urgencias">
-            <Siren size={20} aria-hidden="true" />
+          {/* En pantallas chicas el menú de vidrio se oculta: Urgencias queda siempre a la vista acá */}
+          <Link to="/urgencias" className="enlace-urgencias urgencias-chica">
+            <IconoSirena size={20} aria-hidden="true" className="icono-sirena" />
             <span>Urgencias</span>
           </Link>
           {!cargando && (

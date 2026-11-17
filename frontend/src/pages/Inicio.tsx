@@ -206,7 +206,7 @@ export function Inicio() {
 
       {/* ---------- Quiénes somos ---------- */}
       <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
-        <img src="/fotos/perro-asoma.webp" alt="" className="asomado asomado-izquierda" loading="lazy" />
+        <img src="/fotos/perrito-asoma.webp" alt="" className="asomado asomado-izquierda" loading="lazy" />
         <img src="/fotos/gato-asoma.webp" alt="" className="asomado asomado-costado" loading="lazy" />
         <h2 id="titulo-sobre" className="sobre-frase">
           Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}

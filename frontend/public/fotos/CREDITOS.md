@@ -12,7 +12,7 @@ Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con intelig
 |---|---|
 | perro-inicio.webp | Foto original de la portada |
 | perro-huella.webp | Portada: la misma foto con más fondo arriba, para recortarla con forma de huella |
-| perro-asoma.webp | Sobre nosotros: perro negro que espía desde el borde izquierdo (pantallas anchas) |
+| perrito-asoma.webp | Sobre nosotros: cachorro que espía desde el borde izquierdo (pantallas anchas) |
 | gato-asoma.webp | Sobre nosotros: gato que espía desde el borde derecho (pantallas anchas) |
 | rottweiler-cachorro.webp, gatito-vacuna.webp | Planes de vacunas del primer año; ingreso |
 | dalmata-espia.webp | Preguntas frecuentes (espía desde el borde derecho) |

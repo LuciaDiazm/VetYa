@@ -284,9 +284,10 @@ svg {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(248, 243, 235, 0.96);
+  background: rgba(248, 243, 235, 0.78);
   border-bottom: 1px solid var(--borde);
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
 }
 
 .barra-interior {
@@ -296,11 +297,37 @@ svg {
   min-height: 80px;
 }
 
+/* Menú de vidrio: una "píldora" translúcida; la opción bajo el mouse se vuelve una pastilla blanca */
 .menu-principal {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   margin-inline: auto;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 6px 24px rgba(28, 45, 99, 0.08);
+}
+
+.menu-principal .barra-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 18px;
+  transition:
+    background-color 200ms var(--curva-salida),
+    box-shadow 200ms var(--curva-salida);
+}
+
+.menu-principal .barra-enlace:hover,
+.menu-principal .barra-enlace:focus-visible {
+  background: #ffffff;
+  color: var(--azul);
+  box-shadow: 0 2px 8px rgba(28, 45, 99, 0.12);
 }
 
 /* En pantallas anchas el menú queda justo en el medio, sin importar el ancho del logo o de los botones */
@@ -338,20 +365,32 @@ svg {
   gap: 12px;
 }
 
+/* Urgencias: sin fondo rojo; solo la sirena queda en rojo */
 .enlace-urgencias {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: var(--rojo-suave);
-  color: var(--rojo);
-  font-weight: 700;
+  color: var(--tinta);
+  font-weight: 500;
   text-decoration: none;
 }
 
-.enlace-urgencias:hover {
-  background: #f9d9d5;
+.icono-sirena {
+  color: var(--rojo);
+}
+
+.urgencias-chica:hover {
+  background: var(--azul-suave);
+  color: var(--azul);
+}
+
+/* En compu Urgencias va dentro del menú de vidrio */
+@media (min-width: 1081px) {
+  .urgencias-chica {
+    display: none;
+  }
 }
 
 .boton-menu {
@@ -965,7 +1004,9 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .asomado-izquierda {
   left: calc((100% - 100vw) / 2);
-  width: 96px;
+  width: 150px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent);
+  mask-image: linear-gradient(to bottom, #000 80%, transparent);
 }
 
 @media (max-width: 1240px) {
