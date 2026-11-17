@@ -8,7 +8,6 @@ import {
   MapPin,
   MessageCircle,
   Microscope,
-  PawPrint,
   Scissors,
   Phone,
   ShoppingBag,
@@ -282,23 +281,6 @@ export function Inicio() {
           <ShoppingBag size={22} aria-hidden="true" />
           También tenemos alimentos, medicamentos y accesorios para tu mascota. Consultanos en la clínica.
         </p>
-      </section>
-
-      {/* ---------- Difusión: la clínica no gestiona adopciones, solo ayuda a difundir ---------- */}
-      <section className="contenedor difusion difusion-cartel" aria-label="Ayuda para difundir">
-        <p>
-          <PawPrint size={22} aria-hidden="true" />
-          ¿Encontraste un animal o buscás adoptar? Escribinos y te ayudamos a difundir.
-        </p>
-        <a
-          href={enlaceWhatsapp(clinica.whatsapp, 'Hola, quiero que me ayuden a difundir un animal.')}
-          target="_blank"
-          rel="noreferrer"
-          className="boton boton-whatsapp"
-        >
-          <MessageCircle size={20} aria-hidden="true" />
-          Escribir por WhatsApp
-        </a>
       </section>
 
       {/* ---------- Opiniones ---------- */}

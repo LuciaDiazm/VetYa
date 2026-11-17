@@ -1016,44 +1016,6 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
-/* ---------- Difusión (una línea: la clínica solo ayuda a difundir animales) ---------- */
-
-.difusion {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 16px 24px;
-  padding-block: 32px;
-  text-align: center;
-}
-
-.difusion p {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 500;
-}
-
-.difusion p svg {
-  flex-shrink: 0;
-  color: var(--azul);
-}
-
-/* Como un cartel pegado: fondo blanco, borde blanco grueso y una sombra suave */
-.difusion-cartel {
-  width: fit-content;
-  max-width: calc(100% - 32px);
-  margin-block: 32px;
-  padding: 22px 28px;
-  border: 6px solid #fff;
-  border-radius: 20px;
-  background: #fffdf9;
-  box-shadow: 0 0 0 1px var(--borde), 0 14px 32px rgba(28, 45, 99, 0.1);
-}
-
 /* ---------- Servicios en mosaico ---------- */
 
 /* Tres por fila en compu (la última fila queda centrada), dos en tablet y una en celular */
@@ -1074,8 +1036,18 @@ html[data-turno-portada='visible'] .boton-turno {
   padding: 24px;
   overflow: hidden;
   border-radius: var(--radio);
-  background: var(--superficie);
+  /* Difuminado suave en la esquina del ícono: amarillo crema y azul, alternados */
+  background:
+    radial-gradient(circle at 0 0, rgba(246, 195, 67, 0.28), rgba(246, 195, 67, 0) 60%),
+    var(--superficie);
   border: 1px solid var(--borde);
+  box-shadow: 0 8px 24px rgba(28, 45, 99, 0.06);
+}
+
+.mosaico-tarjeta:nth-child(even) {
+  background:
+    radial-gradient(circle at 0 0, rgba(28, 45, 99, 0.13), rgba(28, 45, 99, 0) 60%),
+    var(--superficie);
 }
 
 @media (max-width: 1000px) {
@@ -1095,10 +1067,11 @@ html[data-turno-portada='visible'] .boton-turno {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #fdf0c4; /* amarillo suave */
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #ffffff; /* cuadradito blanco sobre el difuminado */
+  box-shadow: 0 4px 12px rgba(28, 45, 99, 0.1);
   color: var(--azul);
 }
 

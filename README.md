@@ -7,9 +7,9 @@ Trabajo Final Integrador — Tecnicatura Universitaria en Programación (UTN FRR
 
 ## Qué hace
 
-- **Sitio público:** servicios, equipo, preguntas frecuentes, contacto con mapa, urgencias, pedir turno online y adopción.
+- **Sitio público:** servicios, equipo, preguntas frecuentes, contacto con mapa, urgencias y pedir turno online.
 - **Cuenta del dueño:** sus mascotas, vacunas, visitas y próximos turnos.
-- **Panel de la clínica:** turnos del día, agenda, clientes y mascotas, historia clínica, recordatorios por WhatsApp, carnet de vacunas en PDF, adopciones, configuración, estadísticas e informe de turnos entre dos fechas.
+- **Panel de la clínica:** turnos del día, agenda, clientes y mascotas, historia clínica, recordatorios por WhatsApp, carnet de vacunas en PDF, configuración, estadísticas e informe de turnos entre dos fechas.
 
 ## Estructura
 
