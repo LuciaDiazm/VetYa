@@ -433,7 +433,7 @@ svg {
   text-align: left;
 }
 
-/* "Pedir turno" del encabezado: no se repite mientras se ve el botón grande de la portada */
+/* "Pedir turno" del encabezado: no se repite mientras se ve el de la portada o el de "Dónde estamos" */
 
 html[data-turno-portada='visible'] .boton-turno {
   opacity: 0;

@@ -37,23 +37,33 @@ const TARJETAS: {
   { clave: 'ESTETICA', nombre: 'Baño y peluquería', icono: <Scissors size={30} aria-hidden="true" />, enlace: '/turno?categoria=ESTETICA', accion: 'Pedir turno' },
 ]
 
-// Mientras se ve el botón grande de la portada, el de "Pedir turno" del encabezado se oculta (ver index.css).
-function observarBotonPortada(boton: HTMLElement | null) {
+// Para no repetir "Pedir turno": mientras se ve el de la portada o el de "Dónde estamos",
+// el del encabezado se oculta (ver index.css). Se anotan los botones que están a la vista.
+const botonesTurnoALaVista = new Set<Element>()
+
+function actualizarBotonEncabezado() {
+  // Los <Link> no avisan cuando se desmontan: se descartan los botones que ya no están en la página.
+  for (const b of botonesTurnoALaVista) if (!b.isConnected) botonesTurnoALaVista.delete(b)
+  document.documentElement.dataset.turnoPortada = botonesTurnoALaVista.size > 0 ? 'visible' : 'oculto'
+}
+
+function observarBotonTurno(boton: HTMLElement | null) {
   if (!boton) return
-  const raiz = document.documentElement
-  raiz.dataset.turnoPortada = 'visible'
+  // Primera medida en el momento, para que el encabezado no muestre el botón ni un instante de más.
+  const caja = boton.getBoundingClientRect()
+  if (caja.bottom > 80 && caja.top < window.innerHeight) botonesTurnoALaVista.add(boton)
+  actualizarBotonEncabezado()
   // El margen descuenta lo que tapa el encabezado fijo.
   const observador = new IntersectionObserver(
     ([entrada]) => {
-      raiz.dataset.turnoPortada = entrada.isIntersecting ? 'visible' : 'oculto'
+      if (!boton.isConnected) observador.disconnect()
+      if (entrada.isIntersecting && boton.isConnected) botonesTurnoALaVista.add(boton)
+      else botonesTurnoALaVista.delete(boton)
+      actualizarBotonEncabezado()
     },
     { rootMargin: '-80px 0px 0px 0px' },
   )
   observador.observe(boton)
-  return () => {
-    observador.disconnect()
-    delete raiz.dataset.turnoPortada
-  }
 }
 
 function iniciales(nombre: string, apellido: string) {
@@ -97,6 +107,15 @@ export function Inicio() {
   const { datos, error } = useSitio()
   const { hash } = useLocation()
 
+  // Al salir del inicio, el botón del encabezado vuelve a verse siempre.
+  useEffect(
+    () => () => {
+      botonesTurnoALaVista.clear()
+      delete document.documentElement.dataset.turnoPortada
+    },
+    [],
+  )
+
   // Al llegar con un enlace como "/#servicios", baja hasta esa sección cuando ya cargó.
   useEffect(() => {
     if (datos && hash) document.getElementById(hash.slice(1))?.scrollIntoView()
@@ -136,7 +155,7 @@ export function Inicio() {
               </h1>
               <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
               <div className="portada-acciones">
-                <Link to="/turno" className="boton boton-grande boton-brillo" ref={observarBotonPortada}>
+                <Link to="/turno" className="boton boton-grande boton-brillo" ref={observarBotonTurno}>
                   <CalendarCheck size={22} aria-hidden="true" />
                   Pedir turno
                 </Link>
@@ -386,7 +405,7 @@ export function Inicio() {
                   </div>
                 )}
                 <div className="contacto-botones">
-                  <Link to="/turno" className="boton boton-amarillo-claro boton-brillo">
+                  <Link to="/turno" className="boton boton-amarillo-claro boton-brillo" ref={observarBotonTurno}>
                     <CalendarCheck size={20} aria-hidden="true" />
                     Pedir turno
                   </Link>
