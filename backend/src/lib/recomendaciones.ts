@@ -1,6 +1,6 @@
 import PDFDocument from "pdfkit";
 import type { Clinica } from "@prisma/client";
-import { AMARILLO, AZUL, dibujarLogo, GRIS } from "./carnet";
+import { AZUL, encabezadoPdf, GRIS } from "./carnet";
 
 // ---------------------------------------------------------------------------
 // Recomendaciones para antes y después de una cirugía
@@ -82,14 +82,11 @@ export function escribirRecomendaciones(nombreServicio: string, clinica: Clinica
   doc.pipe(salida);
   const ancho = doc.page.width - 96;
 
-  dibujarLogo(doc, 48, 44, 44);
-  doc.font("Helvetica-Bold").fontSize(18).fillColor(AZUL).text(clinica.nombre, 104, 46);
-  doc.font("Helvetica").fontSize(10).fillColor(GRIS).text(`${clinica.direccion}  -  Tel. ${clinica.telefono}`, 104, 70);
-  doc.rect(48, 104, ancho, 3).fill(AMARILLO);
+  const yTitulo = encabezadoPdf(doc, clinica);
 
   const esCirugia = r === CIRUGIA_GENERAL;
   const titulo = esCirugia ? "Recomendaciones para la cirugía" : "Recomendaciones para la limpieza dental";
-  doc.font("Helvetica-Bold").fontSize(21).fillColor(AZUL).text(titulo, 48, 122);
+  doc.font("Helvetica-Bold").fontSize(21).fillColor(AZUL).text(titulo, 48, yTitulo);
   if (esCirugia) doc.font("Helvetica").fontSize(13).fillColor(GRIS).text(nombreServicio, 48);
 
   seccion(doc, `Antes de la ${r.queEs}`, r.antes, AZUL, ancho);
