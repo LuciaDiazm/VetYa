@@ -2123,7 +2123,7 @@ html[data-turno-portada='visible'] .boton-turno {
   --panel-fondo: #f2f4f8;
   --panel-borde: #e2e6ee;
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: 76px 1fr;
   min-height: 100vh;
   background: var(--panel-fondo);
 }
@@ -2139,7 +2139,7 @@ html[data-turno-portada='visible'] .boton-turno {
   align-items: center;
   gap: 0;
   height: 100vh;
-  padding: 18px 0 16px;
+  padding: 14px 0 13px;
   background: var(--azul);
   color: #ffffff;
 }
@@ -2160,15 +2160,15 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .panel-menu .logo-texto {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #ffffff;
 }
 
 .panel-navegacion {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 56px;
+  gap: 8px;
+  margin-top: 32px;
 }
 
 /* Cada sección es un cuadrado redondeado con su ícono */
@@ -2176,10 +2176,10 @@ html[data-turno-portada='visible'] .boton-turno {
   position: relative;
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 50px;
+  height: 50px;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   background: none;
   color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
@@ -2191,8 +2191,8 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .panel-enlace svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
 }
 
 .panel-enlace:hover {
@@ -2209,7 +2209,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-enlace.active::after {
   content: '';
   position: absolute;
-  left: -14px;
+  left: -13px;
   top: 50%;
   width: 5px;
   height: 36px;
@@ -2223,22 +2223,6 @@ html[data-turno-portada='visible'] .boton-turno {
   outline-offset: 2px;
 }
 
-/* La inicial de quien usa el panel, en un círculo, arriba de Salir */
-.panel-inicial {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-top: auto;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  font-family: var(--fuente-titulos);
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
 .panel-salir {
   display: flex;
   flex-direction: column;
@@ -2247,15 +2231,15 @@ html[data-turno-portada='visible'] .boton-turno {
   gap: 2px;
   width: 72px;
   height: auto;
-  min-height: 64px;
-  margin-top: 14px;
-  padding: 6px 0;
+  min-height: 50px;
+  margin-top: auto;
+  padding: 5px 0;
   color: #ffffff;
 }
 
 /* "Salir" va siempre escrito, para que se encuentre sin pasar el mouse */
 .panel-salir-texto {
-  font-size: 0.9rem;
+  font-size: 0.81rem;
   font-weight: 600;
 }
 
@@ -2265,11 +2249,11 @@ html[data-turno-portada='visible'] .boton-turno {
   left: calc(100% + 18px);
   top: 50%;
   z-index: 30;
-  padding: 8px 14px;
+  padding: 6px 11px;
   border-radius: 10px;
   background: var(--azul-oscuro);
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
   box-shadow: 0 8px 20px rgba(9, 22, 48, 0.25);
@@ -2316,15 +2300,16 @@ html[data-turno-portada='visible'] .boton-turno {
   min-width: 24px;
   height: 24px;
   margin: 0;
-  padding: 0 6px;
+  padding: 0 5px;
   border: 2px solid var(--azul);
   background: var(--amarillo);
   color: var(--azul);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
 }
 
 .panel-contenido {
-  padding: 18px 20px 32px;
+  padding: 13px 14px 22px;
+  font-size: 0.95rem;
   min-width: 0;
 }
 
@@ -2335,11 +2320,11 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .panel-encabezado {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 
 .panel-encabezado h1 {
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-size: clamp(1.62rem, 3vw, 2.16rem);
   color: var(--azul);
 }
 
@@ -2351,7 +2336,7 @@ html[data-turno-portada='visible'] .boton-turno {
 /* ---------- Hoy ---------- */
 .hoy-grilla {
   display: grid;
-  gap: 16px;
+  gap: 11px;
 }
 
 /* Saludo: franja azul con el día y la cantidad de turnos; las dos acciones a la derecha */
@@ -2360,9 +2345,9 @@ html[data-turno-portada='visible'] .boton-turno {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px 24px;
-  padding: 30px 28px;
-  border-radius: 22px;
+  gap: 13px 19px;
+  padding: 18px 21px;
+  border-radius: 18px;
   background: var(--azul);
   color: #ffffff;
 }
@@ -2370,17 +2355,17 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-saludo h1 {
   margin: 0;
   color: #ffffff;
-  font-size: clamp(1.8rem, 2.6vw, 2.3rem);
+  font-size: clamp(1.35rem, 2vw, 1.67rem);
   line-height: 1.15;
 }
 
 .hoy-saludo p {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 24px;
-  margin: 10px 0 0;
+  gap: 3px 19px;
+  margin: 6px 0 0;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 1.2rem;
+  font-size: 0.95rem;
 }
 
 .hoy-saludo-dia::first-letter {
@@ -2394,18 +2379,18 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-saludo-acciones {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .hoy-boton-avisos,
 .hoy-boton-turno {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 58px;
-  padding: 0 22px;
-  border-radius: 14px;
-  font-size: 1.15rem;
+  gap: 8px;
+  min-height: 45px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 0.92rem;
   font-weight: 700;
   text-decoration: none;
 }
@@ -2434,7 +2419,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-caja {
   overflow: visible;
   border: 1px solid var(--panel-borde);
-  border-radius: 18px;
+  border-radius: 16px;
   background: #ffffff;
 }
 
@@ -2443,24 +2428,24 @@ html[data-turno-portada='visible'] .boton-turno {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 16px;
-  padding: 18px 22px;
+  gap: 6px 13px;
+  padding: 11px 14px;
   border-bottom: 1px solid var(--panel-borde);
 }
 
 .hoy-caja-titulo-izquierda {
   justify-content: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hoy-caja-titulo h2 {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
   color: var(--tinta);
   font-family: var(--fuente-cuerpo, inherit);
-  font-size: 1.3rem;
+  font-size: 1.01rem;
   font-weight: 700;
 }
 
@@ -2470,7 +2455,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .hoy-faltan {
   color: var(--gris);
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .hoy-faltan strong {
@@ -2479,39 +2464,39 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .hoy-vacio {
   margin: 0;
-  padding: 22px;
+  padding: 14px;
   color: var(--gris);
 }
 
 /* Debajo del saludo: la tabla de turnos y, a la derecha, veterinarios y calendario */
 .hoy-columnas {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 480px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 24vw, 420px);
   align-items: start;
-  gap: 16px;
+  gap: 11px;
 }
 
 .hoy-costado {
   display: grid;
-  gap: 16px;
+  gap: 11px;
 }
 
 /* ---------- Turnos de hoy: renglones como una tabla ---------- */
 .fila-encabezado,
 .fila-turno {
   display: grid;
-  grid-template-columns: 92px minmax(150px, 1fr) minmax(190px, 1.1fr) 136px 362px;
+  grid-template-columns: 54px minmax(100px, 1fr) minmax(150px, 1.1fr) 96px 284px;
   align-items: center;
-  gap: 12px;
-  padding: 10px 22px;
+  gap: 8px;
+  padding: 6px 14px;
 }
 
 .fila-encabezado {
-  padding-block: 18px;
+  padding-block: 10px;
   border-bottom: 1px solid var(--panel-borde);
   background: #f7f8fb;
   color: var(--gris);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
@@ -2524,7 +2509,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .fila-turno {
   position: relative;
   border-bottom: 1px solid var(--panel-borde);
-  font-size: 1.05rem;
+  font-size: 0.88rem;
 }
 
 .fila-turno:last-child {
@@ -2542,7 +2527,7 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .fila-hora strong {
-  font-size: 1.2rem;
+  font-size: 0.97rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2553,7 +2538,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .fila-mascota a {
   color: var(--tinta);
-  font-size: 1.2rem;
+  font-size: 0.97rem;
   font-weight: 700;
   text-decoration: none;
 }
@@ -2565,14 +2550,14 @@ html[data-turno-portada='visible'] .boton-turno {
 .fila-mascota .fila-nota {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.98rem;
+  gap: 4px;
+  font-size: 0.83rem;
 }
 
 .fila-dueno {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   line-height: 1.3;
 }
 
@@ -2583,7 +2568,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .fila-origen {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: var(--gris);
 }
 
@@ -2592,10 +2577,10 @@ html[data-turno-portada='visible'] .boton-turno {
   display: grid;
   place-items: center;
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border: 1px solid var(--panel-borde);
-  border-radius: 12px;
+  border-radius: 10px;
   background: #f7f8fb;
   color: #1f8a4c;
   transition: background-color 0.15s;
@@ -2613,7 +2598,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .fila-estado span {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-weight: 600;
 }
 
@@ -2637,7 +2622,7 @@ html[data-turno-portada='visible'] .boton-turno {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 5px;
 }
 
 /* Botones de los renglones: grises con borde, el ícono y la palabra */
@@ -2645,15 +2630,15 @@ html[data-turno-portada='visible'] .boton-turno {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 16px;
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 1px solid #d3d8e2;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #f7f8fb;
   color: var(--tinta);
   font: inherit;
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
@@ -2702,7 +2687,7 @@ html[data-turno-portada='visible'] .boton-turno {
   z-index: 25;
   min-width: 230px;
   margin: 0;
-  padding: 6px;
+  padding: 5px;
   border: 1px solid var(--panel-borde);
   border-radius: 12px;
   background: #ffffff;
@@ -2712,14 +2697,14 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .menu-mas-lista button {
   width: 100%;
-  min-height: 46px;
-  padding: 0 14px;
+  min-height: 44px;
+  padding: 0 11px;
   border: none;
   border-radius: 8px;
   background: none;
   color: var(--tinta);
   font: inherit;
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   text-align: left;
   cursor: pointer;
 }
@@ -2747,10 +2732,10 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .hoy-equipo li {
   display: grid;
-  grid-template-columns: 56px 1fr auto;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
-  gap: 14px;
-  padding: 12px 22px;
+  gap: 10px;
+  padding: 8px 14px;
 }
 
 .hoy-equipo li + li {
@@ -2764,25 +2749,27 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .hoy-equipo strong {
-  font-size: 1.15rem;
+  font-size: 0.92rem;
 }
 
 .hoy-equipo li > div > span {
   color: var(--gris);
+  font-size: 0.88rem;
 }
 
 .hoy-matricula {
   align-self: start;
   padding-top: 4px;
   color: var(--gris);
+  font-size: 0.83rem;
   white-space: nowrap;
 }
 
 .hoy-avatar {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--amarillo-suave);
   color: var(--azul);
@@ -2794,20 +2781,20 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-mes-encabezado {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hoy-mes-encabezado strong {
-  min-width: 170px;
-  font-size: 1.15rem;
+  min-width: 140px;
+  font-size: 0.9rem;
   text-align: center;
 }
 
 .hoy-mes-flecha {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border: 1px solid var(--panel-borde);
   border-radius: 50%;
   background: #ffffff;
@@ -2822,27 +2809,28 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-mes {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
   margin: 0;
-  padding: 14px 16px 18px;
+  padding: 10px 11px 11px;
   list-style: none;
 }
 
 .hoy-mes-nombre {
-  padding: 2px 0 4px;
+  padding: 2px 0 3px;
   color: var(--gris);
-  font-size: 0.95rem;
+  font-size: 0.77rem;
   text-align: center;
 }
 
 .hoy-mes-dia {
   position: relative;
   display: block;
-  min-height: 58px;
-  padding: 6px 8px;
+  min-height: 44px;
+  padding: 3px 5px;
   border: 1px solid var(--panel-borde);
   border-radius: 10px;
   color: var(--tinta);
+  font-size: 0.83rem;
   font-weight: 700;
   text-decoration: none;
   transition: background-color 0.15s;
@@ -2866,8 +2854,8 @@ html[data-turno-portada='visible'] .boton-turno {
 .hoy-mes-dia.es-hoy > span:first-child {
   display: inline-grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   margin: -3px 0 0 -4px;
   border-radius: 50%;
   background: var(--amarillo);
@@ -2875,14 +2863,14 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .hoy-mes-cantidad {
   position: absolute;
-  right: 6px;
-  bottom: 5px;
+  right: 4px;
+  bottom: 3px;
   min-width: 22px;
-  padding: 0 5px;
+  padding: 0 4px;
   border-radius: 6px;
   background: #eef0f5;
   color: var(--gris);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.6;
   text-align: center;
@@ -2900,8 +2888,8 @@ html[data-turno-portada='visible'] .boton-turno {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 20px;
-  padding: 16px 22px;
+  gap: 10px 16px;
+  padding: 10px 14px;
 }
 
 .suspendidos li + li {
@@ -2910,20 +2898,20 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .suspendidos a:not(.boton-fila) {
   color: var(--tinta);
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
 .suspendidos p {
   margin: 4px 0 0;
   color: var(--gris);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
 }
 
 .suspendidos-acciones {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* ---------- Turnos de días anteriores sin marcar ---------- */
@@ -2936,8 +2924,8 @@ html[data-turno-portada='visible'] .boton-turno {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
-  padding: 16px 22px;
+  gap: 10px 13px;
+  padding: 10px 14px;
 }
 
 .sin-marcar-aviso > svg {
@@ -2948,11 +2936,11 @@ html[data-turno-portada='visible'] .boton-turno {
 .sin-marcar-aviso p {
   flex: 1 1 260px;
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.88rem;
 }
 
 .sin-marcar-aviso .boton {
-  min-height: 46px;
+  min-height: 44px;
   background: #ffffff;
 }
 
@@ -2963,9 +2951,9 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .sin-marcar-dia h3 {
   margin: 0;
-  padding: 14px 22px 4px;
+  padding: 10px 14px 3px;
   color: var(--azul);
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .sin-marcar-dia:last-child {
@@ -2981,14 +2969,14 @@ html[data-turno-portada='visible'] .boton-turno {
 .ayuda-boton {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border: none;
   border-radius: 50%;
   background: #eceff4;
   color: var(--gris);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.77rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -3012,18 +3000,18 @@ html[data-turno-portada='visible'] .boton-turno {
   top: calc(100% + 10px);
   z-index: 30;
   width: min(340px, 80vw);
-  padding: 14px 16px;
+  padding: 11px 13px;
   border-radius: 12px;
   background: var(--azul-oscuro);
   color: #ffffff;
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   font-weight: 400;
   line-height: 1.45;
   box-shadow: 0 12px 28px rgba(9, 22, 48, 0.25);
 }
 
 /* Pantallas medianas: el costado pasa abajo y los renglones se acomodan en dos partes */
-@media (max-width: 1400px) {
+@media (max-width: 1160px) {
   .hoy-columnas {
     grid-template-columns: 1fr;
   }
@@ -3034,21 +3022,21 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 980px) {
   .fila-encabezado {
     display: none;
   }
 
   .fila-turno {
-    grid-template-columns: 76px 1fr;
+    grid-template-columns: 62px 1fr;
     grid-template-areas:
       'hora mascota'
       'hora dueno'
       'hora estado'
       'acciones acciones';
     align-items: start;
-    row-gap: 8px;
-    padding-block: 16px;
+    row-gap: 6px;
+    padding-block: 13px;
   }
 
   .fila-hora {
@@ -3075,7 +3063,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 @media (max-width: 640px) {
   .hoy-saludo {
-    padding: 22px 20px;
+    padding: 18px 16px;
   }
 
   .hoy-saludo-acciones,
@@ -3090,14 +3078,14 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .hoy-mes {
-    gap: 4px;
-    padding-inline: 10px;
+    gap: 3px;
+    padding-inline: 8px;
   }
 
   .hoy-mes-dia {
-    min-height: 50px;
-    padding: 4px 5px;
-    font-size: 0.9rem;
+    min-height: 45px;
+    padding: 3px 4px;
+    font-size: 0.81rem;
   }
 
   .hoy-mes-cantidad {
@@ -3339,10 +3327,6 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .panel-enlace-nombre::before {
-    display: none;
-  }
-
-  .panel-inicial {
     display: none;
   }
 
@@ -5490,23 +5474,23 @@ form.campo-en-linea {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .informe-encabezado h1 {
   margin: 0;
   color: var(--tinta);
-  font-size: clamp(1.7rem, 2.4vw, 2.1rem);
+  font-size: clamp(1.3rem, 2vw, 1.57rem);
 }
 
 .boton.informe-imprimir {
   margin-left: auto;
-  min-height: 52px;
-  border-radius: 14px;
+  min-height: 44px;
+  border-radius: 12px;
   background: var(--amarillo);
   color: var(--azul);
-  font-size: 1.1rem;
+  font-size: 0.88rem;
 }
 
 .boton.informe-imprimir:hover {
@@ -5517,7 +5501,7 @@ form.campo-en-linea {
 .informe-caja {
   position: relative;
   border: 1px solid var(--panel-borde);
-  border-radius: 18px;
+  border-radius: 16px;
   background: #ffffff;
 }
 
@@ -5526,8 +5510,8 @@ form.campo-en-linea {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 20px;
-  padding: 10px 20px;
+  gap: 10px 16px;
+  padding: 5px 14px;
   border-bottom: 1px solid var(--panel-borde);
 }
 
@@ -5535,18 +5519,18 @@ form.campo-en-linea {
 .informe-pestanas {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 26px;
+  gap: 3px 18px;
 }
 
 .informe-pestana {
-  min-height: 52px;
+  min-height: 44px;
   padding: 0;
   border: none;
   border-bottom: 3px solid transparent;
   background: none;
   color: var(--tinta);
   font: inherit;
-  font-size: 1.15rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -5562,21 +5546,25 @@ form.campo-en-linea {
 .informe-campos {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 
 /* Campo compacto: la palabra gris y el valor en negrita, adentro del mismo recuadro */
 .campo-compacto {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 12px;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 8px;
   border: 1px solid #d3d8e2;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #ffffff;
   color: var(--gris);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
+}
+
+.campo-compacto select {
+  max-width: 140px;
 }
 
 .campo-compacto:focus-within {
@@ -5612,10 +5600,10 @@ form.campo-en-linea {
 .informe-totales li {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 16px 22px;
+  gap: 8px;
+  padding: 10px 14px;
   color: var(--gris);
-  font-size: 1.1rem;
+  font-size: 0.88rem;
 }
 
 .informe-totales li + li {
@@ -5624,7 +5612,7 @@ form.campo-en-linea {
 
 .informe-totales strong {
   color: var(--tinta);
-  font-size: 1.7rem;
+  font-size: 1.26rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -5637,19 +5625,19 @@ form.campo-en-linea {
 }
 
 .informe-resultado .vacio {
-  padding: 22px;
+  padding: 18px;
 }
 
 .informe-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
 
 .informe-tabla th,
 .informe-tabla td {
-  padding: 15px 10px;
+  padding: 9px 8px;
   border-bottom: 1px solid var(--panel-borde);
   text-align: left;
   vertical-align: middle;
@@ -5657,13 +5645,13 @@ form.campo-en-linea {
 
 .informe-tabla th:first-child,
 .informe-tabla td:first-child {
-  padding-left: 22px;
+  padding-left: 18px;
 }
 
 .informe-tabla th {
   background: #f7f8fb;
   color: var(--gris);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
@@ -5690,7 +5678,7 @@ form.campo-en-linea {
 .informe-estado {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-weight: 700;
   white-space: nowrap;
 }
