@@ -31,22 +31,6 @@ interface DatosEstadisticas {
   recuperados: number
 }
 
-// ---------- Períodos ----------
-
-const PERIODOS = [
-  { clave: 'mes', nombre: 'Este mes', rango: (hoy: string) => [primeroDeMes(hoy), hoy] },
-  {
-    clave: 'mes-pasado',
-    nombre: 'Mes pasado',
-    rango: (hoy: string) => {
-      const ultimo = sumarDias(primeroDeMes(hoy), -1)
-      return [primeroDeMes(ultimo), ultimo]
-    },
-  },
-  { clave: '3-meses', nombre: 'Últimos 3 meses', rango: (hoy: string) => [sumarDias(hoy, -90), hoy] },
-  { clave: 'anio', nombre: 'Este año', rango: (hoy: string) => [`${hoy.slice(0, 4)}-01-01`, hoy] },
-] as const
-
 const DIA_MES = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 const DIA_LARGO = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
 const MES = new Intl.DateTimeFormat('es-AR', { month: 'short', timeZone: 'UTC' })
@@ -132,13 +116,10 @@ const DIAS_SEMANA_LARGO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes',
 export function Estadisticas() {
   const [parametros, setParametros] = useSearchParams()
   const [hoy] = useState(hoyArgentina)
-  // "Elegir fechas": el período lo pone la persona con Desde y Hasta.
-  const aMano = parametros.get('periodo') === 'fechas'
-  const periodo = aMano ? null : (PERIODOS.find((p) => p.clave === parametros.get('periodo')) ?? PERIODOS[0])
-  const [desde, hasta] = periodo
-    ? periodo.rango(hoy)
-    : [parametros.get('desde') ?? primeroDeMes(hoy), parametros.get('hasta') ?? hoy]
-  const problema = aMano ? problemaDePeriodo(desde, hasta) : null
+  // El período se elige con Desde y Hasta; si no se eligió nada, es este mes hasta hoy.
+  const desde = parametros.get('desde') ?? primeroDeMes(hoy)
+  const hasta = parametros.get('hasta') ?? hoy
+  const problema = problemaDePeriodo(desde, hasta)
   const [datos, setDatos] = useState<DatosEstadisticas | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -159,14 +140,9 @@ export function Estadisticas() {
     }
   }, [desde, hasta, problema])
 
-  function elegir(clave: string) {
-    setCargando(true)
-    setParametros(clave === PERIODOS[0].clave ? {} : { periodo: clave })
-  }
-
   function elegirFechas(d: string, h: string) {
     setCargando(true)
-    setParametros({ periodo: 'fechas', desde: d, hasta: h }, { replace: aMano })
+    setParametros({ desde: d, hasta: h }, { replace: true })
   }
 
   const porPeriodo = useMemo(() => (datos ? agrupar(datos.porDia, datos.desde, datos.hasta) : null), [datos])
@@ -175,37 +151,15 @@ export function Estadisticas() {
     <>
       <div className="panel-encabezado">
         <h1>Estadísticas</h1>
-        <p>Cómo viene la clínica: turnos, ausencias, lo que más se pide y si los avisos traen gente.</p>
       </div>
 
-      {/* Filtro único, arriba de todo: cambia todos los números de la pantalla */}
-      <div className="filtro-periodo segmentado" role="group" aria-label="Período">
-        {PERIODOS.map((p) => (
-          <button
-            key={p.clave}
-            type="button"
-            className={p === periodo ? 'activo' : undefined}
-            aria-pressed={p === periodo}
-            onClick={() => elegir(p.clave)}
-          >
-            {p.nombre}
-          </button>
-        ))}
-        <button
-          type="button"
-          className={aMano ? 'activo' : undefined}
-          aria-pressed={aMano}
-          onClick={() => elegirFechas(desde, hasta)}
-        >
-          Elegir fechas
-        </button>
-      </div>
-      {aMano && <ElegirFechas desde={desde} hasta={hasta} alCambiar={elegirFechas} />}
-      <p className="ayuda">
+      {/* Filtro único, arriba de todo: Desde y Hasta cambian todos los números de la pantalla */}
+      <div className="filtro-periodo">
+        <ElegirFechas desde={desde} hasta={hasta} alCambiar={elegirFechas} />
         <Link to={`/panel/informe?desde=${desde}&hasta=${hasta}`} className="enlace-con-icono">
           <FileText size={18} aria-hidden="true" /> Ver el detalle de estos turnos
         </Link>
-      </p>
+      </div>
 
       {problema && <p className="mensaje-error">{problema}</p>}
       {error && <p className="mensaje-error">{error}</p>}

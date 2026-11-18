@@ -6364,11 +6364,17 @@ form.campo-en-linea {
 
 /* ---------- Panel: estadísticas ---------- */
 
+/* Estadísticas: Desde y Hasta, y al lado el enlace al informe con esas mismas fechas */
 .filtro-periodo {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 8px 20px;
   margin-bottom: 20px;
+}
+
+.filtro-periodo .elegir-fechas {
+  margin-bottom: 0;
 }
 
 .estadisticas {
@@ -7197,43 +7203,4 @@ form.campo-en-linea {
     .dia-hoja
   ) {
   border-radius: 6px;
-}
-
-/* Estadísticas: el período como botones pegados (el elegido en azul) */
-.panel .segmentado {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0;
-  border: 1px solid var(--panel-borde);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #ffffff;
-}
-
-.panel .segmentado button {
-  min-height: 56px;
-  padding: 0 18px;
-  border: none;
-  border-right: 1px solid var(--panel-borde);
-  border-radius: 0;
-  background: none;
-  color: var(--tinta);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.panel .segmentado button:last-child {
-  border-right: none;
-}
-
-.panel .segmentado button.activo {
-  background: var(--azul);
-  color: #ffffff;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .panel .segmentado button:not(.activo):hover {
-    background: #f7f8fb;
-  }
 }
