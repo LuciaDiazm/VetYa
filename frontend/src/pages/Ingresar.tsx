@@ -39,7 +39,7 @@ export function Ingresar() {
         <p className="registro-lema">¡Qué bueno verte de nuevo!</p>
         <img src="/fotos/pastor-aleman-ingreso.webp" alt="" />
       </section>
-      <div className="acceso-formulario registro-formulario">
+      <div className="acceso-formulario registro-formulario ingreso-formulario">
         <h1>Ingresar</h1>
         <form onSubmit={enviar} className="formulario">
           <label className="campo campo-icono">

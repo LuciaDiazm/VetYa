@@ -2063,7 +2063,7 @@ html[data-turno-portada='visible'] .boton-turno {
   align-self: center;
   width: auto;
   max-width: 100%;
-  height: min(470px, 58dvh);
+  height: min(600px, 74dvh);
   margin-top: auto;
   object-fit: contain;
   object-position: bottom;
@@ -2072,6 +2072,18 @@ html[data-turno-portada='visible'] .boton-turno {
 .registro-formulario h1 {
   margin: 0;
   font-size: 2.4rem;
+}
+
+/* En la compu, el formulario de Ingresar se ve más chico (como con el zoom al 80 %).
+   El botón se agranda antes de achicar para que siga midiendo unos 45 px de alto. */
+@media (min-width: 861px) {
+  .ingreso-formulario {
+    zoom: 0.8;
+  }
+
+  .acceso-formulario.ingreso-formulario .boton.ingreso-boton {
+    min-height: 56px;
+  }
 }
 
 .registro-formulario .formulario {
