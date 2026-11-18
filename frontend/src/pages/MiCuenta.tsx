@@ -1,10 +1,10 @@
-import { Ban, CalendarDays, CalendarPlus, FileDown, MessageCircle, PawPrint, Stethoscope, Syringe } from 'lucide-react'
+import { Ban, CalendarPlus, CircleCheck, Clock, FileDown, MessageCircle, Syringe, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { GuiaVacunas } from '../components/GuiaVacunas'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPatch, ErrorApi } from '../lib/api'
-import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../lib/fechas'
+import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina, partesDeFecha } from '../lib/fechas'
 import { edadTexto, ESPECIES, FECHA_CORTA } from '../lib/mascotas'
 import { estadoDosis, ultimasPorProducto } from '../lib/sanitario'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
@@ -37,7 +37,6 @@ function ProximosTurnos({
   return (
     <section id="turnos" className="cuenta-seccion" aria-labelledby="titulo-turnos">
       <h2 id="titulo-turnos" className="cuenta-titulo">
-        <CalendarDays size={26} aria-hidden="true" />
         {turnos.length === 1 ? 'Tu próximo turno' : 'Tus próximos turnos'}
       </h2>
       {turnos.length === 0 ? (
@@ -47,19 +46,25 @@ function ProximosTurnos({
           {turnos.map(({ turno: t, mascota }) => {
             const dia = conMayuscula(diaLargo(diaDe(t.fechaHoraInicio)))
             const hora = horaDe(t.fechaHoraInicio)
+            const { semana, numero, mes } = partesDeFecha(diaDe(t.fechaHoraInicio))
             const sePuedeCancelar = new Date(t.fechaHoraInicio).getTime() - ahora >= horasCancelacion * 3600 * 1000
             return (
               <li key={t.id} className="turno-dueno">
-                <p className="turno-dueno-mascota">
-                  <IconoEspecie especie={mascota.especie} size={20} />
-                  {mascota.nombre}
-                </p>
-                <p className="turno-dueno-dia">{dia}</p>
-                <p className="turno-dueno-hora">{hora} h</p>
-                <p className="turno-dueno-servicio">
-                  {t.servicio.nombre}
-                  {t.estado === 'PENDIENTE' && ' · La clínica te lo va a confirmar por WhatsApp'}
-                </p>
+                {/* El día como hojita de calendario, igual que al pedir el turno */}
+                <span className="turno-hoja" aria-hidden="true">
+                  <span>{semana}</span>
+                  <strong>{numero}</strong>
+                  <span>{mes}</span>
+                </span>
+                <div className="turno-dueno-datos">
+                  <p className="turno-dueno-hora">
+                    {hora} h · {t.servicio.nombre}
+                  </p>
+                  <p>
+                    Para {mascota.nombre} · {dia}
+                  </p>
+                  {t.estado === 'PENDIENTE' && <p>La clínica te lo va a confirmar por WhatsApp.</p>}
+                </div>
                 {sePuedeCancelar ? (
                   <button type="button" className="boton boton-contorno" onClick={() => alCancelar(t.id)}>
                     Cancelar turno
@@ -97,8 +102,6 @@ function TarjetaMascota({ mascota }: { mascota: MascotaDelDueno }) {
 
   return (
     <article className="mascota-dueno">
-      {/* Huellita de adorno en la esquina contraria al nombre */}
-      <PawPrint className="mascota-dueno-huella" aria-hidden="true" />
       <header className="mascota-dueno-encabezado">
         <span className="icono-circulo">
           <IconoEspecie especie={mascota.especie} size={26} />
@@ -112,7 +115,8 @@ function TarjetaMascota({ mascota }: { mascota: MascotaDelDueno }) {
           </p>
         </div>
         <a href={mascota.carnetUrl} target="_blank" rel="noreferrer" className="boton boton-contorno">
-          <FileDown size={18} aria-hidden="true" /> Carnet de vacunas
+          <FileDown size={18} aria-hidden="true" /> Carnet
+          <span className="solo-lectores"> de vacunas de {mascota.nombre}</span>
         </a>
       </header>
 
@@ -122,34 +126,35 @@ function TarjetaMascota({ mascota }: { mascota: MascotaDelDueno }) {
           carnet.
         </p>
       ) : (
-        <section className="bloque-dueno" aria-label={`Vacunas de ${mascota.nombre}`}>
-          <h4>
-            <Syringe size={20} aria-hidden="true" /> Vacunas y desparasitaciones
-          </h4>
-          <ul className="lista-dosis">
-            {dosis.map((a) => {
-              const estado = estadoDosis(a, hoy)
-              return (
-                <li key={a.id}>
-                  <div>
-                    <strong>{a.producto}</strong>
-                    <span>Aplicada el {FECHA_CORTA.format(new Date(a.fechaAplicacion))}</span>
-                  </div>
-                  <div className="dosis-proxima">
-                    {a.fechaProximaDosis ? (
-                      <>
-                        <span>Próxima: {FECHA_CORTA.format(new Date(a.fechaProximaDosis))}</span>
-                        {estado && <span className={`estado-dosis ${estado.clase}`}>{estado.texto}</span>}
-                      </>
+        <ul className="lista-dosis dosis-dueno" aria-label={`Vacunas y desparasitaciones de ${mascota.nombre}`}>
+          {dosis.map((a) => {
+            const estado = estadoDosis(a, hoy)
+            return (
+              <li key={a.id}>
+                <div>
+                  <strong>{a.producto}</strong>
+                  <span>
+                    {a.fechaProximaDosis
+                      ? `${estado?.clase === 'vencida' ? 'Tocaba el' : 'Próxima:'} ${FECHA_CORTA.format(new Date(a.fechaProximaDosis))}`
+                      : `Aplicada el ${FECHA_CORTA.format(new Date(a.fechaAplicacion))} · sin refuerzo`}
+                  </span>
+                </div>
+                {estado && (
+                  <span className={`estado-dosis ${estado.clase}`}>
+                    {estado.clase === 'al-dia' ? (
+                      <CircleCheck size={16} aria-hidden="true" />
+                    ) : estado.clase === 'vencida' ? (
+                      <TriangleAlert size={16} aria-hidden="true" />
                     ) : (
-                      <span className="ayuda">Sin refuerzo</span>
+                      <Clock size={16} aria-hidden="true" />
                     )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
+                    {estado.texto}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
       )}
     </article>
   )
@@ -163,7 +168,7 @@ function Visitas({ visitas }: { visitas: { consulta: ConsultaDelDueno; mascota: 
   return (
     <section id="visitas" className="cuenta-seccion" aria-labelledby="titulo-visitas">
       <h2 id="titulo-visitas" className="cuenta-titulo">
-        <Stethoscope size={26} aria-hidden="true" /> Visitas a la veterinaria
+        Visitas a la veterinaria
       </h2>
       {visitas.length === 0 ? (
         <p className="cuenta-vacio">Después de cada consulta, lo que te indicaron va a aparecer acá.</p>
@@ -178,7 +183,7 @@ function Visitas({ visitas }: { visitas: { consulta: ConsultaDelDueno; mascota: 
                     {mascota.nombre}: {c.motivo}
                   </strong>
                   {c.tratamiento && <p>Indicaciones: {c.tratamiento}</p>}
-                  <span className="ayuda">
+                  <span className="visita-quien">
                     Atendió {c.veterinario.nombre} {c.veterinario.apellido}
                     {c.pesoKg && ` · Peso: ${Number(c.pesoKg).toLocaleString('es-AR')} kg`}
                   </span>
@@ -266,12 +271,12 @@ Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a pod
   return (
     <main className="mi-cuenta-fondo">
       <div className="contenedor mi-cuenta">
-        {/* Saludo en un recuadro de vidrio. Es el único "Pedir turno" de la página (el del encabezado se oculta acá). */}
+        {/* Saludo simple: a la izquierda el nombre, a la derecha "Pedir turno" (el del encabezado se oculta acá) */}
         <section className="bienvenida">
-          <h1>
-            <span className="bienvenida-hola">Hola,</span> {usuario?.nombre}
-          </h1>
-          <p>Acá ves a tus mascotas: sus vacunas, sus visitas y tus próximos turnos.</p>
+          <div>
+            <h1>Hola, {usuario?.nombre}</h1>
+            <p>Tus turnos, las vacunas de tus mascotas y sus visitas.</p>
+          </div>
           {!datos?.suspendidoHasta && (
             <Link to="/turno" className="boton boton-grande boton-brillo">
               <CalendarPlus size={22} aria-hidden="true" /> Pedir turno
@@ -336,7 +341,6 @@ Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a pod
 
             <section id="vacunas" className="cuenta-seccion" aria-labelledby="titulo-mascotas">
               <h2 id="titulo-mascotas" className="cuenta-titulo">
-                <PawPrint size={26} aria-hidden="true" />
                 {datos.mascotas.length === 1 ? 'Tu mascota' : 'Tus mascotas'}
               </h2>
               <div className="lista-mascotas-dueno">

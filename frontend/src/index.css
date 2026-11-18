@@ -3134,42 +3134,41 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* ---------- Mi cuenta (dueño) ---------- */
 
-/* Fondo con manchas suaves de color, para que se note el vidrio de las tarjetas */
+/* Fondo crema liso; todo en una columna: turnos, mascotas (de a dos) y visitas */
 .mi-cuenta-fondo {
-  background:
-    radial-gradient(circle at 6% 4%, rgba(246, 195, 67, 0.38), transparent 26%),
-    radial-gradient(circle at 94% 14%, rgba(28, 45, 99, 0.14), transparent 28%),
-    radial-gradient(circle at 10% 62%, rgba(28, 45, 99, 0.1), transparent 26%),
-    radial-gradient(circle at 90% 88%, rgba(246, 195, 67, 0.22), transparent 26%),
-    var(--fondo);
+  background: var(--fondo);
 }
 
 .mi-cuenta {
+  max-width: 860px;
   padding-block: 32px 72px;
 }
 
-/* Saludo en un recuadro de vidrio: "Hola," en cursiva y el nombre */
+/* En la compu, Mi cuenta se ve más chica (como con el zoom al 75 %).
+   Los botones se agrandan antes de achicar para seguir midiendo unos 45 px de alto. */
+@media (min-width: 861px) {
+  .mi-cuenta {
+    zoom: 0.75;
+  }
+
+  .mi-cuenta .boton {
+    min-height: 60px;
+  }
+}
+
+/* Saludo: el nombre a la izquierda y "Pedir turno" a la derecha */
 .bienvenida {
-  padding: 32px 40px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: var(--radio-grande);
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 12px 32px rgba(28, 45, 99, 0.08);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  backdrop-filter: blur(16px) saturate(1.2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
 }
 
 .bienvenida h1 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 0.3em;
   margin: 0;
   color: var(--azul);
-}
-
-.bienvenida-hola {
-  font-weight: 600;
+  font-size: clamp(2.2rem, 4vw, 2.8rem);
 }
 
 .bienvenida p {
@@ -3382,9 +3381,6 @@ html[data-turno-portada='visible'] .boton-turno {
     padding: 16px 12px 28px;
   }
 
-  .bienvenida {
-    padding: 24px 20px;
-  }
 }
 
 /* ---------- Celular ---------- */
@@ -5221,27 +5217,12 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 600;
 }
 
-.bienvenida .boton {
-  display: inline-flex;
-  width: auto;
-  margin-top: 16px;
-}
-
-.lista-mascotas-dueno {
-  display: grid;
-  gap: 24px;
-  margin-top: 28px;
-}
-
 .cuenta-seccion {
-  margin-top: 40px;
+  margin-top: 36px;
 }
 
 .cuenta-titulo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   color: var(--azul);
   font-size: 1.6rem;
 }
@@ -5258,11 +5239,10 @@ html[data-turno-portada='visible'] .boton-turno {
   flex: none;
 }
 
-/* Próximos turnos: tarjetas de vidrio con la mascota, el día y la hora bien grandes */
+/* Próximos turnos: una fila por turno, con la hojita del día, los datos y el botón */
 .turnos-dueno {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -5270,121 +5250,80 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .turno-dueno {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 22px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: var(--radio);
-  background:
-    radial-gradient(circle at 0 0, rgba(246, 195, 67, 0.38), rgba(246, 195, 67, 0) 60%),
-    rgba(255, 255, 255, 0.7);
-  box-shadow: 0 10px 28px rgba(28, 45, 99, 0.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
-}
-
-.turno-dueno p {
-  margin: 0;
-}
-
-.turno-dueno-mascota {
-  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--azul);
-  font-size: 1.15rem;
-  font-weight: 700;
+  gap: 18px;
+  padding: 14px 18px 14px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
 }
 
-.turno-dueno-dia {
-  margin-top: 8px !important;
-  font-family: var(--fuente-titulos);
-  font-size: 1.3rem;
-  font-weight: 600;
+.turno-hoja {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 80px;
+  padding: 8px 0;
+  border-radius: var(--radio-chico);
+  background: var(--azul);
+  color: #ffffff;
+  font-size: 0.9rem;
 }
 
-.turno-dueno-hora {
-  font-family: var(--fuente-titulos);
-  font-size: 2.3rem;
-  font-weight: 700;
+.turno-hoja strong {
+  font-size: 1.8rem;
   line-height: 1.1;
-  color: var(--azul);
 }
 
-.turno-dueno-servicio {
+.turno-hoja span:last-child {
+  color: #d7def0;
+}
+
+.turno-dueno-datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.turno-dueno-datos p {
+  margin: 0;
   color: var(--gris);
 }
 
-.turno-dueno .boton {
-  align-self: flex-start;
-  margin-top: 16px;
-}
-
-/* Cada mascota: vidrio con un difuminado en la esquina del nombre (azul y amarillo, alternados)
-   y una huellita grande y muy suave en la esquina contraria */
-.mascota-dueno {
-  position: relative;
-  overflow: hidden;
-  padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: var(--radio);
-  background:
-    radial-gradient(circle at 0 0, rgba(28, 45, 99, 0.13), rgba(28, 45, 99, 0) 55%),
-    rgba(255, 255, 255, 0.66);
-  box-shadow: 0 10px 28px rgba(28, 45, 99, 0.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
-}
-
-.mascota-dueno:nth-child(even) {
-  background:
-    radial-gradient(circle at 0 0, rgba(246, 195, 67, 0.32), rgba(246, 195, 67, 0) 55%),
-    rgba(255, 255, 255, 0.66);
-}
-
-.mascota-dueno-huella {
-  position: absolute;
-  right: -18px;
-  bottom: -18px;
-  width: 130px;
-  height: 130px;
+.turno-dueno-datos .turno-dueno-hora {
   color: var(--azul);
-  opacity: 0.08;
-  transform: rotate(-22deg);
-  pointer-events: none;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
-.mascota-dueno > :not(.mascota-dueno-huella) {
-  position: relative;
+.turno-dueno .boton {
+  flex: none;
 }
 
-.mascota-dueno > .cuenta-vacio {
-  padding-top: 16px;
+/* Mascotas: tarjetas blancas de a dos, con sus vacunas debajo del nombre */
+.lista-mascotas-dueno {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  align-items: start;
+  gap: 16px;
 }
 
-/* Visitas: una sola tarjeta de vidrio con las de todas las mascotas */
-.visitas-dueno {
-  padding: 8px 24px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+.mascota-dueno {
+  padding: 20px 22px;
+  border: 1px solid var(--borde);
   border-radius: var(--radio);
-  background: rgba(255, 255, 255, 0.66);
-  box-shadow: 0 10px 28px rgba(28, 45, 99, 0.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
+  background: var(--superficie);
 }
 
 .mascota-dueno-encabezado {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--borde);
+  gap: 14px;
+  padding-bottom: 12px;
 }
 
 .mascota-dueno-encabezado h3 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
 }
 
 .mascota-dueno-encabezado p {
@@ -5394,22 +5333,35 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .mascota-dueno-encabezado > div {
   flex: 1;
-  min-width: 160px;
+  min-width: 0;
 }
 
-.bloque-dueno {
-  padding-top: 20px;
+.mascota-dueno > .cuenta-vacio {
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
 }
 
-.bloque-dueno h4 {
-  display: flex;
+/* Vacunas: una fila por vacuna, separadas por una línea, con el estado (ícono + texto) a la derecha */
+.lista-dosis.dosis-dueno {
+  gap: 0;
+}
+
+.lista-dosis.dosis-dueno li {
+  flex-wrap: nowrap;
+  padding: 12px 0;
+  border-top: 1px solid var(--borde);
+  border-radius: 0;
+  background: none;
+}
+
+.dosis-dueno .estado-dosis {
+  display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 12px;
-  font-size: 1.15rem;
-  color: var(--azul);
+  gap: 6px;
 }
 
+/* Visitas: una tarjetita por visita, con la fecha a la izquierda */
 .lista-visitas {
   display: grid;
   gap: 10px;
@@ -5418,20 +5370,23 @@ html[data-turno-portada='visible'] .boton-turno {
   list-style: none;
 }
 
+.lista-visitas li {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+
 .lista-visitas li > div {
   display: grid;
   gap: 2px;
 }
 
-.lista-visitas li {
-  display: flex;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--borde);
-}
-
-.lista-visitas li:last-child {
-  border-bottom: 0;
+.lista-visitas strong {
+  color: var(--azul);
 }
 
 .lista-visitas p {
@@ -5439,9 +5394,17 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .visita-fecha {
-  min-width: 96px;
+  color: var(--gris);
   font-weight: 700;
-  color: var(--azul);
+}
+
+.visita-quien {
+  color: var(--gris);
+  font-size: 0.95rem;
+}
+
+.visitas-dueno .boton-texto {
+  margin-top: 10px;
 }
 
 .mi-cuenta-vacia {
@@ -5464,8 +5427,21 @@ html[data-turno-portada='visible'] .boton-turno {
 
 @media (max-width: 600px) {
   .lista-visitas li {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  /* En el celular el botón del turno va abajo, a lo ancho */
+  .turno-dueno {
+    flex-wrap: wrap;
+  }
+
+  .turno-dueno .boton {
+    width: 100%;
+  }
+
+  .lista-mascotas-dueno {
+    grid-template-columns: 1fr;
   }
 }
 
