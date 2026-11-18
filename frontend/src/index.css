@@ -5408,12 +5408,12 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--gris);
 }
 
-.tabla-avisos {
+.tabla-notificaciones {
   overflow: hidden;
   padding: 0;
 }
 
-.tabla-avisos-ayuda {
+.tabla-notificaciones-ayuda {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -5422,17 +5422,17 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--gris);
 }
 
-.tabla-avisos-ayuda svg {
+.tabla-notificaciones-ayuda svg {
   flex: none;
   color: var(--azul);
 }
 
-.tabla-avisos > .vacio {
+.tabla-notificaciones > .vacio {
   margin: 0;
   padding: 0 18px 20px;
 }
 
-.tabla-avisos-encabezado,
+.tabla-notificaciones-encabezado,
 .aviso-fila {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto;
@@ -5441,7 +5441,7 @@ html[data-turno-portada='visible'] .boton-turno {
   padding-inline: 18px;
 }
 
-.tabla-avisos-encabezado {
+.tabla-notificaciones-encabezado {
   padding-block: 10px;
   border-block: 1px solid var(--panel-borde);
   background: #f7f8fb;
@@ -5510,7 +5510,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* En el celular, cada aviso muestra quién, qué y el botón uno debajo del otro */
 @media (max-width: 860px) {
-  .tabla-avisos-encabezado {
+  .tabla-notificaciones-encabezado {
     display: none;
   }
 
@@ -6450,12 +6450,15 @@ form.campo-en-linea {
   backdrop-filter: blur(12px);
 }
 
-.indicadores {
+/* Las líneas entre número y número son el fondo gris que se ve por el espacio de 1 px */
+.panel-contenido .indicadores {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  background: var(--panel-borde);
   list-style: none;
 }
 
@@ -6464,6 +6467,19 @@ form.campo-en-linea {
   flex-direction: column;
   gap: 4px;
   padding: 16px 18px;
+  background: #ffffff;
+}
+
+@media (max-width: 1250px) {
+  .panel-contenido .indicadores {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .panel-contenido .indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .indicador-titulo {
@@ -7181,4 +7197,43 @@ form.campo-en-linea {
     .dia-hoja
   ) {
   border-radius: 6px;
+}
+
+/* Estadísticas: el período como botones pegados (el elegido en azul) */
+.panel .segmentado {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border: 1px solid var(--panel-borde);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.panel .segmentado button {
+  min-height: 56px;
+  padding: 0 18px;
+  border: none;
+  border-right: 1px solid var(--panel-borde);
+  border-radius: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel .segmentado button:last-child {
+  border-right: none;
+}
+
+.panel .segmentado button.activo {
+  background: var(--azul);
+  color: #ffffff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .panel .segmentado button:not(.activo):hover {
+    background: #f7f8fb;
+  }
 }

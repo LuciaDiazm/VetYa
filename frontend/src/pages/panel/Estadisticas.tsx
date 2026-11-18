@@ -103,7 +103,7 @@ function Indicador({
   const bueno = cambio && cambio.signo !== 0 && (cambio.signo > 0) === arribaEsBueno
   const Flecha = !cambio || cambio.signo === 0 ? Minus : cambio.signo > 0 ? ArrowUp : ArrowDown
   return (
-    <li className="indicador tarjeta">
+    <li className="indicador">
       <span className="indicador-titulo">
         {icono} {titulo}
       </span>
@@ -179,12 +179,12 @@ export function Estadisticas() {
       </div>
 
       {/* Filtro único, arriba de todo: cambia todos los números de la pantalla */}
-      <div className="filtro-periodo" role="group" aria-label="Período">
+      <div className="filtro-periodo segmentado" role="group" aria-label="Período">
         {PERIODOS.map((p) => (
           <button
             key={p.clave}
             type="button"
-            className={`chip${p === periodo ? ' chip-activo' : ''}`}
+            className={p === periodo ? 'activo' : undefined}
             aria-pressed={p === periodo}
             onClick={() => elegir(p.clave)}
           >
@@ -193,7 +193,7 @@ export function Estadisticas() {
         ))}
         <button
           type="button"
-          className={`chip${aMano ? ' chip-activo' : ''}`}
+          className={aMano ? 'activo' : undefined}
           aria-pressed={aMano}
           onClick={() => elegirFechas(desde, hasta)}
         >
@@ -220,8 +220,8 @@ export function Estadisticas() {
           </div>
         )}
         <div className={`estadisticas${cargando ? ' recargando' : ''}`} aria-busy={cargando}>
-          {/* ---------- Indicadores ---------- */}
-          <ul className="indicadores">
+          {/* ---------- Indicadores: los seis números en una sola franja, separados por líneas finitas ---------- */}
+          <ul className="indicadores tarjeta">
             <Indicador
               icono={<CalendarDays size={18} aria-hidden="true" />}
               titulo="Turnos"

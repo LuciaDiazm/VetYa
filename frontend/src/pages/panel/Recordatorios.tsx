@@ -182,14 +182,14 @@ export function Recordatorios() {
       </nav>
 
       {/* Los avisos como tabla: quién, qué le toca y el botón para avisarle */}
-      <section className="tarjeta tabla-avisos" aria-label={lista.titulo}>
-        <p className="tabla-avisos-ayuda">
+      <section className="tarjeta tabla-notificaciones" aria-label={lista.titulo}>
+        <p className="tabla-notificaciones-ayuda">
           <lista.icono size={18} aria-hidden="true" /> {lista.explicacion}
         </p>
         {cantidades[elegida] === 0 ? (
           <p className="vacio">{lista.vacio}</p>
         ) : (
-          <div className="tabla-avisos-encabezado" aria-hidden="true">
+          <div className="tabla-notificaciones-encabezado" aria-hidden="true">
             <span>Mascota y dueño</span>
             <span>{lista.columna}</span>
             <span>Avisar</span>
