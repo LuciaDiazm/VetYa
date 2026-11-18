@@ -145,14 +145,10 @@ export function Inicio() {
             <div className="portada-texto">
               <h1 id="titulo-portada" className="titulo-portada">
                 {/* Cada palabra sube apenas después de la anterior (ver .palabra en index.css) */}
-                <span className="titulo-cursiva">
-                  <span className="palabra" style={{ '--orden': 0 } as CSSProperties}>Clínica</span>{' '}
-                  <span className="palabra" style={{ '--orden': 1 } as CSSProperties}>veterinaria</span>
-                </span>
-                <span className="titulo-serif">
-                  <span className="palabra" style={{ '--orden': 2 } as CSSProperties}>en</span>{' '}
-                  <span className="palabra" style={{ '--orden': 3 } as CSSProperties}>Goya</span>
-                </span>
+                <span className="palabra" style={{ '--orden': 0 } as CSSProperties}>Clínica</span>{' '}
+                <span className="palabra" style={{ '--orden': 1 } as CSSProperties}>veterinaria</span>{' '}
+                <span className="palabra" style={{ '--orden': 2 } as CSSProperties}>en</span>{' '}
+                <span className="palabra" style={{ '--orden': 3 } as CSSProperties}>Goya</span>
               </h1>
               <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
               <div className="portada-acciones">
