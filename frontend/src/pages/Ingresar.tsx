@@ -2,7 +2,7 @@ import { KeyRound, Mail, MessageCircle, Phone } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { rutaInicial, useAuth } from '../context/AuthContext'
-import { enlaceWhatsapp, useSitio } from '../lib/sitio'
+import { enlaceTelefono, enlaceWhatsapp, useSitio } from '../lib/sitio'
 
 export function Ingresar() {
   const { ingresar } = useAuth()
@@ -90,7 +90,7 @@ export function Ingresar() {
                     >
                       <MessageCircle size={20} aria-hidden="true" /> Escribir por WhatsApp
                     </a>
-                    <a className="boton boton-contorno" href={`tel:+${sitio.clinica.whatsapp}`}>
+                    <a className="boton boton-contorno" href={enlaceTelefono(sitio.clinica.telefono)}>
                       <Phone size={20} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
                     </a>
                   </div>

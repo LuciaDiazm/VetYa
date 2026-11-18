@@ -36,6 +36,13 @@ export function enlaceWhatsapp(numero: string, mensaje: string) {
   return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
 }
 
+// Enlace para llamar por teléfono: deja solo los números y les agrega el código de Argentina.
+// "3777 000000" → "tel:+543777000000". Si ya viene con 54 adelante, lo respeta.
+export function enlaceTelefono(numero: string) {
+  const digitos = numero.replace(/\D/g, '').replace(/^0+/, '')
+  return `tel:+${digitos.startsWith('54') ? digitos : `54${digitos}`}`
+}
+
 export const MENSAJE_TURNO = 'Hola, quiero pedir un turno para mi mascota.'
 
 // Después de cambiar la configuración, la próxima vez se vuelven a pedir los datos públicos.

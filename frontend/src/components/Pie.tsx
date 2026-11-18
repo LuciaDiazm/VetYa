@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { agruparHorarios } from '../lib/horarios'
-import { useSitio } from '../lib/sitio'
+import { enlaceTelefono, useSitio } from '../lib/sitio'
 import { Logo } from './Logo'
 
 // Pie de página de la parte pública, igual en todas las páginas.
@@ -30,7 +30,9 @@ export function Pie() {
         </div>
         <div>
           <h2 className="pie-titulo">Contacto</h2>
-          <p className="pie-texto">Teléfono: {clinica.telefono}</p>
+          <p className="pie-texto">
+            Teléfono: <a href={enlaceTelefono(clinica.telefono)}>{clinica.telefono}</a>
+          </p>
           {clinica.email && <p className="pie-texto">{clinica.email}</p>}
           <p className="pie-texto">
             <Link to="/urgencias">Qué hacer en una urgencia</Link>

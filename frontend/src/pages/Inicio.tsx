@@ -20,7 +20,7 @@ import { IconoDiente } from '../components/IconoDiente'
 import { Mapa } from '../components/Mapa'
 import { revelarAlBajar } from '../lib/revelar'
 import { agruparHorarios } from '../lib/horarios'
-import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
+import { enlaceTelefono, enlaceWhatsapp, esLimpiezaDental, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import { Cargando } from '../components/Cargando'
 
 // Cada tarjeta de servicios (todas blancas) con su ícono y a dónde lleva.
@@ -160,8 +160,9 @@ export function Inicio() {
                   <CalendarCheck size={22} aria-hidden="true" />
                   Pedir turno
                 </Link>
-                <a href="#servicios" className="boton boton-grande boton-contorno">
-                  Ver servicios
+                <a href={enlaceTelefono(clinica.telefono)} className="boton boton-grande boton-contorno">
+                  <Phone size={22} aria-hidden="true" />
+                  Llamar al <span className="sin-corte">{clinica.telefono}</span>
                 </a>
               </div>
             </div>
@@ -410,7 +411,7 @@ export function Inicio() {
                     <CalendarCheck size={20} aria-hidden="true" />
                     Pedir turno
                   </Link>
-                  <a href={`tel:+${clinica.whatsapp}`} className="boton boton-contorno">
+                  <a href={enlaceTelefono(clinica.telefono)} className="boton boton-contorno">
                     <Phone size={20} aria-hidden="true" />
                     Llamar
                   </a>
@@ -430,6 +431,23 @@ export function Inicio() {
           </div>
         </div>
       </section>
+
+      {/* ---------- Barra fija en el celular: llamar o escribir, siempre a un toque ---------- */}
+      <nav className="barra-contacto" aria-label="Contactar a la clínica">
+        <a href={enlaceTelefono(clinica.telefono)} className="boton">
+          <Phone size={20} aria-hidden="true" />
+          Llamar
+        </a>
+        <a
+          href={enlaceWhatsapp(clinica.whatsapp, MENSAJE_TURNO)}
+          target="_blank"
+          rel="noreferrer"
+          className="boton boton-whatsapp"
+        >
+          <MessageCircle size={20} aria-hidden="true" />
+          WhatsApp
+        </a>
+      </nav>
     </main>
   )
 }

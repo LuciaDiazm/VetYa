@@ -2,7 +2,7 @@ import { CalendarCheck, Download, Phone, TriangleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../lib/api'
-import { enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
+import { enlaceTelefono, enlaceWhatsapp, esLimpiezaDental, useSitio } from '../lib/sitio'
 import type { Cirugia } from '../types'
 import { Cargando } from '../components/Cargando'
 
@@ -79,7 +79,7 @@ export function Cirugias({ tipo }: { tipo: keyof typeof TEXTOS }) {
               ) : (
                 // Se coordinan hablando: llamar es la acción principal.
                 sitio && (
-                  <a href={`tel:+${sitio.clinica.whatsapp}`} className="boton boton-grande">
+                  <a href={enlaceTelefono(sitio.clinica.telefono)} className="boton boton-grande">
                     <Phone size={22} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
                   </a>
                 )

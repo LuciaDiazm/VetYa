@@ -27,8 +27,8 @@
   --fondo: #f8f3eb; /* crema */
 
   /* Estados */
-  --verde-whatsapp: #1e9e57;
-  --verde-whatsapp-hover: #188049;
+  --verde-whatsapp: #17804a;
+  --verde-whatsapp-hover: #126a3d;
   --rojo: #c2352b;
   --rojo-hover: #a32b22;
   --rojo-suave: #fdecea;
@@ -1823,6 +1823,52 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .pie a {
   color: #ffffff;
+}
+
+/* Los enlaces del pie son fáciles de tocar: 44 px de alto aunque el texto sea chico */
+.pie-texto a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-underline-offset: 3px;
+}
+
+.pie-texto:has(> a:only-child) {
+  margin: 0;
+}
+
+/* Barra de contacto fija abajo: solo en el celular */
+.barra-contacto {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .barra-contacto {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--borde);
+    background: #ffffff;
+    box-shadow: 0 -6px 18px rgba(28, 45, 99, 0.08);
+  }
+
+  .barra-contacto .boton {
+    min-height: 52px;
+    justify-content: center;
+  }
+
+  /* Lo de abajo de todo no queda tapado por la barra */
+  body:has(.barra-contacto) .pie {
+    padding-bottom: 76px;
+  }
+
+  body:has(.barra-contacto) .boton-arriba {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
 }
 
 .pie-legal {
