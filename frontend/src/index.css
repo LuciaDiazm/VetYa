@@ -976,40 +976,43 @@ html[data-turno-portada='visible'] .boton-turno {
   background: var(--azul);
 }
 
-/* ---------- Cinta en movimiento ---------- */
+/* ---------- Franja debajo de la portada: horario de hoy y dirección ---------- */
 
-.cinta {
-  overflow: hidden;
+.franja-hoy {
   background: var(--azul);
   color: #ffffff;
-  padding-block: 14px;
+  padding-block: 16px;
 }
 
-.cinta-pista {
+.franja-hoy-datos {
   display: flex;
-  width: max-content;
-  animation: cinta 120s linear infinite; /* 3 veces más largo, misma velocidad */
-}
-
-.cinta-punto {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--amarillo);
-}
-
-.cinta-grupo {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  padding-right: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 48px;
+  margin: 0;
   font-size: 1.05rem;
-  white-space: nowrap;
 }
 
-@keyframes cinta {
-  to {
-    transform: translateX(-50%);
+.franja-hoy-datos > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.franja-hoy-datos svg {
+  flex-shrink: 0;
+  color: var(--amarillo);
+}
+
+/* En el celular, un dato debajo del otro y alineados a la izquierda */
+@media (max-width: 640px) {
+  .franja-hoy-datos {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .franja-hoy-datos > span {
+    align-items: flex-start;
   }
 }
 
@@ -1077,43 +1080,6 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .tarjeta-oscura h3 {
   color: #ffffff;
-}
-
-/* ---------- Animales que se asoman (decoración, sin fondo) ---------- */
-
-.asomado {
-  position: absolute;
-  height: auto;
-  pointer-events: none;
-}
-
-/* Un perro espía desde el borde izquierdo y un gato desde el derecho, a la misma altura */
-.sobre {
-  position: relative;
-}
-
-.asomado-costado,
-.asomado-izquierda {
-  top: 32px;
-  width: 150px;
-}
-
-.asomado-costado {
-  right: calc((100% - 100vw) / 2);
-}
-
-.asomado-izquierda {
-  left: calc((100% - 100vw) / 2);
-  width: 150px;
-  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent);
-  mask-image: linear-gradient(to bottom, #000 80%, transparent);
-}
-
-@media (max-width: 1240px) {
-  .asomado-costado,
-  .asomado-izquierda {
-    display: none;
-  }
 }
 
 /* ---------- Servicios en mosaico ---------- */
@@ -3457,10 +3423,6 @@ html[data-turno-portada='visible'] .boton-turno {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .cinta-pista {
-    animation: none;
   }
 
   * {

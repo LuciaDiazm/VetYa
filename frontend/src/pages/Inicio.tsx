@@ -14,14 +14,16 @@ import {
   Star,
   Syringe,
 } from 'lucide-react'
-import { Fragment, useEffect, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { IconoDiente } from '../components/IconoDiente'
 import { Mapa } from '../components/Mapa'
 import { revelarAlBajar } from '../lib/revelar'
-import { agruparHorarios } from '../lib/horarios'
+import { diaSemanaHoy } from '../lib/fechas'
+import { agruparHorarios, horarioDelDia } from '../lib/horarios'
 import { enlaceTelefono, enlaceWhatsapp, esLimpiezaDental, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import { Cargando } from '../components/Cargando'
+import type { HorarioAtencion } from '../types'
 
 // Cada tarjeta de servicios (todas blancas) con su ícono y a dónde lleva.
 const TARJETAS: {
@@ -202,28 +204,49 @@ export function Inicio() {
         </div>
       </div>
 
-      {/* ---------- Cinta en movimiento ---------- */}
-      <div className="cinta" aria-hidden="true">
-        <div className="cinta-pista">
-          {Array.from({ length: 2 }, (_, i) => (
-            // Cada grupo repite las frases 3 veces para cubrir hasta las pantallas más anchas.
-            <span key={i} className="cinta-grupo">
-              {Array.from({ length: 3 }, (_, j) => (
-                <Fragment key={j}>
-                  Veterinarios con experiencia <span className="cinta-punto" />
-                  Perros y gatos <span className="cinta-punto" />
-                  Turnos online <span className="cinta-punto" />
-                </Fragment>
-              ))}
-            </span>
-          ))}
+      {/* ---------- Franja: horario de hoy y dirección (el teléfono ya está en la portada) ---------- */}
+      <FranjaHoy horarios={clinica.horarios} direccion={clinica.direccion} />
+
+      {/* ---------- Servicios ---------- */}
+      <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
+        <h2 id="titulo-servicios" className="titulo-centrado">
+          Todo lo que tu mascota necesita
+        </h2>
+        <div className="mosaico revelar-costados" ref={revelarAlBajar}>
+          {TARJETAS.map((c) => {
+            const lista = servicios.filter((s) =>
+              c.clave === 'LIMPIEZA' ? esLimpiezaDental(s) : s.categoria === c.clave && !esLimpiezaDental(s),
+            )
+            if (lista.length === 0) return null
+            return (
+              <article
+                key={c.clave}
+                className="mosaico-tarjeta"
+              >
+                <span className="mosaico-icono">{c.icono}</span>
+                <div className="mosaico-texto">
+                  <h3>{c.nombre}</h3>
+                  <ul>
+                    {lista.map((s) => (
+                      <li key={s.id}>{s.nombre === c.nombre ? (s.descripcion ?? s.nombre) : s.nombre}</li>
+                    ))}
+                  </ul>
+                  <Link to={c.enlace} className="mosaico-enlace" aria-label={`${c.nombre}: ${c.accion.toLowerCase()}`}>
+                    {c.accion} <ArrowRight size={18} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            )
+          })}
         </div>
-      </div>
+        <p className="servicios-productos">
+          <ShoppingBag size={22} aria-hidden="true" />
+          También tenemos alimentos, medicamentos y accesorios para tu mascota. Consultanos en la clínica.
+        </p>
+      </section>
 
       {/* ---------- Quiénes somos ---------- */}
       <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
-        <img src="/fotos/perrito-asoma.webp" alt="" className="asomado asomado-izquierda" loading="lazy" />
-        <img src="/fotos/gato-asoma.webp" alt="" className="asomado asomado-costado" loading="lazy" />
         <h2 id="titulo-sobre" className="sobre-frase">
           Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}
           <strong>sin vueltas</strong>.
@@ -262,44 +285,6 @@ export function Inicio() {
             </ul>
           </div>
         )}
-      </section>
-
-      {/* ---------- Servicios ---------- */}
-      <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
-        <h2 id="titulo-servicios" className="titulo-centrado">
-          Todo lo que tu mascota necesita
-        </h2>
-        <div className="mosaico revelar-costados" ref={revelarAlBajar}>
-          {TARJETAS.map((c) => {
-            const lista = servicios.filter((s) =>
-              c.clave === 'LIMPIEZA' ? esLimpiezaDental(s) : s.categoria === c.clave && !esLimpiezaDental(s),
-            )
-            if (lista.length === 0) return null
-            return (
-              <article
-                key={c.clave}
-                className="mosaico-tarjeta"
-              >
-                <span className="mosaico-icono">{c.icono}</span>
-                <div className="mosaico-texto">
-                  <h3>{c.nombre}</h3>
-                  <ul>
-                    {lista.map((s) => (
-                      <li key={s.id}>{s.nombre === c.nombre ? (s.descripcion ?? s.nombre) : s.nombre}</li>
-                    ))}
-                  </ul>
-                  <Link to={c.enlace} className="mosaico-enlace" aria-label={`${c.nombre}: ${c.accion.toLowerCase()}`}>
-                    {c.accion} <ArrowRight size={18} aria-hidden="true" />
-                  </Link>
-                </div>
-              </article>
-            )
-          })}
-        </div>
-        <p className="servicios-productos">
-          <ShoppingBag size={22} aria-hidden="true" />
-          También tenemos alimentos, medicamentos y accesorios para tu mascota. Consultanos en la clínica.
-        </p>
       </section>
 
       {/* ---------- Opiniones ---------- */}
@@ -447,6 +432,34 @@ export function Inicio() {
         </a>
       </nav>
     </main>
+  )
+}
+
+// Franja azul debajo de la portada: lo que más se pregunta (si hoy está abierto y dónde queda), de un vistazo.
+function FranjaHoy({ horarios, direccion }: { horarios: HorarioAtencion[]; direccion: string }) {
+  const [dia] = useState(diaSemanaHoy)
+  const horas = horarioDelDia(horarios, dia)
+  return (
+    <div className="franja-hoy">
+      <p className="contenedor franja-hoy-datos">
+        <span>
+          <Clock size={22} aria-hidden="true" />
+          {horas ? (
+            <span>
+              Hoy atendemos: <strong>{horas}</strong>
+            </span>
+          ) : (
+            <strong>Hoy la clínica está cerrada</strong>
+          )}
+        </span>
+        <span>
+          <MapPin size={22} aria-hidden="true" />
+          <span>
+            Estamos en <strong>{direccion}</strong>
+          </span>
+        </span>
+      </p>
+    </div>
   )
 }
 

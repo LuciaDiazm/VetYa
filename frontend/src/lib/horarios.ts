@@ -38,6 +38,16 @@ export function agruparHorarios(horarios: HorarioAtencion[]): RenglonHorario[] {
   }))
 }
 
+// Horario de un día de la semana (0 = domingo): "9:00 a 12:30 y 17:00 a 20:30", o null si ese día está cerrado.
+export function horarioDelDia(horarios: HorarioAtencion[], diaSemana: number): string | null {
+  const horas = horarios
+    .filter((h) => h.diaSemana === diaSemana)
+    .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+    .map((h) => `${sinCero(h.horaInicio)} a ${sinCero(h.horaFin)}`)
+    .join(' y ')
+  return horas || null
+}
+
 // "09:00" → "9:00"
 function sinCero(hora: string) {
   return hora.replace(/^0/, '')

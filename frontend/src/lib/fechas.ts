@@ -7,6 +7,11 @@ export function hoyArgentina() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date())
 }
 
+// Día de la semana de hoy en Argentina (0 = domingo)
+export function diaSemanaHoy() {
+  return new Date(`${hoyArgentina()}T12:00:00Z`).getUTCDay()
+}
+
 export function sumarDias(fecha: string, dias: number) {
   const d = new Date(`${fecha}T12:00:00Z`)
   d.setUTCDate(d.getUTCDate() + dias)
