@@ -2120,35 +2120,28 @@ html[data-turno-portada='visible'] .boton-turno {
 /* ---------- Panel interno (veterinario y administrador) ---------- */
 
 .panel {
+  --panel-fondo: #f2f4f8;
+  --panel-borde: #e2e6ee;
   display: grid;
-  grid-template-columns: 104px 1fr;
+  grid-template-columns: 92px 1fr;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(246, 195, 67, 0.3), transparent 28%),
-    radial-gradient(circle at 92% 12%, rgba(159, 207, 238, 0.45), transparent 30%),
-    radial-gradient(circle at 40% 70%, rgba(159, 207, 238, 0.3), transparent 30%),
-    radial-gradient(circle at 88% 92%, rgba(246, 195, 67, 0.2), transparent 28%),
-    var(--fondo);
-  background-attachment: fixed;
+  background: var(--panel-fondo);
 }
 
-/* Barra azul angosta, redondeada y separada del borde; queda fija mientras se baja la página */
+/* Barra azul de arriba a abajo, pegada al borde; queda fija mientras se baja la página */
 .panel-menu {
   position: sticky;
-  top: 16px;
+  top: 0;
   z-index: 20;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
-  height: calc(100vh - 32px);
-  margin: 16px 0 16px 16px;
-  padding: 22px 0 18px;
-  border-radius: 24px;
+  gap: 0;
+  height: 100vh;
+  padding: 18px 0 16px;
   background: var(--azul);
   color: #ffffff;
-  box-shadow: 0 16px 36px rgba(28, 45, 99, 0.25);
 }
 
 /* Logo en blanco: el dibujo arriba y el nombre abajo, chiquito */
@@ -2158,13 +2151,12 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .panel-menu .logo {
   flex-direction: column;
-  gap: 2px;
-  color: #ffffff;
+  gap: 0;
 }
 
 .panel-menu .logo-marca {
-  width: 56px;
-  height: 28px;
+  width: 52px;
+  height: 26px;
 }
 
 .panel-menu .logo-texto {
@@ -2175,20 +2167,21 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-navegacion {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  margin-top: 56px;
 }
 
-/* Cada sección es un cuadradito con su ícono */
+/* Cada sección es un cuadrado redondeado con su ícono */
 .panel-enlace {
   position: relative;
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   border: none;
   border-radius: 16px;
   background: none;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
   font: inherit;
   cursor: pointer;
@@ -2197,20 +2190,53 @@ html[data-turno-portada='visible'] .boton-turno {
     color 0.15s;
 }
 
+.panel-enlace svg {
+  width: 28px;
+  height: 28px;
+}
+
 .panel-enlace:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
 
+/* La sección abierta: fondo un poco más claro y una rayita amarilla en el borde de la barra */
 .panel-enlace.active {
-  background: #ffffff;
-  color: var(--azul);
-  box-shadow: 0 6px 16px rgba(9, 22, 48, 0.25);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.panel-enlace.active::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 5px;
+  height: 36px;
+  border-radius: 0 4px 4px 0;
+  background: var(--amarillo);
+  transform: translateY(-50%);
 }
 
 .panel-enlace:focus-visible {
   outline: 3px solid var(--amarillo);
   outline-offset: 2px;
+}
+
+/* La inicial de quien usa el panel, en un círculo, arriba de Salir */
+.panel-inicial {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-top: auto;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-family: var(--fuente-titulos);
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .panel-salir {
@@ -2222,22 +2248,21 @@ html[data-turno-portada='visible'] .boton-turno {
   width: 72px;
   height: auto;
   min-height: 64px;
-  margin-top: auto;
-  padding: 8px 0;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  margin-top: 14px;
+  padding: 6px 0;
   color: #ffffff;
 }
 
 /* "Salir" va siempre escrito, para que se encuentre sin pasar el mouse */
 .panel-salir-texto {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 /* El nombre de la sección: un cartelito a la derecha del ícono, al pasar el mouse o con el teclado */
 .panel-enlace-nombre {
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 18px);
   top: 50%;
   z-index: 30;
   padding: 8px 14px;
@@ -2283,32 +2308,30 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
-/* El globito de avisos va en la esquina del ícono */
+/* El globito de avisos: amarillo, en la esquina del ícono */
 .panel-enlace .globo {
   position: absolute;
-  top: -4px;
-  right: -6px;
-  min-width: 22px;
-  height: 22px;
+  top: -2px;
+  right: -4px;
+  min-width: 24px;
+  height: 24px;
   margin: 0;
   padding: 0 6px;
   border: 2px solid var(--azul);
-  font-size: 0.75rem;
+  background: var(--amarillo);
+  color: var(--azul);
+  font-size: 0.8rem;
 }
 
 .panel-contenido {
-  padding: 32px 40px;
+  padding: 18px 20px 32px;
   min-width: 0;
 }
 
-/* Tarjetas del panel: vidrio esmerilado, como en el sitio público y en Mi cuenta */
-.panel-contenido .tarjeta,
-.panel-contenido .hoy-tarjeta {
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 10px 28px rgba(28, 45, 99, 0.07);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  backdrop-filter: blur(16px) saturate(1.2);
+/* Tarjetas del panel: blancas, planas, con borde finito */
+.panel-contenido .tarjeta {
+  border: 1px solid var(--panel-borde);
+  background: #ffffff;
 }
 
 .panel-encabezado {
@@ -2325,190 +2348,588 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--gris);
 }
 
-/* Hoy: contenido a la izquierda y una columna angosta con el perfil y la semana */
+/* ---------- Hoy ---------- */
 .hoy-grilla {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: start;
-  gap: 24px;
+  gap: 16px;
 }
 
-.hoy-principal {
-  display: grid;
-  gap: 20px;
-}
-
-.hoy-principal > * {
-  margin: 0;
-}
-
+/* Saludo: franja azul con el día y la cantidad de turnos; las dos acciones a la derecha */
 .hoy-saludo {
-  position: relative;
-  overflow: hidden;
-  padding: 28px 32px 30px;
-  border-radius: 24px;
-  background: linear-gradient(120deg, var(--azul) 0%, #2b4596 100%);
-  color: #ffffff;
-  box-shadow: 0 16px 36px rgba(28, 45, 99, 0.22);
-}
-
-.hoy-saludo > :not(.hoy-saludo-dibujos) {
-  position: relative;
-  z-index: 1;
-}
-
-.hoy-saludo-fecha {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  font-weight: 500;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding: 30px 28px;
+  border-radius: 22px;
+  background: var(--azul);
+  color: #ffffff;
 }
 
 .hoy-saludo h1 {
-  margin: 18px 0 4px;
+  margin: 0;
   color: #ffffff;
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-size: clamp(1.8rem, 2.6vw, 2.3rem);
+  line-height: 1.15;
 }
 
 .hoy-saludo p {
-  margin: 0 0 20px;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 1.1rem;
-}
-
-/* Dibujitos de la clínica, quietos y muy suaves, del lado derecho */
-.hoy-saludo-dibujos {
-  position: absolute;
-  inset: 0 0 0 auto;
-  width: 45%;
-  pointer-events: none;
-  color: rgba(255, 255, 255, 0.14);
-}
-
-.hoy-saludo-dibujos svg {
-  position: absolute;
-}
-
-.hoy-saludo-dibujos svg:nth-child(1) {
-  top: 18%;
-  right: 12%;
-  transform: rotate(-18deg);
-}
-
-.hoy-saludo-dibujos svg:nth-child(2) {
-  bottom: 14%;
-  right: 30%;
-  transform: rotate(10deg);
-}
-
-.hoy-saludo-dibujos svg:nth-child(3) {
-  top: 12%;
-  right: 42%;
-  transform: rotate(30deg);
-}
-
-.hoy-saludo-dibujos svg:nth-child(4) {
-  bottom: 12%;
-  right: 6%;
-}
-
-.hoy-costado {
-  position: sticky;
-  top: 16px;
-  display: grid;
-  gap: 20px;
-}
-
-/* Tarjetas de la columna: título en una franja azul, como en la referencia */
-.hoy-tarjeta {
-  overflow: hidden;
-  border: 1px solid var(--borde);
-  border-radius: 20px;
-  background: var(--superficie);
-}
-
-.hoy-tarjeta-titulo {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0;
-  padding: 16px 20px;
-  background: var(--azul);
-  color: #ffffff;
-  font-size: 1rem;
-  letter-spacing: 0.04em;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.2rem;
+}
+
+.hoy-saludo-dia::first-letter {
   text-transform: uppercase;
 }
 
-.hoy-tarjeta-titulo span {
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
+.hoy-saludo strong {
+  color: #ffffff;
 }
 
-.hoy-perfil {
+.hoy-saludo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hoy-boton-avisos,
+.hoy-boton-turno {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 0 22px;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.hoy-boton-avisos {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  transition: background-color 0.15s;
+}
+
+.hoy-boton-avisos:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.boton.hoy-boton-turno {
+  background: var(--amarillo);
+  color: var(--azul);
+}
+
+.boton.hoy-boton-turno:hover {
+  background: #f0b829;
+}
+
+/* Cajas blancas de Hoy: título arriba separado por una línea */
+.hoy-caja {
+  overflow: visible;
+  border: 1px solid var(--panel-borde);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.hoy-caja-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+.hoy-caja-titulo-izquierda {
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.hoy-caja-titulo h2 {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 20px;
+  gap: 10px;
+  margin: 0;
+  color: var(--tinta);
+  font-family: var(--fuente-cuerpo, inherit);
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
-.hoy-perfil > div {
+.hoy-caja-titulo h2 svg {
+  color: var(--gris);
+}
+
+.hoy-faltan {
+  color: var(--gris);
+  font-size: 1.1rem;
+}
+
+.hoy-faltan strong {
+  color: var(--tinta);
+}
+
+.hoy-vacio {
+  margin: 0;
+  padding: 22px;
+  color: var(--gris);
+}
+
+/* Debajo del saludo: la tabla de turnos y, a la derecha, veterinarios y calendario */
+.hoy-columnas {
   display: grid;
-  gap: 2px;
+  grid-template-columns: minmax(0, 1fr) 480px;
+  align-items: start;
+  gap: 16px;
+}
+
+.hoy-costado {
+  display: grid;
+  gap: 16px;
+}
+
+/* ---------- Turnos de hoy: renglones como una tabla ---------- */
+.fila-encabezado,
+.fila-turno {
+  display: grid;
+  grid-template-columns: 92px minmax(150px, 1fr) minmax(190px, 1.1fr) 136px 362px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px;
+}
+
+.fila-encabezado {
+  padding-block: 18px;
+  border-bottom: 1px solid var(--panel-borde);
+  background: #f7f8fb;
+  color: var(--gris);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.filas-turnos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila-turno {
+  position: relative;
+  border-bottom: 1px solid var(--panel-borde);
+  font-size: 1.05rem;
+}
+
+.fila-turno:last-child {
+  border-bottom: none;
+}
+
+.fila-turno[aria-busy='true'] {
+  opacity: 0.6;
+}
+
+.fila-hora,
+.fila-mascota {
+  display: grid;
+  line-height: 1.3;
+}
+
+.fila-hora strong {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-hora span,
+.fila-mascota > span {
+  color: var(--gris);
+}
+
+.fila-mascota a {
+  color: var(--tinta);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fila-mascota a:hover {
+  text-decoration: underline;
+}
+
+.fila-mascota .fila-nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.98rem;
+}
+
+.fila-dueno {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.3;
+}
+
+.fila-dueno > span {
+  display: grid;
+}
+
+.fila-origen {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--gris);
+}
+
+/* WhatsApp: botoncito cuadrado con borde gris y el ícono verde */
+.fila-whatsapp {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 12px;
+  background: #f7f8fb;
+  color: #1f8a4c;
+  transition: background-color 0.15s;
+}
+
+.fila-whatsapp:hover {
+  background: #e8f5ee;
+}
+
+.fila-estado {
+  display: grid;
+  line-height: 1.3;
+}
+
+.fila-estado span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.fila-estado-atendido {
+  color: #1e7a46;
+}
+
+.fila-estado-ausente {
+  color: var(--rojo);
+}
+
+.fila-estado-cancelado {
+  color: var(--gris);
+}
+
+.fila-estado .fila-paso {
+  color: #c2410c;
+}
+
+.fila-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Botones de los renglones: grises con borde, el ícono y la palabra */
+.boton-fila {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid #d3d8e2;
+  border-radius: 12px;
+  background: #f7f8fb;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  touch-action: manipulation;
+}
+
+.boton-fila:hover {
+  background: #eceff4;
+}
+
+.boton-fila:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.boton-fila:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+.boton-fila-whatsapp {
+  border-color: #1f8a4c;
+  background: #1f8a4c;
+  color: #ffffff;
+}
+
+.boton-fila-whatsapp:hover {
+  background: #176b3a;
+}
+
+.boton-fila-whatsapp-icono svg {
+  color: #1f8a4c;
+}
+
+/* Menú "Más": lista que se abre debajo del botón */
+.menu-mas {
+  position: relative;
+}
+
+.menu-mas-lista {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 25;
+  min-width: 230px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(28, 45, 99, 0.14);
+  list-style: none;
+}
+
+.menu-mas-lista button {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.05rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-mas-lista button:hover,
+.menu-mas-lista button:focus-visible {
+  background: #f2f4f8;
+}
+
+.menu-mas-lista .menu-mas-peligro {
+  color: var(--rojo);
+}
+
+.fila-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+/* ---------- Veterinarios ---------- */
+.hoy-equipo {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hoy-equipo li {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 22px;
+}
+
+.hoy-equipo li + li {
+  border-top: 1px solid var(--panel-borde);
+}
+
+.hoy-equipo li > div {
+  display: grid;
+  line-height: 1.3;
   min-width: 0;
 }
 
-.hoy-perfil strong {
+.hoy-equipo strong {
   font-size: 1.15rem;
-  color: var(--azul);
+}
+
+.hoy-equipo li > div > span {
+  color: var(--gris);
+}
+
+.hoy-matricula {
+  align-self: start;
+  padding-top: 4px;
+  color: var(--gris);
+  white-space: nowrap;
 }
 
 .hoy-avatar {
   display: grid;
   place-items: center;
-  flex: none;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--amarillo-suave);
   color: var(--azul);
-  font-family: var(--fuente-titulos);
-  font-size: 1.4rem;
   font-weight: 700;
-  box-shadow: 0 0 0 4px #ffffff, 0 0 0 6px var(--amarillo);
+  object-fit: cover;
 }
 
-.hoy-perfil-rol {
-  color: var(--gris);
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.hoy-perfil-email {
-  display: inline-flex;
+/* ---------- Calendario del mes ---------- */
+.hoy-mes-encabezado {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  overflow: hidden;
-  color: var(--gris);
-  font-size: 0.9rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: 10px;
 }
 
-/* Aviso de turnos de días anteriores sin marcar */
-.tarjeta.sin-marcar {
+.hoy-mes-encabezado strong {
+  min-width: 170px;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.hoy-mes-flecha {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.hoy-mes-flecha:hover {
+  background: #f2f4f8;
+}
+
+.hoy-mes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 14px 16px 18px;
+  list-style: none;
+}
+
+.hoy-mes-nombre {
+  padding: 2px 0 4px;
+  color: var(--gris);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.hoy-mes-dia {
+  position: relative;
+  display: block;
+  min-height: 58px;
+  padding: 6px 8px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 10px;
+  color: var(--tinta);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.hoy-mes-dia:hover {
+  background: #f2f4f8;
+}
+
+.hoy-mes-dia.otro-mes {
+  color: #a3abbb;
+  font-weight: 500;
+}
+
+/* Hoy: borde amarillo y el número en un círculo amarillo */
+.hoy-mes-dia.es-hoy {
   border: 2px solid var(--amarillo);
-  background: rgba(255, 250, 238, 0.75);
+  background: #fffbef;
+}
+
+.hoy-mes-dia.es-hoy > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -3px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--amarillo);
+}
+
+.hoy-mes-cantidad {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  min-width: 22px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: #eef0f5;
+  color: var(--gris);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ---------- Cancelan muchos turnos ---------- */
+.suspendidos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suspendidos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 22px;
+}
+
+.suspendidos li + li {
+  border-top: 1px solid var(--panel-borde);
+}
+
+.suspendidos a:not(.boton-fila) {
+  color: var(--tinta);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.suspendidos p {
+  margin: 4px 0 0;
+  color: var(--gris);
+  font-size: 1.05rem;
+}
+
+.suspendidos-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- Turnos de días anteriores sin marcar ---------- */
+.hoy-caja.sin-marcar {
+  border: 2px solid var(--amarillo);
+  background: #fffbef;
 }
 
 .sin-marcar-aviso {
@@ -2516,6 +2937,7 @@ html[data-turno-portada='visible'] .boton-turno {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 16px;
+  padding: 16px 22px;
 }
 
 .sin-marcar-aviso > svg {
@@ -2526,183 +2948,161 @@ html[data-turno-portada='visible'] .boton-turno {
 .sin-marcar-aviso p {
   flex: 1 1 260px;
   margin: 0;
+  font-size: 1.05rem;
 }
 
 .sin-marcar-aviso .boton {
-  min-height: 48px;
+  min-height: 46px;
+  background: #ffffff;
+}
+
+.sin-marcar-dia {
+  border-top: 1px solid #f1dfa6;
   background: #ffffff;
 }
 
 .sin-marcar-dia h3 {
-  margin: 24px 0 0;
-  color: var(--azul);
-  font-size: 1.15rem;
-}
-
-/* Veterinarios: uno debajo del otro */
-.hoy-equipo {
   margin: 0;
-  padding: 4px 0;
-  list-style: none;
-}
-
-.hoy-equipo .hoy-perfil + .hoy-perfil {
-  border-top: 1px solid var(--borde);
-}
-
-img.hoy-avatar {
-  object-fit: cover;
-}
-
-.hoy-perfil-dato {
-  color: var(--gris);
-  font-size: 0.9rem;
-}
-
-.hoy-vacio {
-  margin: 0;
-  padding: 20px;
-  color: var(--gris);
-}
-
-/* Aviso de notificaciones dentro del saludo azul */
-.hoy-saludo-avisos {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  min-height: 44px;
-  margin-top: 14px;
-  color: #ffffff;
-  font-weight: 600;
-  text-underline-offset: 4px;
-}
-
-.hoy-saludo-avisos:hover {
-  color: var(--amarillo);
-}
-
-/* Calendario del mes: siete columnas de lunes a domingo; hoy resaltado en azul */
-.hoy-mes-encabezado {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 12px 0;
-}
-
-.hoy-mes-encabezado strong {
+  padding: 14px 22px 4px;
   color: var(--azul);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
-.hoy-mes-flecha {
+.sin-marcar-dia:last-child {
+  border-radius: 0 0 16px 16px;
+}
+
+/* ---------- Botón "?" con su explicación ---------- */
+.ayuda-globo {
+  position: relative;
+  display: inline-flex;
+}
+
+.ayuda-boton {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--borde);
-  border-radius: 12px;
-  background: var(--superficie);
-  color: var(--azul);
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #eceff4;
+  color: var(--gris);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.hoy-mes-flecha:hover {
-  background: var(--azul-suave);
+/* El área para tocar es más grande que el círculo que se ve */
+.ayuda-boton::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
-.hoy-mes {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  margin: 0;
-  padding: 10px 10px 8px;
-  list-style: none;
-}
-
-.hoy-mes-nombre {
-  padding: 4px 0;
-  color: var(--gris);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.hoy-mes-dia {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  align-content: start;
-  gap: 1px;
-  min-height: 44px;
-  padding: 5px 0 4px;
-  border-radius: 10px;
-  color: var(--tinta);
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.15s;
-}
-
-.hoy-mes-dia:hover {
-  background: var(--azul-suave);
-}
-
-.hoy-mes-dia.otro-mes {
-  color: var(--gris);
-  opacity: 0.55;
-}
-
-.hoy-mes-dia.es-hoy {
+.ayuda-boton:hover,
+.ayuda-boton[aria-expanded='true'] {
   background: var(--azul);
   color: #ffffff;
-  opacity: 1;
 }
 
-.hoy-mes-cantidad {
-  min-width: 20px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--amarillo-suave);
-  color: var(--azul);
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.5;
-  text-align: center;
+.ayuda-texto {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+  width: min(340px, 80vw);
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--azul-oscuro);
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 400;
+  line-height: 1.45;
+  box-shadow: 0 12px 28px rgba(9, 22, 48, 0.25);
 }
 
-.hoy-mes-dia.es-hoy .hoy-mes-cantidad {
-  background: var(--amarillo);
-}
-
-.hoy-semana-ayuda {
-  margin: 0;
-  padding: 0 20px 18px;
-  color: var(--gris);
-  font-size: 0.85rem;
-}
-
-@media (max-width: 1280px) {
-  .hoy-grilla {
+/* Pantallas medianas: el costado pasa abajo y los renglones se acomodan en dos partes */
+@media (max-width: 1400px) {
+  .hoy-columnas {
     grid-template-columns: 1fr;
   }
 
   .hoy-costado {
-    position: static;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 1150px) {
+  .fila-encabezado {
+    display: none;
+  }
+
+  .fila-turno {
+    grid-template-columns: 76px 1fr;
+    grid-template-areas:
+      'hora mascota'
+      'hora dueno'
+      'hora estado'
+      'acciones acciones';
+    align-items: start;
+    row-gap: 8px;
+    padding-block: 16px;
+  }
+
+  .fila-hora {
+    grid-area: hora;
+  }
+
+  .fila-mascota {
+    grid-area: mascota;
+  }
+
+  .fila-dueno {
+    grid-area: dueno;
+  }
+
+  .fila-estado {
+    grid-area: estado;
+  }
+
+  .fila-acciones {
+    grid-area: acciones;
+    justify-content: flex-start;
   }
 }
 
 @media (max-width: 640px) {
   .hoy-saludo {
-    padding: 22px 20px 24px;
+    padding: 22px 20px;
   }
 
-  .hoy-saludo .boton {
+  .hoy-saludo-acciones,
+  .hoy-boton-avisos,
+  .hoy-boton-turno {
     width: 100%;
+    justify-content: center;
   }
 
   .hoy-costado {
     grid-template-columns: 1fr;
+  }
+
+  .hoy-mes {
+    gap: 4px;
+    padding-inline: 10px;
+  }
+
+  .hoy-mes-dia {
+    min-height: 50px;
+    padding: 4px 5px;
+    font-size: 0.9rem;
+  }
+
+  .hoy-mes-cantidad {
+    right: 3px;
+    bottom: 3px;
   }
 }
 
@@ -2891,11 +3291,9 @@ img.hoy-avatar {
     position: static;
     flex-direction: row;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     height: auto;
-    margin: 0;
     padding: 10px 12px;
-    border-radius: 0;
   }
 
   .panel-navegacion {
@@ -2903,6 +3301,7 @@ img.hoy-avatar {
     min-width: 0;
     flex-direction: row;
     gap: 4px;
+    margin-top: 0;
     overflow-x: auto;
   }
 
@@ -2914,6 +3313,15 @@ img.hoy-avatar {
     min-height: 58px;
     padding: 6px 8px;
     gap: 2px;
+  }
+
+  .panel-enlace svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .panel-enlace.active::after {
+    display: none;
   }
 
   .panel-enlace-nombre,
@@ -2934,6 +3342,10 @@ img.hoy-avatar {
     display: none;
   }
 
+  .panel-inicial {
+    display: none;
+  }
+
   .panel-salir {
     width: auto;
     min-width: 76px;
@@ -2943,7 +3355,7 @@ img.hoy-avatar {
   }
 
   .panel-contenido {
-    padding: 24px 16px;
+    padding: 16px 12px 28px;
   }
 
   .bienvenida {
@@ -5073,72 +5485,198 @@ form.campo-en-linea {
   font-weight: 700;
 }
 
-.informe-filtros {
-  display: grid;
-  gap: 16px;
-  justify-items: start;
-  margin-bottom: 20px;
+/* Encabezado: título, el "?" y el botón amarillo de imprimir a la derecha */
+.informe-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.informe-filtros .filtro-periodo {
-  margin-bottom: 0;
+.informe-encabezado h1 {
+  margin: 0;
+  color: var(--tinta);
+  font-size: clamp(1.7rem, 2.4vw, 2.1rem);
+}
+
+.boton.informe-imprimir {
+  margin-left: auto;
+  min-height: 52px;
+  border-radius: 14px;
+  background: var(--amarillo);
+  color: var(--azul);
+  font-size: 1.1rem;
+}
+
+.boton.informe-imprimir:hover {
+  background: #f0b829;
+}
+
+/* Todo el informe en una sola caja blanca: filtros, totales y tabla */
+.informe-caja {
+  position: relative;
+  border: 1px solid var(--panel-borde);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.informe-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+/* Atajos como pestañas: el elegido, en negrita y subrayado en amarillo */
+.informe-pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 26px;
+}
+
+.informe-pestana {
+  min-height: 52px;
+  padding: 0;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.informe-pestana:hover {
+  color: var(--azul);
+}
+
+.informe-pestana.activa {
+  border-bottom-color: var(--amarillo);
+  font-weight: 700;
 }
 
 .informe-campos {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
-.informe-campos .elegir-fechas {
-  margin-bottom: 0;
+/* Campo compacto: la palabra gris y el valor en negrita, adentro del mismo recuadro */
+.campo-compacto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid #d3d8e2;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--gris);
+  font-size: 1.05rem;
 }
 
-.informe-campos > .campo {
-  min-width: 200px;
+.campo-compacto:focus-within {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(28, 45, 99, 0.15);
 }
 
+.campo-compacto input,
+.campo-compacto select {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Totales en una sola franja, separados por líneas */
 .informe-totales {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin: 0 0 20px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
   padding: 0;
+  border-bottom: 1px solid var(--panel-borde);
   list-style: none;
 }
 
 .informe-totales li {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 18px;
+  align-items: baseline;
+  gap: 10px;
+  padding: 16px 22px;
   color: var(--gris);
+  font-size: 1.1rem;
+}
+
+.informe-totales li + li {
+  border-left: 1px solid var(--panel-borde);
 }
 
 .informe-totales strong {
-  color: var(--azul);
-  font-size: 1.8rem;
+  color: var(--tinta);
+  font-size: 1.7rem;
   font-variant-numeric: tabular-nums;
+}
+
+.informe-resultado {
+  padding-bottom: 8px;
+}
+
+.informe-resultado .paginacion {
+  margin: 12px 20px 8px;
+}
+
+.informe-resultado .vacio {
+  padding: 22px;
 }
 
 .informe-tabla {
   width: 100%;
   border-collapse: collapse;
+  font-size: 1.05rem;
   font-variant-numeric: tabular-nums;
 }
 
 .informe-tabla th,
 .informe-tabla td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--borde);
+  padding: 15px 10px;
+  border-bottom: 1px solid var(--panel-borde);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+.informe-tabla th:first-child,
+.informe-tabla td:first-child {
+  padding-left: 22px;
 }
 
 .informe-tabla th {
+  background: #f7f8fb;
   color: var(--gris);
-  font-size: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.informe-tabla tbody tr:hover {
+  background: #f7f8fb;
+}
+
+.informe-mascota {
+  font-weight: 700;
+}
+
+.informe-gris {
+  color: var(--gris);
 }
 
 .informe-fecha {
@@ -5153,6 +5691,7 @@ form.campo-en-linea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -5160,9 +5699,33 @@ form.campo-en-linea {
   color: #1e7a46;
 }
 
-.informe-estado.estado-ausente,
-.informe-estado.estado-cancelado {
+.informe-estado.estado-ausente {
   color: var(--rojo);
+}
+
+.informe-estado.estado-cancelado {
+  color: var(--gris);
+  font-weight: 500;
+}
+
+/* "Confirmado" y "Sin confirmar" van sin ícono, en negrita */
+.informe-estado.estado-confirmado svg,
+.informe-estado.estado-pendiente svg {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .informe-totales {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .informe-totales li:nth-child(4) {
+    border-left: none;
+  }
+
+  .informe-totales li:nth-child(n + 4) {
+    border-top: 1px solid var(--panel-borde);
+  }
 }
 
 .solo-impresion {
@@ -5177,8 +5740,26 @@ form.campo-en-linea {
   }
 
   .informe-campos,
-  .informe-campos > .campo {
+  .campo-compacto {
     width: 100%;
+  }
+
+  .informe-encabezado .informe-imprimir {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .informe-totales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .informe-totales li:nth-child(n) {
+    border-left: none;
+    border-top: 1px solid var(--panel-borde);
+  }
+
+  .informe-tabla td:first-child {
+    padding-left: 0;
   }
 
   .informe-tabla thead {
@@ -5189,8 +5770,8 @@ form.campo-en-linea {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 10px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--borde);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--panel-borde);
   }
 
   .informe-tabla td {
@@ -5249,6 +5830,10 @@ form.campo-en-linea {
     padding: 0;
     border: none;
     box-shadow: none;
+  }
+
+  .informe-caja {
+    border: none;
   }
 
   .informe-totales li {

@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, HeartPulse, PawPrint, Stethoscope, Syringe } from 'lucide-react'
+import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -8,7 +8,7 @@ import { useHoraActual } from '../lib/horaActual'
 import { useSitio } from '../lib/sitio'
 import type { ResumenRecordatorios, Turno } from '../types'
 import { AvisosSuspension } from '../components/AvisosSuspension'
-import { TarjetaTurno } from '../components/TarjetaTurno'
+import { FilaTurno } from '../components/FilaTurno'
 import { Cargando } from '../components/Cargando'
 
 const NOMBRE_MES = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
@@ -50,118 +50,127 @@ export function Panel() {
   const avisos = resumen ? resumen.turnosManana + resumen.dosis + resumen.recuperar : 0
   const equipo = sitio?.equipo ?? []
 
+  const actualizar = (nuevo: Turno) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)
+
   return (
     <div className="hoy-grilla">
-      <div className="hoy-principal">
-        {/* Saludo en un recuadro azul, con algunos dibujitos de la clínica muy suaves a la derecha */}
-        <section className="hoy-saludo">
-          <span className="hoy-saludo-fecha">
-            <CalendarDays size={18} aria-hidden="true" /> {diaLargo(hoy)}
-          </span>
+      {/* ---------- Saludo: una franja azul con el día, los turnos y las dos acciones ---------- */}
+      <section className="hoy-saludo">
+        <div>
           <h1>
             {saludo}, {usuario?.nombre}
           </h1>
           <p>
-            {activos.length === 0
-              ? 'Hoy no hay turnos en la agenda.'
-              : activos.length === 1
-                ? 'Hoy hay 1 turno en la agenda.'
-                : `Hoy hay ${activos.length} turnos en la agenda.`}
+            <span className="hoy-saludo-dia">{diaLargo(hoy)}</span>
+            <span>
+              <strong>{activos.length}</strong> {activos.length === 1 ? 'turno' : 'turnos'} en la agenda
+            </span>
           </p>
-          <Link to="/panel/agenda/nuevo" className="boton boton-grande boton-secundario">
-            <CalendarPlus size={22} aria-hidden="true" /> Dar turno
-          </Link>
+        </div>
+        <div className="hoy-saludo-acciones">
           {/* Los avisos están en Notificaciones: acá solo se recuerda que hay */}
           {avisos > 0 && (
-            <Link to="/panel/recordatorios" className="hoy-saludo-avisos">
-              <Bell size={18} aria-hidden="true" />
-              {avisos === 1 ? 'Tenés 1 aviso para mandar' : `Tenés ${avisos} avisos para mandar`}
+            <Link to="/panel/recordatorios" className="hoy-boton-avisos">
+              <Bell size={22} aria-hidden="true" />
+              {avisos === 1 ? '1 aviso para mandar' : `${avisos} avisos para mandar`}
             </Link>
           )}
-          <span className="hoy-saludo-dibujos" aria-hidden="true">
-            <PawPrint size={64} />
-            <Stethoscope size={52} />
-            <Syringe size={40} />
-            <HeartPulse size={46} />
-          </span>
-        </section>
+          <Link to="/panel/agenda/nuevo" className="boton hoy-boton-turno">
+            <CalendarPlus size={22} aria-hidden="true" /> Dar turno
+          </Link>
+        </div>
+      </section>
 
-        {/* Decidir sobre una suspensión le toca al administrador */}
-        {usuario?.rol === 'ADMIN' && <AvisosSuspension />}
+      {/* Decidir sobre una suspensión le toca al administrador */}
+      {usuario?.rol === 'ADMIN' && <AvisosSuspension />}
 
-        {/* Turnos de días anteriores que quedaron sin marcar (nadie dijo si vino o no) */}
-        <TurnosSinMarcar hoy={hoy} />
+      {/* Turnos de días anteriores que quedaron sin marcar (nadie dijo si vino o no) */}
+      <TurnosSinMarcar hoy={hoy} />
 
-        <section className="tarjeta bloque-ficha">
-          <div className="bloque-ficha-titulo">
+      <div className="hoy-columnas">
+        {/* ---------- Turnos de hoy, como tabla ---------- */}
+        <section className="hoy-caja hoy-turnos">
+          <div className="hoy-caja-titulo">
             <h2>
               <CalendarDays size={22} aria-hidden="true" /> Turnos de hoy
             </h2>
             {turnos && activos.length > 0 && (
-              <span className="ayuda">
-                {porAtender.length === 0
-                  ? 'Ya atendiste todos'
-                  : porAtender.length === 1
-                    ? 'Falta atender 1'
-                    : `Faltan atender ${porAtender.length}`}
+              <span className="hoy-faltan">
+                {porAtender.length === 0 ? (
+                  'Ya atendiste todos'
+                ) : (
+                  <>
+                    Faltan atender <strong>{porAtender.length}</strong>
+                  </>
+                )}
               </span>
             )}
           </div>
           {turnos === null ? (
             <Cargando />
           ) : activos.length === 0 ? (
-            <p className="vacio">No hay turnos para hoy.</p>
+            <p className="hoy-vacio">
+              No hay turnos para hoy. <Link to="/panel/agenda">Ver la agenda</Link>
+            </p>
           ) : (
-            <ul className="lista-turnos">
-              {activos.map((t) => (
-                <TarjetaTurno
-                  key={t.id}
-                  turno={t}
-                  // Igual que en la Agenda: si ya pasó la hora y sigue confirmado, pregunta "¿vino?"
-                  marca={t.estado === 'CONFIRMADO' && horaDe(t.fechaHoraFin) <= ahora ? 'pasado' : undefined}
-                  alCambiar={(nuevo) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)}
-                />
-              ))}
-            </ul>
+            <>
+              <div className="fila-encabezado" aria-hidden="true">
+                <span>Hora</span>
+                <span>Mascota</span>
+                <span>La trae</span>
+                <span>Estado</span>
+                <span />
+              </div>
+              <ul className="filas-turnos">
+                {activos.map((t) => (
+                  <FilaTurno
+                    key={t.id}
+                    turno={t}
+                    // Igual que en la Agenda: si ya pasó la hora y sigue confirmado, se avisa
+                    paso={t.estado === 'CONFIRMADO' && horaDe(t.fechaHoraFin) <= ahora}
+                    alCambiar={actualizar}
+                  />
+                ))}
+              </ul>
+            </>
           )}
-          <Link to="/panel/agenda" className="boton-texto enlace-chico">
-            Ver la agenda
-          </Link>
         </section>
+
+        <aside className="hoy-costado" aria-label="Equipo y calendario">
+          {/* ---------- Veterinarios: los mismos datos que se muestran en la web ---------- */}
+          <section className="hoy-caja">
+            <div className="hoy-caja-titulo">
+              <h2>Veterinarios</h2>
+            </div>
+            {equipo.length === 0 ? (
+              <p className="hoy-vacio">Todavía no hay veterinarios cargados en Configuración.</p>
+            ) : (
+              <ul className="hoy-equipo">
+                {equipo.map((m) => (
+                  <li key={m.id}>
+                    {m.fotoUrl ? (
+                      <img src={m.fotoUrl} alt="" className="hoy-avatar" loading="lazy" />
+                    ) : (
+                      <span className="hoy-avatar" aria-hidden="true">
+                        {`${m.nombre[0] ?? ''}${m.apellido[0] ?? ''}`.toUpperCase()}
+                      </span>
+                    )}
+                    <div>
+                      <strong>
+                        {m.nombre} {m.apellido}
+                      </strong>
+                      {m.especialidad && <span>{m.especialidad}</span>}
+                    </div>
+                    {m.matricula && <span className="hoy-matricula">{m.matricula}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <CalendarioMes hoy={hoy} />
+        </aside>
       </div>
-
-      <aside className="hoy-costado" aria-label="Equipo y calendario">
-        {/* ---------- Veterinarios: los mismos datos que se muestran en la web ---------- */}
-        <section className="hoy-tarjeta">
-          <h2 className="hoy-tarjeta-titulo">Veterinarios</h2>
-          {equipo.length === 0 ? (
-            <p className="hoy-vacio">Todavía no hay veterinarios cargados en Configuración.</p>
-          ) : (
-            <ul className="hoy-equipo">
-              {equipo.map((m) => (
-                <li key={m.id} className="hoy-perfil">
-                  {m.fotoUrl ? (
-                    <img src={m.fotoUrl} alt="" className="hoy-avatar" loading="lazy" />
-                  ) : (
-                    <span className="hoy-avatar" aria-hidden="true">
-                      {`${m.nombre[0] ?? ''}${m.apellido[0] ?? ''}`.toUpperCase()}
-                    </span>
-                  )}
-                  <div>
-                    <strong>
-                      {m.nombre} {m.apellido}
-                    </strong>
-                    {m.especialidad && <span className="hoy-perfil-rol">{m.especialidad}</span>}
-                    {m.matricula && <span className="hoy-perfil-dato">{m.matricula}</span>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <CalendarioMes hoy={hoy} />
-      </aside>
     </div>
   )
 }
@@ -189,7 +198,7 @@ function TurnosSinMarcar({ hoy }: { hoy: string }) {
   const dias = [...new Set(turnos.map((t) => diaDe(t.fechaHoraInicio)))].sort().reverse()
 
   return (
-    <section className="tarjeta sin-marcar">
+    <section className="hoy-caja sin-marcar">
       <div className="sin-marcar-aviso">
         <CircleAlert size={26} aria-hidden="true" />
         <p>
@@ -214,14 +223,14 @@ function TurnosSinMarcar({ hoy }: { hoy: string }) {
         dias.map((d) => (
           <div key={d} className="sin-marcar-dia">
             <h3>{diaLargo(d)}</h3>
-            <ul className="lista-turnos">
+            <ul className="filas-turnos">
               {turnos
                 .filter((t) => diaDe(t.fechaHoraInicio) === d)
                 .map((t) => (
-                  <TarjetaTurno
+                  <FilaTurno
                     key={t.id}
                     turno={t}
-                    marca={t.estado === 'CONFIRMADO' ? 'pasado' : undefined}
+                    paso={t.estado === 'CONFIRMADO'}
                     alCambiar={(nuevo) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)}
                   />
                 ))}
@@ -267,16 +276,18 @@ function CalendarioMes({ hoy }: { hoy: string }) {
   for (let d = inicio; d <= fin; d = sumarDias(d, 1)) dias.push(d)
 
   return (
-    <section className="hoy-tarjeta">
-      <h2 className="hoy-tarjeta-titulo">Calendario</h2>
-      <div className="hoy-mes-encabezado">
-        <button type="button" className="hoy-mes-flecha" onClick={() => setMes((m) => moverMes(m, -1))} aria-label="Mes anterior">
-          <ChevronLeft size={22} aria-hidden="true" />
-        </button>
-        <strong>{NOMBRE_MES.format(new Date(`${mes}T12:00:00Z`)).replace(/^./, (l) => l.toUpperCase())}</strong>
-        <button type="button" className="hoy-mes-flecha" onClick={() => setMes((m) => moverMes(m, 1))} aria-label="Mes siguiente">
-          <ChevronRight size={22} aria-hidden="true" />
-        </button>
+    <section className="hoy-caja">
+      <div className="hoy-caja-titulo">
+        <h2>Calendario</h2>
+        <div className="hoy-mes-encabezado">
+          <button type="button" className="hoy-mes-flecha" onClick={() => setMes((m) => moverMes(m, -1))} aria-label="Mes anterior">
+            <ChevronLeft size={20} aria-hidden="true" />
+          </button>
+          <strong>{NOMBRE_MES.format(new Date(`${mes}T12:00:00Z`)).replace(/^./, (l) => l.toUpperCase())}</strong>
+          <button type="button" className="hoy-mes-flecha" onClick={() => setMes((m) => moverMes(m, 1))} aria-label="Mes siguiente">
+            <ChevronRight size={20} aria-hidden="true" />
+          </button>
+        </div>
       </div>
       <ol className="hoy-mes">
         {DIAS_SEMANA.map((d) => (
@@ -302,7 +313,6 @@ function CalendarioMes({ hoy }: { hoy: string }) {
           )
         })}
       </ol>
-      <p className="hoy-semana-ayuda">El número amarillo es la cantidad de turnos. Tocá un día para ver su agenda.</p>
     </section>
   )
 }

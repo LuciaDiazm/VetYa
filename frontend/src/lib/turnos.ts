@@ -20,7 +20,7 @@ export const ICONOS_ESTADO = {
 }
 
 export const ORIGENES = {
-  ONLINE: { texto: 'Pedido online', icono: Globe },
+  ONLINE: { texto: 'Por la web', icono: Globe },
   TELEFONO: { texto: 'Por teléfono', icono: Phone },
   MOSTRADOR: { texto: 'En el mostrador', icono: Store },
 }

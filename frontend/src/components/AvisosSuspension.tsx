@@ -1,6 +1,7 @@
 import { Ban, Check, MessageCircle, Undo2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Ayuda } from './Ayuda'
 import { apiGet, apiPatch } from '../lib/api'
 import { fechaCortaDe } from '../lib/fechas'
 import { enlaceWhatsapp } from '../lib/sitio'
@@ -30,43 +31,38 @@ export function AvisosSuspension() {
   if (clientes.length === 0) return null
 
   return (
-    <section className="tarjeta bloque-ficha avisos-suspension" aria-labelledby="titulo-suspensiones">
-      <div className="bloque-ficha-titulo">
+    <section className="hoy-caja avisos-suspension" aria-labelledby="titulo-suspensiones">
+      <div className="hoy-caja-titulo hoy-caja-titulo-izquierda">
         <h2 id="titulo-suspensiones">
           <Ban size={22} aria-hidden="true" /> Cancelan muchos turnos
         </h2>
+        <Ayuda
+          etiqueta="Qué es Cancelan muchos turnos"
+          texto="Estos dueños cancelaron varios turnos por la web en pocos días. Quedaron sin poder sacar turnos por la web hasta la fecha que dice; ustedes deciden si sigue así."
+        />
       </div>
-      <p className="ayuda">
-        Estos dueños cancelaron varios turnos por la web en pocos días. Quedaron sin poder sacar turnos por la web hasta
-        la fecha que dice; ustedes deciden si sigue así.
-      </p>
       {error && (
         <p className="mensaje-error" role="alert">
           {error}
         </p>
       )}
-      <ul className="lista-avisos">
+      <ul className="suspendidos">
         {clientes.map((c) => (
-          <li key={c.id} className="aviso">
-            <span className="icono-circulo">
-              <Ban size={22} aria-hidden="true" />
-            </span>
-            <div className="aviso-datos">
-              <p className="aviso-titulo">
-                <Link to={`/panel/clientes/${c.id}`}>
-                  {c.nombre} {c.apellido}
-                </Link>
-              </p>
-              <p className="aviso-detalle">
+          <li key={c.id}>
+            <div>
+              <Link to={`/panel/clientes/${c.id}`}>
+                {c.nombre} {c.apellido}
+              </Link>
+              <p>
                 {c.suspensionMotivo}. Sin turnos web hasta el {fechaCortaDe(c.suspendidoHasta)}.
               </p>
             </div>
-            <div className="aviso-acciones aviso-acciones-fila">
-              <button type="button" className="boton" onClick={() => decidir(c.id, 'mantener')}>
-                <Check size={20} aria-hidden="true" /> Mantener
+            <div className="suspendidos-acciones">
+              <button type="button" className="boton-fila" onClick={() => decidir(c.id, 'mantener')}>
+                <Check size={18} aria-hidden="true" /> Mantener
               </button>
-              <button type="button" className="boton boton-contorno" onClick={() => decidir(c.id, 'levantar')}>
-                <Undo2 size={20} aria-hidden="true" /> Levantar
+              <button type="button" className="boton-fila" onClick={() => decidir(c.id, 'levantar')}>
+                <Undo2 size={18} aria-hidden="true" /> Levantar
               </button>
               <a
                 href={enlaceWhatsapp(
@@ -75,9 +71,9 @@ export function AvisosSuspension() {
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="boton boton-whatsapp"
+                className="boton-fila boton-fila-whatsapp-icono"
               >
-                <MessageCircle size={20} aria-hidden="true" /> WhatsApp
+                <MessageCircle size={18} aria-hidden="true" /> WhatsApp
               </a>
             </div>
           </li>

@@ -53,6 +53,12 @@ export function DisenoPanel() {
             </NavLink>
           ))}
         </nav>
+        <span className="panel-inicial" title={`${usuario?.nombre ?? ''} ${usuario?.apellido ?? ''}`}>
+          <span aria-hidden="true">{usuario?.nombre?.[0]?.toUpperCase()}</span>
+          <span className="solo-lectores">
+            Sesión de {usuario?.nombre} {usuario?.apellido}
+          </span>
+        </span>
         <button type="button" className="panel-enlace panel-salir" onClick={cerrarSesion}>
           <LogOut size={24} aria-hidden="true" />
           <span className="panel-salir-texto">Salir</span>

@@ -7,6 +7,7 @@ import { diaDe, horaDe, hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, 
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, ORIGENES } from '../../lib/turnos'
 import type { EstadoTurno, OrigenTurno } from '../../types'
+import { Ayuda } from '../../components/Ayuda'
 import { Cargando } from '../../components/Cargando'
 import { Paginacion } from '../../components/Paginacion'
 
@@ -157,13 +158,25 @@ export function InformeTurnos() {
         <p>Impreso el {FECHA_LARGA.format(aFecha(hoy))}</p>
       </div>
 
-      <div className="panel-encabezado no-imprimir">
+      <div className="informe-encabezado no-imprimir">
         <h1>Informe de turnos</h1>
-        <p>Todos los turnos entre dos fechas. Podés filtrarlos e imprimirlos.</p>
+        <Ayuda
+          etiqueta="Qué es el informe de turnos"
+          texto="Todos los turnos entre dos fechas. Podés filtrarlos por estado, servicio o veterinario, y después imprimirlos o guardarlos en PDF."
+        />
+        <button
+          type="button"
+          className="boton informe-imprimir"
+          onClick={() => window.print()}
+          disabled={!filtrados.length}
+        >
+          <Printer size={20} aria-hidden="true" /> Imprimir o guardar en PDF
+        </button>
       </div>
 
-      <section className="tarjeta informe-filtros no-imprimir" aria-label="Filtros del informe">
-        <div className="filtro-periodo" role="group" aria-label="Atajos de fechas">
+      <div className="informe-caja">
+      <section className="informe-filtros no-imprimir" aria-label="Filtros del informe">
+        <div className="informe-pestanas" role="group" aria-label="Atajos de fechas">
           {ATAJOS.map((a) => {
             const [d, h] = a.rango(hoy)
             const activo = d === desde && h === hasta
@@ -171,7 +184,7 @@ export function InformeTurnos() {
               <button
                 key={a.nombre}
                 type="button"
-                className={`chip${activo ? ' chip-activo' : ''}`}
+                className={`informe-pestana${activo ? ' activa' : ''}`}
                 aria-pressed={activo}
                 onClick={() => cambiar({ desde: d, hasta: h })}
               >
@@ -181,9 +194,9 @@ export function InformeTurnos() {
           })}
         </div>
         <div className="informe-campos">
-          <ElegirFechas desde={desde} hasta={hasta} alCambiar={(d, h) => cambiar({ desde: d, hasta: h })} />
-          <label className="campo">
-            Estado
+          <ElegirFechas compacto desde={desde} hasta={hasta} alCambiar={(d, h) => cambiar({ desde: d, hasta: h })} />
+          <label className="campo-compacto">
+            <span>Estado</span>
             <select value={estado} onChange={(e) => cambiar({ estado: e.target.value })}>
               {ESTADOS_FILTRO.map(([valor, texto]) => (
                 <option key={valor} value={valor}>
@@ -192,8 +205,8 @@ export function InformeTurnos() {
               ))}
             </select>
           </label>
-          <label className="campo">
-            Servicio
+          <label className="campo-compacto">
+            <span>Servicio</span>
             <select value={servicio} onChange={(e) => cambiar({ servicio: e.target.value })}>
               <option value="">Todos</option>
               {servicios.map(([id, nombre]) => (
@@ -203,8 +216,8 @@ export function InformeTurnos() {
               ))}
             </select>
           </label>
-          <label className="campo">
-            Veterinario
+          <label className="campo-compacto">
+            <span>Veterinario</span>
             <select value={veterinario} onChange={(e) => cambiar({ veterinario: e.target.value })}>
               <option value="">Todos</option>
               {veterinarios.map(([id, nombre]) => (
@@ -215,9 +228,6 @@ export function InformeTurnos() {
             </select>
           </label>
         </div>
-        <button type="button" className="boton boton-contorno" onClick={() => window.print()} disabled={!filtrados.length}>
-          <Printer size={20} aria-hidden="true" /> Imprimir o guardar en PDF
-        </button>
       </section>
 
       {problema && <p className="mensaje-error">{problema}</p>}
@@ -235,14 +245,14 @@ export function InformeTurnos() {
           <div className={consultando ? 'recargando' : undefined} aria-busy={consultando}>
           <ul className="informe-totales">
             {totales.map(([texto, valor]) => (
-              <li key={texto} className="tarjeta">
+              <li key={texto}>
                 <strong>{valor}</strong>
                 {texto}
               </li>
             ))}
           </ul>
 
-          <section className="tarjeta">
+          <section className="informe-resultado">
             {filtrados.length === 0 ? (
               <p className="vacio">No hay turnos con estos filtros.</p>
             ) : (
@@ -268,18 +278,24 @@ export function InformeTurnos() {
                       <tr key={t.id} className={enLaPagina ? undefined : 'fuera-de-pagina'}>
                         <td className="informe-fecha">{fechaCorta(diaDe(t.fechaHoraInicio))}</td>
                         <td>{horaDe(t.fechaHoraInicio)}</td>
-                        <td data-etiqueta="Mascota">{t.mascota.nombre}</td>
+                        <td data-etiqueta="Mascota" className="informe-mascota">
+                          {t.mascota.nombre}
+                        </td>
                         <td data-etiqueta="Dueño">
                           {t.mascota.cliente.nombre} {t.mascota.cliente.apellido}
                         </td>
                         <td data-etiqueta="Servicio">{t.servicio.nombre}</td>
-                        <td data-etiqueta="Veterinario">{nombreVet(t.veterinario)}</td>
+                        <td data-etiqueta="Veterinario" className="informe-gris">
+                          {nombreVet(t.veterinario)}
+                        </td>
                         <td data-etiqueta="Estado">
                           <span className={`informe-estado estado-${t.estado.toLowerCase()}`}>
                             <Icono size={16} aria-hidden="true" /> {ESTADOS_TURNO[t.estado]}
                           </span>
                         </td>
-                        <td data-etiqueta="Cómo se pidió">{ORIGENES[t.origen].texto}</td>
+                        <td data-etiqueta="Cómo se pidió" className="informe-gris">
+                          {ORIGENES[t.origen].texto}
+                        </td>
                       </tr>
                     )
                   })}
@@ -297,6 +313,7 @@ export function InformeTurnos() {
           </div>
         </>
       )}
+      </div>
     </>
   )
 }
