@@ -3771,19 +3771,20 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-bottom: 16px;
 }
 
-/* Ficha del cliente: datos del dueño en una columna al costado y sus mascotas y turnos a la derecha */
-.ficha-cliente {
+/* Fichas del cliente y de la mascota: los datos y los botones en una columna al costado,
+   y lo demás (mascotas y turnos, o vacunas e historia clínica) a la derecha */
+.ficha-con-costado {
   display: grid;
   grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
   align-items: start;
   gap: 16px;
 }
 
-.ficha-cliente-datos {
+.ficha-costado {
   padding: 22px 20px;
 }
 
-.ficha-cliente-datos h1 {
+.ficha-costado h1 {
   margin: 0;
   font-size: 1.7rem;
   line-height: 1.15;
@@ -3799,38 +3800,66 @@ html[data-turno-portada='visible'] .boton-turno {
   font-size: 0.9rem;
 }
 
-.ficha-cliente-lista {
+.ficha-costado-lista {
   display: grid;
   gap: 12px;
   margin: 20px 0;
 }
 
-.ficha-cliente-lista dt {
+.ficha-costado-lista dt {
   color: var(--gris);
   font-size: 0.85rem;
 }
 
-.ficha-cliente-lista dd {
+.ficha-costado-lista dd {
   margin: 0;
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.ficha-cliente-lista dd.sin-cargar {
+.ficha-costado-tel {
+  display: block;
   color: var(--gris);
   font-weight: 400;
 }
 
-.ficha-cliente-botones {
+.ficha-costado .icono-circulo {
+  margin-bottom: 10px;
+}
+
+.ficha-costado-bajada {
+  margin: 4px 0 0;
+  color: var(--gris);
+}
+
+.ficha-inactiva {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--rojo);
+  font-weight: 700;
+}
+
+.ficha-costado-extra {
+  margin-top: 14px;
+}
+
+.ficha-costado-lista dd.sin-cargar {
+  color: var(--gris);
+  font-weight: 400;
+}
+
+.ficha-costado-botones {
   display: grid;
   gap: 8px;
 }
 
-.ficha-cliente-datos .formulario {
+.ficha-costado .formulario {
   margin-top: 18px;
 }
 
-.ficha-cliente-datos .fila-campos {
+.ficha-costado .fila-campos {
   grid-template-columns: 1fr;
 }
 
@@ -3858,7 +3887,7 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 @media (max-width: 960px) {
-  .ficha-cliente {
+  .ficha-con-costado {
     grid-template-columns: 1fr;
   }
 }
@@ -3907,30 +3936,9 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 700;
 }
 
-.titulo-mascota {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.titulo-mascota h1 {
-  margin-bottom: 2px;
-}
-
 .icono-grande {
   width: 64px;
   height: 64px;
-}
-
-.ficha-panel {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 0 16px;
-  align-items: start;
-}
-
-.ficha-ancho-completo {
-  grid-column: 1 / -1;
 }
 
 .lista-dosis,
@@ -4011,16 +4019,75 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .observaciones {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
   padding: 12px 16px;
   border-radius: var(--radio-chico);
   background: var(--amarillo-suave);
 }
 
-@media (max-width: 860px) {
-  .ficha-panel {
-    grid-template-columns: 1fr;
-  }
+.observaciones svg {
+  flex: none;
+  margin-top: 2px;
+  color: #8a5a00;
+}
 
+/* Historia clínica como línea de tiempo: una raya azul con un punto por consulta */
+.lista-consultas.historia-linea {
+  gap: 0;
+}
+
+.historia-linea li {
+  position: relative;
+  padding: 0 0 22px 26px;
+  border-left: none;
+  border-radius: 0;
+  background: none;
+}
+
+.historia-linea li::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: -8px;
+  width: 2px;
+  background: var(--panel-borde);
+}
+
+.historia-linea li:last-child {
+  padding-bottom: 0;
+}
+
+.historia-linea li:last-child::before {
+  display: none;
+}
+
+.historia-linea li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--azul);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.historia-linea li:first-child::after {
+  background: var(--azul);
+}
+
+.consulta-fecha {
+  color: var(--gris);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
   .cliente-fila {
     flex-wrap: wrap;
   }

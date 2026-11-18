@@ -94,8 +94,8 @@ export function ClienteDetalle() {
       {error && <p className="mensaje-error">{error}</p>}
 
       {/* Datos del dueño al costado (con los botones para contactarlo) y, al lado, sus mascotas y sus turnos */}
-      <div className="ficha-cliente">
-        <aside className="tarjeta ficha-cliente-datos" aria-label="Datos del dueño">
+      <div className="ficha-con-costado">
+        <aside className="tarjeta ficha-costado" aria-label="Datos del dueño">
           <h1>
             {cliente.nombre} {cliente.apellido}
           </h1>
@@ -119,7 +119,7 @@ export function ClienteDetalle() {
             </form>
           ) : (
             <>
-              <dl className="ficha-cliente-lista">
+              <dl className="ficha-costado-lista">
                 <div>
                   <dt>Teléfono</dt>
                   <dd>{formatearTelefono(cliente.telefono)}</dd>
@@ -137,7 +137,7 @@ export function ClienteDetalle() {
                   <dd className={cliente.direccion ? undefined : 'sin-cargar'}>{cliente.direccion ?? 'Sin cargar'}</dd>
                 </div>
               </dl>
-              <div className="ficha-cliente-botones">
+              <div className="ficha-costado-botones">
                 <a
                   href={enlaceWhatsapp(cliente.telefono, `Hola ${cliente.nombre}, te escribimos de la veterinaria.`)}
                   target="_blank"
@@ -217,7 +217,7 @@ export function ClienteDetalle() {
           )}
         </aside>
 
-        <div className="ficha-cliente-principal">
+        <div className="ficha-principal">
           <section className="tarjeta bloque-ficha">
             <div className="bloque-ficha-titulo">
               <h2>Mascotas</h2>
