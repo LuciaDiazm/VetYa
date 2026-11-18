@@ -1,6 +1,7 @@
-import { Check, KeyRound, Mail, Smartphone, UserRound } from 'lucide-react'
+import { KeyRound, Mail, Smartphone, UserRound } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { PanelVentajas } from '../components/PanelVentajas'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
@@ -44,22 +45,7 @@ export function Registro() {
   return (
     // Mitad azul con lo que se gana al tener cuenta; mitad blanca con el formulario.
     <main className="registro">
-      <section className="registro-ventajas" aria-label="Para qué sirve la cuenta">
-        <p className="registro-lema">Tu mascota, a un toque de la clínica</p>
-        <ul>
-          {VENTAJAS.map((v) => (
-            <li key={v.titulo}>
-              <span className="registro-tilde" aria-hidden="true">
-                <Check size={22} strokeWidth={2.6} />
-              </span>
-              <span>
-                <strong>{v.titulo}</strong>
-                {v.detalle}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <PanelVentajas lema="Tu mascota, a un toque de la clínica" ventajas={VENTAJAS} />
 
       <div className="acceso-formulario registro-formulario">
         <h1>Crear cuenta</h1>

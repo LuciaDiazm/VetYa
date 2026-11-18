@@ -32,90 +32,91 @@ export function Ingresar() {
   }
 
   return (
-    // Fondo del color de la foto (se funde con ella) que pasa al azul de VetYa.
-    // La tarjeta blanca y la foto van juntas en el centro, la tarjeta apenas encima del borde de la foto.
-    <main className="ingreso">
-      <div className="ingreso-interior">
-        <div className="acceso-formulario ingreso-tarjeta">
-          <h1>Ingresar</h1>
-          <form onSubmit={enviar} className="formulario">
-            <label className="campo campo-icono">
-              Email
-              <span className="campo-con-icono">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-                <Mail size={22} aria-hidden="true" />
-              </span>
-            </label>
-            <label className="campo campo-icono">
-              Contraseña
-              <span className="campo-con-icono">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                />
-                <KeyRound size={22} aria-hidden="true" />
-              </span>
-            </label>
+    // Mismo armado que Crear cuenta: a la izquierda el saludo y el perro (sobre el verde azulado de la foto),
+    // a la derecha el formulario.
+    <main className="registro">
+      <section className="registro-ventajas ingreso-saludo">
+        <p className="registro-lema">¡Qué bueno verte de nuevo!</p>
+        <img src="/fotos/pastor-aleman-ingreso.webp" alt="" />
+      </section>
+      <div className="acceso-formulario registro-formulario">
+        <h1>Ingresar</h1>
+        <form onSubmit={enviar} className="formulario">
+          <label className="campo campo-icono">
+            Email
+            <span className="campo-con-icono">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+              <Mail size={22} aria-hidden="true" />
+            </span>
+          </label>
+          <label className="campo campo-icono">
+            Contraseña
+            <span className="campo-con-icono">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <KeyRound size={22} aria-hidden="true" />
+            </span>
+          </label>
 
-            {/* Sin emails automáticos: la clínica le da una contraseña nueva desde la ficha del cliente. */}
-            {!olvido ? (
-              <button type="button" className="boton-texto" onClick={() => setOlvido(true)} aria-expanded={false}>
-                ¿Te olvidaste la contraseña?
-              </button>
-            ) : (
-              sitio && (
-                <div className="ingresar-olvido" role="region" aria-label="Recuperar la contraseña">
-                  <p>
-                    <strong>Tus datos y tus mascotas siguen guardados.</strong> Escribinos o llamanos y te damos una
-                    contraseña nueva.
-                  </p>
-                  <div className="ingresar-olvido-botones">
-                    <a
-                      className="boton boton-whatsapp"
-                      href={enlaceWhatsapp(
-                        sitio.clinica.whatsapp,
-                        `Hola, me olvidé la contraseña de mi cuenta en la web${email ? ` (${email})` : ''}. ¿Me dan una nueva?`,
-                      )}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <MessageCircle size={20} aria-hidden="true" /> Escribir por WhatsApp
-                    </a>
-                    <a className="boton boton-contorno" href={enlaceTelefono(sitio.clinica.telefono)}>
-                      <Phone size={20} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
-                    </a>
-                  </div>
-                </div>
-              )
-            )}
-
-            {error && (
-              <p className="mensaje-error" role="alert">
-                {error}
-              </p>
-            )}
-            <button type="submit" className="boton ingreso-boton" disabled={enviando}>
-              {enviando ? 'Ingresando…' : 'Ingresar'}
+          {/* Sin emails automáticos: la clínica le da una contraseña nueva desde la ficha del cliente. */}
+          {!olvido ? (
+            <button type="button" className="boton-texto" onClick={() => setOlvido(true)} aria-expanded={false}>
+              ¿Te olvidaste la contraseña?
             </button>
-          </form>
+          ) : (
+            sitio && (
+              <div className="ingresar-olvido" role="region" aria-label="Recuperar la contraseña">
+                <p>
+                  <strong>Tus datos y tus mascotas siguen guardados.</strong> Escribinos o llamanos y te damos una
+                  contraseña nueva.
+                </p>
+                <div className="ingresar-olvido-botones">
+                  <a
+                    className="boton boton-whatsapp"
+                    href={enlaceWhatsapp(
+                      sitio.clinica.whatsapp,
+                      `Hola, me olvidé la contraseña de mi cuenta en la web${email ? ` (${email})` : ''}. ¿Me dan una nueva?`,
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <MessageCircle size={20} aria-hidden="true" /> Escribir por WhatsApp
+                  </a>
+                  <a className="boton boton-contorno" href={enlaceTelefono(sitio.clinica.telefono)}>
+                    <Phone size={20} aria-hidden="true" /> Llamar al {sitio.clinica.telefono}
+                  </a>
+                </div>
+              </div>
+            )
+          )}
 
-          <p className="ingreso-registro">
-            ¿Todavía no tenés cuenta?{' '}
-            <Link to="/registro" state={ubicacion.state}>
-              Creá una
-            </Link>
-          </p>
-        </div>
-        <img src="/fotos/pastor-aleman-ingreso.webp" alt="" className="ingreso-foto" />
+          {error && (
+            <p className="mensaje-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="boton ingreso-boton" disabled={enviando}>
+            {enviando ? 'Ingresando…' : 'Ingresar'}
+          </button>
+        </form>
+
+        <p className="ingreso-registro">
+          ¿Todavía no tenés cuenta?{' '}
+          <Link to="/registro" state={ubicacion.state}>
+            Creá una
+          </Link>
+        </p>
       </div>
     </main>
   )
