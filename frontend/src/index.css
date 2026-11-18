@@ -7041,3 +7041,24 @@ form.campo-en-linea {
     translate: 0 0;
   }
 }
+
+/* Panel: botones y campos con las esquinas apenas redondeadas (más sobrios que la píldora del sitio público).
+   El globito de avisos y los días del calendario quedan como estaban. */
+.panel
+  :is(
+    button:not(.hoy-mes-dia),
+    .boton,
+    .boton-fila,
+    .chip,
+    .chip-dato,
+    .buscador,
+    .buscador input,
+    .campo input,
+    .campo select,
+    .campo textarea,
+    .panel-enlace,
+    .hora-cuadro,
+    .dia-hoja
+  ) {
+  border-radius: 6px;
+}
