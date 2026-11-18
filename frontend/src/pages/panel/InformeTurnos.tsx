@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ElegirFechas } from '../../components/ElegirFechas'
 import { apiGet } from '../../lib/api'
-import { diaDe, horaDe, hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, sumarDias } from '../../lib/fechas'
+import { diaDe, horaDe, hoyArgentina, lunesDe, problemaDePeriodo, sumarDias } from '../../lib/fechas'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, ORIGENES } from '../../lib/turnos'
 import type { EstadoTurno, OrigenTurno } from '../../types'
@@ -20,22 +20,6 @@ interface TurnoInforme {
   veterinario: { id: number; nombre: string; apellido: string } | null
   mascota: { nombre: string; cliente: { nombre: string; apellido: string } }
 }
-
-const ultimoDeMes = (f: string) => sumarDias(primeroDeMes(sumarDias(primeroDeMes(f), 32)), -1)
-
-// Atajos para no tener que escribir las fechas.
-const ATAJOS = [
-  { nombre: 'Hoy', rango: (hoy: string) => [hoy, hoy] },
-  { nombre: 'Esta semana', rango: (hoy: string) => [lunesDe(hoy), sumarDias(lunesDe(hoy), 5)] },
-  { nombre: 'Este mes', rango: (hoy: string) => [primeroDeMes(hoy), ultimoDeMes(hoy)] },
-  {
-    nombre: 'Mes pasado',
-    rango: (hoy: string) => {
-      const ultimo = sumarDias(primeroDeMes(hoy), -1)
-      return [primeroDeMes(ultimo), ultimo]
-    },
-  },
-]
 
 const ESTADOS_FILTRO = [
   ['', 'Todos'],
@@ -60,9 +44,9 @@ export function InformeTurnos() {
   const { datos: sitio } = useSitio()
   const [parametros, setParametros] = useSearchParams()
   const [hoy] = useState(hoyArgentina)
-  const [semanaDesde, semanaHasta] = ATAJOS[1].rango(hoy)
-  const desde = parametros.get('desde') ?? semanaDesde
-  const hasta = parametros.get('hasta') ?? semanaHasta
+  // Si no se eligieron fechas, se muestra esta semana (de lunes a sábado).
+  const desde = parametros.get('desde') ?? lunesDe(hoy)
+  const hasta = parametros.get('hasta') ?? sumarDias(lunesDe(hoy), 5)
   const estado = parametros.get('estado') ?? ''
   const servicio = parametros.get('servicio') ?? ''
   const veterinario = parametros.get('veterinario') ?? ''
@@ -176,23 +160,6 @@ export function InformeTurnos() {
 
       <div className="informe-caja">
       <section className="informe-filtros no-imprimir" aria-label="Filtros del informe">
-        <div className="informe-pestanas" role="group" aria-label="Atajos de fechas">
-          {ATAJOS.map((a) => {
-            const [d, h] = a.rango(hoy)
-            const activo = d === desde && h === hasta
-            return (
-              <button
-                key={a.nombre}
-                type="button"
-                className={`informe-pestana${activo ? ' activa' : ''}`}
-                aria-pressed={activo}
-                onClick={() => cambiar({ desde: d, hasta: h })}
-              >
-                {a.nombre}
-              </button>
-            )
-          })}
-        </div>
         <div className="informe-campos">
           <ElegirFechas compacto desde={desde} hasta={hasta} alCambiar={(d, h) => cambiar({ desde: d, hasta: h })} />
           <label className="campo-compacto">

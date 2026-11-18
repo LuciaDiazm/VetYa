@@ -2163,7 +2163,6 @@ html[data-turno-portada='visible'] .boton-turno {
       .boton-fila,
       .chip,
       .casilla,
-      .informe-pestana,
       .enlace-con-icono,
       .campo-compacto,
       .hoy-mes-dia,
@@ -6035,36 +6034,8 @@ form.campo-en-linea {
   align-items: center;
   justify-content: space-between;
   gap: 10px 16px;
-  padding: 5px 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--panel-borde);
-}
-
-/* Atajos como pestañas: el elegido, en negrita y subrayado en amarillo */
-.informe-pestanas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px 18px;
-}
-
-.informe-pestana {
-  min-height: 44px;
-  padding: 0;
-  border: none;
-  border-bottom: 3px solid transparent;
-  background: none;
-  color: var(--tinta);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.informe-pestana:hover {
-  color: var(--azul);
-}
-
-.informe-pestana.activa {
-  border-bottom-color: var(--amarillo);
-  font-weight: 700;
 }
 
 .informe-campos {
