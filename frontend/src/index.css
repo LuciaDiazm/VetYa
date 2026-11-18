@@ -270,16 +270,6 @@ svg {
   background: var(--amarillo-hover);
 }
 
-/* "Pedir turno" del sitio público: un amarillo más claro (va con brillo, ver .boton-brillo) */
-.boton-amarillo-claro {
-  background: #fdd970;
-  color: var(--azul-oscuro);
-}
-
-.boton-amarillo-claro:hover {
-  background: #fbcd4f;
-}
-
 .boton-whatsapp {
   background: var(--verde-whatsapp);
 }
@@ -1510,6 +1500,11 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .miembro .boton {
   margin-top: auto;
+}
+
+/* "Escribir por WhatsApp": botón con borde y el ícono verde, para que se note que abre WhatsApp */
+.miembro-whatsapp svg {
+  color: var(--verde-whatsapp);
 }
 
 /* ---------- Opiniones ---------- */

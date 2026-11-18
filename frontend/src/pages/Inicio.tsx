@@ -251,9 +251,11 @@ export function Inicio() {
                     href={enlaceWhatsapp(clinica.whatsapp, `Hola, quiero pedir un turno con ${m.nombre} ${m.apellido}.`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="boton boton-secundario"
+                    className="boton boton-contorno miembro-whatsapp"
+                    aria-label={`Escribirle a ${m.nombre} ${m.apellido} por WhatsApp (se abre en otra pestaña)`}
                   >
-                    Pedir turno con {m.nombre}
+                    <MessageCircle size={20} aria-hidden="true" />
+                    Escribir por WhatsApp
                   </a>
                 </li>
               ))}
@@ -403,7 +405,7 @@ export function Inicio() {
                   </div>
                 )}
                 <div className="contacto-botones">
-                  <Link to="/turno" className="boton boton-amarillo-claro boton-brillo" ref={observarBotonTurno}>
+                  <Link to="/turno" className="boton boton-brillo" ref={observarBotonTurno}>
                     <CalendarCheck size={20} aria-hidden="true" />
                     Pedir turno
                   </Link>
