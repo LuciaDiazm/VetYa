@@ -50,6 +50,19 @@ export function diaCorto(fecha: string) {
   return DIA_CORTO.format(new Date(`${fecha}T12:00:00Z`)).replace(/\./g, '').replace(',', '')
 }
 
+// "2026-10-12" → { semana: "Lun", numero: 12, mes: "oct" } (para mostrar el día como hojita de calendario)
+const SEMANA_CORTA = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
+const MES_CORTO = new Intl.DateTimeFormat('es-AR', { month: 'short', timeZone: 'UTC' })
+export function partesDeFecha(fecha: string) {
+  const d = new Date(`${fecha}T12:00:00Z`)
+  const semana = SEMANA_CORTA.format(d).replace('.', '')
+  return {
+    semana: semana.charAt(0).toUpperCase() + semana.slice(1),
+    numero: d.getUTCDate(),
+    mes: MES_CORTO.format(d).replace('.', ''),
+  }
+}
+
 // Fecha y hora ISO → "09:30" en hora argentina
 export function horaDe(iso: string) {
   return HORA.format(new Date(iso))

@@ -1,9 +1,9 @@
-import { Ban, CalendarCheck, CircleCheck, Clock, MessageCircle, UserRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Ban, CalendarCheck, CircleCheck, Clock, MessageCircle, Moon, Sun, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPost, ErrorApi } from '../lib/api'
-import { diaAmigable, diaCorto, diaLargo, fechaCortaDe } from '../lib/fechas'
+import { diaAmigable, diaCorto, diaLargo, fechaCortaDe, partesDeFecha } from '../lib/fechas'
 import { enlaceWhatsapp, MENSAJE_TURNO, useSitio } from '../lib/sitio'
 import type { DatosMiCuenta, EspecieMascota, Servicio } from '../types'
 import { Cargando } from '../components/Cargando'
@@ -83,7 +83,8 @@ export function SacarTurno() {
   return <PedirTurno key={categoria ?? 'todos'} categoria={categoria} />
 }
 
-// Los cuatro pasos: servicio, día, horario y mascota.
+// Los cuatro pasos (servicio, día, horario y mascota), de a uno por pantalla, con una barra de avance.
+// Al elegir algo se pasa solo al paso siguiente; "Volver" deja cambiar lo elegido.
 // Si viene de una tarjeta de servicios, solo muestra esa categoría; si tiene un solo servicio, ya queda elegido.
 function PedirTurno({ categoria }: { categoria: string | null }) {
   const { datos: sitio } = useSitio()
@@ -92,17 +93,22 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
   const [disponibilidad, setDisponibilidad] = useState<Disponibilidad | null>(null)
   const [dia, setDia] = useState<string | null>(null)
   const [hora, setHora] = useState<string | null>(null)
+  const [paso, setPaso] = useState(1)
   const [confirmado, setConfirmado] = useState<{ dia: string; hora: string; servicio: string; mascota: string } | null>(
     null,
   )
   // Si la clínica lo suspendió para turnos web, se avisa de entrada (no tiene sentido completar los pasos).
   const [suspendidoHasta, setSuspendidoHasta] = useState<string | null>(null)
+  const titulo = useRef<HTMLHeadingElement>(null)
 
-  const pasoDia = useRef<HTMLElement>(null)
-  const pasoHora = useRef<HTMLElement>(null)
-  const pasoDatos = useRef<HTMLElement>(null)
-  const bajarA = (paso: React.RefObject<HTMLElement | null>) =>
-    window.setTimeout(() => paso.current?.scrollIntoView({ block: 'start' }), 50)
+  // Al cambiar de paso, el título del paso nuevo queda a la vista y con el foco (para lectores de pantalla y teclado).
+  function irAPaso(n: number) {
+    setPaso(n)
+    window.setTimeout(() => {
+      titulo.current?.focus({ preventScroll: true })
+      window.scrollTo({ top: 0 })
+    }, 0)
+  }
 
   useEffect(() => {
     apiGet<Servicio[]>('/publico/turnos/servicios')
@@ -119,20 +125,33 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
   }, [])
 
   function elegirServicio(s: Servicio) {
-    setServicio(s)
-    setDia(null)
-    setHora(null)
-    setDisponibilidad(null)
-    apiGet<Disponibilidad>(`/publico/turnos/disponibilidad?servicioId=${s.id}`).then((d) => {
-      setDisponibilidad(d)
-      bajarA(pasoDia)
-    })
+    if (servicio?.id !== s.id) {
+      setServicio(s)
+      setDia(null)
+      setHora(null)
+      setDisponibilidad(null)
+      apiGet<Disponibilidad>(`/publico/turnos/disponibilidad?servicioId=${s.id}`).then(setDisponibilidad)
+    }
+    irAPaso(2)
   }
 
+  function elegirDia(d: string) {
+    if (d !== dia) setHora(null)
+    setDia(d)
+    irAPaso(3)
+  }
+
+  function elegirHora(h: string) {
+    setHora(h)
+    irAPaso(4)
+  }
+
+  // Si otra persona tomó el horario mientras completaba los datos, vuelve a elegir la hora.
   async function recargarHorarios() {
     if (!servicio) return
     setHora(null)
     setDisponibilidad(await apiGet<Disponibilidad>(`/publico/turnos/disponibilidad?servicioId=${servicio.id}`))
+    irAPaso(3)
   }
 
   if (suspendidoHasta) {
@@ -194,53 +213,90 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
   const maniana = horas.filter((h) => h.hora < '13:00')
   const tarde = horas.filter((h) => h.hora >= '13:00')
 
+  // Lo ya elegido, en una línea, al lado de la barra de avance
+  const elegido = [servicio?.nombre, paso > 2 && dia ? diaCorto(dia) : null, paso > 3 ? hora : null]
+    .filter(Boolean)
+    .join(' · ')
+
+  // Volver al paso anterior y, si ya había algo elegido en este paso, seguir sin volver a tocarlo
+  const puedeSeguir = (paso === 1 && servicio) || (paso === 2 && dia) || (paso === 3 && hora)
+  const navegacion = (
+    <div className="paso-navegacion">
+      {paso > 1 && (
+        <button type="button" className="boton boton-contorno" onClick={() => irAPaso(paso - 1)}>
+          <ArrowLeft size={20} aria-hidden="true" /> Volver
+        </button>
+      )}
+      {puedeSeguir && (
+        <button type="button" className="boton paso-siguiente" onClick={() => irAPaso(paso + 1)}>
+          Siguiente <ArrowRight size={20} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  )
+
   return (
     <main className="fondo-huellas">
       <section className="contenedor seccion sacar-turno">
         <h1>Pedir turno</h1>
-        <p className="ayuda-grande">Elegí el servicio, el día y el horario.</p>
+
+        {/* ---------- Barra de avance ---------- */}
+        <div className="avance">
+          <p className="avance-texto">
+            <strong>Paso {paso} de 4</strong>
+            {elegido && <span>{elegido}</span>}
+          </p>
+          <div className="avance-barra" aria-hidden="true">
+            {[1, 2, 3, 4].map((n) => (
+              <span key={n} className={n <= paso ? 'hecho' : undefined} />
+            ))}
+          </div>
+        </div>
 
         {/* ---------- 1. Servicio ---------- */}
-        <section className="paso" aria-labelledby="paso-1">
-          <h2 id="paso-1">
-            <span className="paso-numero">1</span> ¿Qué necesita tu mascota?
-          </h2>
-          {servicios === null ? (
-            <Cargando />
-          ) : (
-            <div className="opciones-servicio">
-              {serviciosVisibles.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className={`opcion-servicio${servicio?.id === s.id ? ' elegida' : ''}`}
-                  aria-pressed={servicio?.id === s.id}
-                  onClick={() => elegirServicio(s)}
-                >
-                  <strong>{s.nombre}</strong>
-                  <span>
-                    <Clock size={16} aria-hidden="true" /> {s.duracionMin} min
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          <p className="ayuda">
-            {deLaCategoria.length > 0 ? (
-              <Link to="/turno">Ver todos los servicios</Link>
+        {paso === 1 && (
+          <section className="paso" aria-labelledby="paso-1">
+            <h2 id="paso-1" ref={titulo} tabIndex={-1}>
+              <span className="paso-numero">1</span> ¿Qué necesita tu mascota?
+            </h2>
+            {servicios === null ? (
+              <Cargando />
             ) : (
-              <>
-                ¿Necesitás una <Link to="/cirugias">cirugía</Link> o una <Link to="/limpieza-dental">limpieza dental</Link>? Se
-                coordinan con la clínica.
-              </>
+              <div className="opciones-servicio">
+                {serviciosVisibles.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`opcion-servicio${servicio?.id === s.id ? ' elegida' : ''}`}
+                    aria-pressed={servicio?.id === s.id}
+                    onClick={() => elegirServicio(s)}
+                  >
+                    <strong>{s.nombre}</strong>
+                    <span>
+                      <Clock size={16} aria-hidden="true" /> {s.duracionMin} min
+                    </span>
+                  </button>
+                ))}
+              </div>
             )}
-          </p>
-        </section>
+            <p className="ayuda">
+              {deLaCategoria.length > 0 ? (
+                <Link to="/turno">Ver todos los servicios</Link>
+              ) : (
+                <>
+                  ¿Necesitás una <Link to="/cirugias">cirugía</Link> o una <Link to="/limpieza-dental">limpieza dental</Link>?
+                  Se coordinan con la clínica.
+                </>
+              )}
+            </p>
+            {navegacion}
+          </section>
+        )}
 
         {/* ---------- 2. Día ---------- */}
-        {servicio && (
-          <section className="paso" aria-labelledby="paso-2" ref={pasoDia}>
-            <h2 id="paso-2">
+        {paso === 2 && servicio && (
+          <section className="paso" aria-labelledby="paso-2">
+            <h2 id="paso-2" ref={titulo} tabIndex={-1}>
               <span className="paso-numero">2</span> ¿Qué día?
             </h2>
             {!disponibilidad ? (
@@ -255,58 +311,71 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
                 )}
               </p>
             ) : (
-              <div className="chips">
-                {diasConLugar.map(([d]) => (
-                  <button
-                    key={d}
-                    type="button"
-                    className={`chip chip-grande chip-dia${dia === d ? ' chip-activo' : ''}`}
-                    aria-pressed={dia === d}
-                    onClick={() => {
-                      setDia(d)
-                      setHora(null)
-                      bajarA(pasoHora)
-                    }}
-                  >
-                    {diaAmigable(d) === 'Hoy' || diaAmigable(d) === 'Mañana' ? `${diaAmigable(d)}, ${diaCorto(d)}` : diaCorto(d)}
-                  </button>
-                ))}
+              // Cada día como una hojita de calendario: día de la semana, número grande y mes
+              <div className="dias-calendario">
+                {diasConLugar.map(([d]) => {
+                  const { semana, numero, mes } = partesDeFecha(d)
+                  const amigable = diaAmigable(d)
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      className={`dia-hoja${dia === d ? ' elegida' : ''}`}
+                      aria-pressed={dia === d}
+                      aria-label={amigable === 'Hoy' || amigable === 'Mañana' ? `${amigable}, ${diaLargo(d)}` : diaLargo(d)}
+                      onClick={() => elegirDia(d)}
+                    >
+                      <span>{amigable === 'Hoy' || amigable === 'Mañana' ? amigable : semana}</span>
+                      <strong>{numero}</strong>
+                      <span>{mes}</span>
+                    </button>
+                  )
+                })}
               </div>
             )}
+            {navegacion}
           </section>
         )}
 
         {/* ---------- 3. Horario ---------- */}
-        {dia && (
-          <section className="paso" aria-labelledby="paso-3" ref={pasoHora}>
-            <h2 id="paso-3">
+        {paso === 3 && dia && (
+          <section className="paso" aria-labelledby="paso-3">
+            <h2 id="paso-3" ref={titulo} tabIndex={-1}>
               <span className="paso-numero">3</span> ¿A qué hora?
             </h2>
             {horas.some((h) => !h.libre) && <p className="ayuda">Los horarios tachados ya están ocupados.</p>}
-            {[
-              ['Mañana', maniana],
-              ['Tarde', tarde],
-            ].map(([titulo, lista]) =>
-              (lista as Disponibilidad[string]).length === 0 ? null : (
-                <div key={titulo as string} className="grupo-horarios">
-                  <h3>{titulo as string}</h3>
-                  <div className="chips">
-                    {(lista as Disponibilidad[string]).map((h) =>
+            {/* Cuadritos en grilla, por la mañana y por la tarde, con cuántos quedan libres */}
+            {(
+              [
+                ['Mañana', maniana, <Sun key="sol" size={22} aria-hidden="true" />],
+                ['Tarde', tarde, <Moon key="luna" size={22} aria-hidden="true" />],
+              ] as const
+            ).map(([nombre, lista, icono]) => {
+              if (lista.length === 0) return null
+              const libres = lista.filter((h) => h.libre).length
+              return (
+                <div key={nombre} className="grupo-horarios">
+                  <h3>
+                    {icono}
+                    {nombre}
+                    <span>
+                      · {libres} {libres === 1 ? 'libre' : 'libres'}
+                    </span>
+                  </h3>
+                  <div className="grilla-horarios">
+                    {lista.map((h) =>
                       h.libre ? (
                         <button
                           key={h.hora}
                           type="button"
-                          className={`chip chip-grande${hora === h.hora ? ' chip-activo' : ''}`}
+                          className={`hora-cuadro${hora === h.hora ? ' elegida' : ''}`}
                           aria-pressed={hora === h.hora}
-                          onClick={() => {
-                            setHora(h.hora)
-                            bajarA(pasoDatos)
-                          }}
+                          onClick={() => elegirHora(h.hora)}
                         >
                           {h.hora}
                         </button>
                       ) : (
-                        <span key={h.hora} className="chip chip-grande chip-ocupado">
+                        <span key={h.hora} className="hora-cuadro hora-ocupada">
                           <s>{h.hora}</s>
                           <span className="solo-lectores"> (ocupado)</span>
                         </span>
@@ -314,15 +383,16 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
                     )}
                   </div>
                 </div>
-              ),
-            )}
+              )
+            })}
+            {navegacion}
           </section>
         )}
 
         {/* ---------- 4. Datos ---------- */}
-        {servicio && dia && hora && (
-          <section className="paso" aria-labelledby="paso-4" ref={pasoDatos}>
-            <h2 id="paso-4">
+        {paso === 4 && servicio && dia && hora && (
+          <section className="paso" aria-labelledby="paso-4">
+            <h2 id="paso-4" ref={titulo} tabIndex={-1}>
               <span className="paso-numero">4</span> ¿Para quién es?
             </h2>
             <p className="resumen-turno">
@@ -337,6 +407,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
               hora={hora}
               alConfirmar={setConfirmado}
               alPerderHorario={recargarHorarios}
+              alVolver={() => irAPaso(3)}
             />
           </section>
         )}
@@ -366,12 +437,14 @@ function FormularioDatos({
   hora,
   alConfirmar,
   alPerderHorario,
+  alVolver,
 }: {
   servicio: Servicio
   dia: string
   hora: string
   alConfirmar: (d: { dia: string; hora: string; servicio: string; mascota: string }) => void
   alPerderHorario: () => void
+  alVolver: () => void
 }) {
   const { salir } = useAuth()
   const [mascotas, setMascotas] = useState<{ id: number; nombre: string }[] | null>(null)
@@ -499,9 +572,14 @@ function FormularioDatos({
           {error}
         </p>
       )}
-      <button type="submit" className="boton boton-grande" disabled={enviando}>
-        {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
-      </button>
+      <div className="paso-navegacion">
+        <button type="button" className="boton boton-contorno" onClick={alVolver}>
+          <ArrowLeft size={20} aria-hidden="true" /> Volver
+        </button>
+        <button type="submit" className="boton boton-grande paso-siguiente" disabled={enviando}>
+          {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
+        </button>
+      </div>
       <p className="ayuda">
         <MessageCircle size={16} aria-hidden="true" /> El día anterior te llega un recordatorio al WhatsApp de tu cuenta.
       </p>
