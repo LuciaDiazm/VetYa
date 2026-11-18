@@ -4,6 +4,7 @@ import { BotonArriba } from './components/BotonArriba'
 import { Pie } from './components/Pie'
 import { DisenoPanel } from './components/DisenoPanel'
 import { RutaProtegida } from './components/RutaProtegida'
+import { SaltarAlContenido } from './components/SaltarAlContenido'
 import { VolverArriba } from './components/VolverArriba'
 import { AuthProvider } from './context/AuthContext'
 import { Cirugias } from './pages/Cirugias'
@@ -30,6 +31,7 @@ import { SacarTurno } from './pages/SacarTurno'
 function DisenoPublico() {
   return (
     <>
+      <SaltarAlContenido />
       <BarraNavegacion />
       <Outlet />
       <Pie />
