@@ -1963,7 +1963,8 @@ html[data-turno-portada='visible'] .boton-turno {
   margin: 22px 0 18px;
 }
 
-.ingreso-tarjeta .campo {
+.ingreso-tarjeta .campo,
+.registro-formulario .campo {
   color: var(--gris);
   font-size: 0.95rem;
 }
@@ -1974,7 +1975,8 @@ html[data-turno-portada='visible'] .boton-turno {
   display: block;
 }
 
-.ingreso-tarjeta .campo input {
+.ingreso-tarjeta .campo input,
+.registro-formulario .campo input {
   min-height: 58px;
   padding: 12px 58px 12px 24px;
   border: 2px solid transparent;
@@ -1983,7 +1985,8 @@ html[data-turno-portada='visible'] .boton-turno {
   font-size: 1.05rem;
 }
 
-.ingreso-tarjeta .campo input:focus {
+.ingreso-tarjeta .campo input:focus,
+.registro-formulario .campo input:focus {
   background: #ffffff;
 }
 
@@ -2051,39 +2054,95 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
-/* ---------- Registro ---------- */
+/* ---------- Crear cuenta ---------- */
 
-.acceso {
+.registro {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  min-height: calc(100dvh - 81px);
+  background: #ffffff;
 }
 
-.acceso-foto {
+.registro-ventajas {
   position: relative;
-  min-height: 560px;
-  background: var(--celeste-suave);
-}
-
-.acceso-foto img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 40%;
-}
-
-.acceso-foto p {
-  position: absolute;
-  inset: auto 0 0;
-  margin: 0;
-  padding: 80px 40px 36px;
-  background: linear-gradient(transparent, rgba(17, 28, 64, 0.85));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  overflow: hidden;
+  padding: 64px clamp(24px, 5vw, 72px);
+  background: var(--azul);
   color: #ffffff;
+}
+
+/* Un círculo apenas más claro arriba a la derecha, para que el azul no quede plano */
+.registro-ventajas::before {
+  content: '';
+  position: absolute;
+  top: -140px;
+  right: -140px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.registro-lema {
+  max-width: 14ch;
+  margin: 0;
   font-family: var(--fuente-titulos);
-  font-size: 1.5rem;
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.registro-ventajas ul {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.registro-ventajas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.registro-ventajas li span:last-child {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.registro-ventajas li strong {
+  display: block;
+  color: #ffffff;
+  font-size: 1.15rem;
+}
+
+.registro-tilde {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--amarillo);
+  color: var(--azul);
+}
+
+.registro-formulario h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.registro-formulario .formulario {
+  margin: 22px 0 18px;
 }
 
 .acceso-formulario {
@@ -3244,7 +3303,7 @@ html[data-turno-portada='visible'] .boton-turno {
   .contacto,
   .urgencias-cuerpo,
   .pie-columnas,
-  .acceso {
+  .registro {
     grid-template-columns: 1fr;
   }
 
@@ -3266,13 +3325,23 @@ html[data-turno-portada='visible'] .boton-turno {
     min-height: 320px;
   }
 
-  .acceso-foto {
-    min-height: 260px;
+  /* En el celular las ventajas van arriba, más compactas */
+  .registro-ventajas {
+    gap: 20px;
+    padding: 28px 20px;
   }
 
-  .acceso-foto p {
-    padding: 60px 20px 20px;
-    font-size: 1.2rem;
+  .registro-ventajas li {
+    font-size: 0.98rem;
+  }
+
+  .registro-tilde {
+    width: 34px;
+    height: 34px;
+  }
+
+  .registro-formulario h1 {
+    font-size: 2rem;
   }
 
   .acceso-formulario {

@@ -1,9 +1,16 @@
-import { useState, type FormEvent } from 'react'
+import { Check, KeyRound, Mail, Smartphone, UserRound } from 'lucide-react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { DisenoAcceso } from '../components/DisenoAcceso'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
+
+// Lo que gana el dueño al crear la cuenta (se muestra en la mitad azul)
+const VENTAJAS = [
+  { titulo: 'Pedí turnos sin llamar', detalle: 'Elegís el día y la hora, y queda confirmado.' },
+  { titulo: 'Mirá las vacunas de tus mascotas', detalle: 'Y descargá el carnet cuando lo necesites.' },
+  { titulo: 'Te recordamos cada turno', detalle: 'Por WhatsApp, el día anterior.' },
+]
 
 // Registro de dueños de mascotas. Hace falta para pedir turno por la web.
 export function Registro() {
@@ -35,83 +42,109 @@ export function Registro() {
   }
 
   return (
-    <DisenoAcceso
-      foto="/fotos/gato-choca.webp"
-      frase="Si ya te atendiste en la clínica, usá el mismo teléfono y vas a ver a tus mascotas.">
-      <h1>Crear cuenta</h1>
-      <p className="ayuda">
-        Con tu cuenta pedís turnos y ves la historia clínica de tus mascotas y el carnet de vacunas.
-      </p>
-      <form onSubmit={enviar} className="formulario">
-        <div className="fila-campos">
-          <label className="campo">
-            Nombre
+    // Mitad azul con lo que se gana al tener cuenta; mitad blanca con el formulario.
+    <main className="registro">
+      <section className="registro-ventajas" aria-label="Para qué sirve la cuenta">
+        <p className="registro-lema">Tu mascota, a un toque de la clínica</p>
+        <ul>
+          {VENTAJAS.map((v) => (
+            <li key={v.titulo}>
+              <span className="registro-tilde" aria-hidden="true">
+                <Check size={22} strokeWidth={2.6} />
+              </span>
+              <span>
+                <strong>{v.titulo}</strong>
+                {v.detalle}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <div className="acceso-formulario registro-formulario">
+        <h1>Crear cuenta</h1>
+        <form onSubmit={enviar} className="formulario">
+          <div className="fila-campos">
+            <Campo etiqueta="Nombre" icono={<UserRound size={22} aria-hidden="true" />}>
+              <input
+                value={datos.nombre}
+                onChange={(e) => cambiar('nombre', e.target.value)}
+                required
+                autoComplete="given-name"
+              />
+            </Campo>
+            <Campo etiqueta="Apellido" icono={<UserRound size={22} aria-hidden="true" />}>
+              <input
+                value={datos.apellido}
+                onChange={(e) => cambiar('apellido', e.target.value)}
+                required
+                autoComplete="family-name"
+              />
+            </Campo>
+          </div>
+          <Campo etiqueta="Email" icono={<Mail size={22} aria-hidden="true" />}>
             <input
-              value={datos.nombre}
-              onChange={(e) => cambiar('nombre', e.target.value)}
+              type="email"
+              value={datos.email}
+              onChange={(e) => cambiar('email', e.target.value)}
               required
-              autoComplete="given-name"
+              autoComplete="email"
             />
-          </label>
-          <label className="campo">
-            Apellido
+          </Campo>
+          <Campo
+            etiqueta="Teléfono con WhatsApp"
+            icono={<Smartphone size={22} aria-hidden="true" />}
+            ayuda="Con código de área. Si ya te atendiste en la clínica, usá ese mismo teléfono y vas a ver a tus mascotas."
+          >
             <input
-              value={datos.apellido}
-              onChange={(e) => cambiar('apellido', e.target.value)}
+              type="tel"
+              value={datos.telefono}
+              onChange={(e) => cambiar('telefono', e.target.value)}
               required
-              autoComplete="family-name"
+              placeholder="3777 123456"
+              autoComplete="tel"
             />
-          </label>
-        </div>
-        <label className="campo">
-          Email
-          <input
-            type="email"
-            value={datos.email}
-            onChange={(e) => cambiar('email', e.target.value)}
-            required
-            autoComplete="email"
-          />
-        </label>
-        <label className="campo">
-          Teléfono con WhatsApp
-          <input
-            type="tel"
-            value={datos.telefono}
-            onChange={(e) => cambiar('telefono', e.target.value)}
-            required
-            placeholder="3777 123456"
-            autoComplete="tel"
-          />
-          <span className="ayuda">Con código de área, por ejemplo 3777 123456.</span>
-        </label>
-        <label className="campo">
-          Contraseña
-          <input
-            type="password"
-            value={datos.password}
-            onChange={(e) => cambiar('password', e.target.value)}
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
-          <span className="ayuda">Mínimo 8 caracteres.</span>
-        </label>
-        {error && (
-          <p className="mensaje-error" role="alert">
-            {error}
-          </p>
-        )}
-        <button type="submit" className="boton" disabled={enviando}>
-          {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
-        </button>
-      </form>
-      <p>
-        ¿Ya tenés cuenta?{' '}
-        <Link to="/ingresar" state={ubicacion.state}>
-          Ingresá
-        </Link>
-      </p>
-    </DisenoAcceso>
+          </Campo>
+          <Campo etiqueta="Contraseña" icono={<KeyRound size={22} aria-hidden="true" />} ayuda="Mínimo 8 caracteres.">
+            <input
+              type="password"
+              value={datos.password}
+              onChange={(e) => cambiar('password', e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </Campo>
+          {error && (
+            <p className="mensaje-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="boton ingreso-boton" disabled={enviando}>
+            {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
+          </button>
+        </form>
+        <p className="ingreso-registro">
+          ¿Ya tenés cuenta?{' '}
+          <Link to="/ingresar" state={ubicacion.state}>
+            Ingresá
+          </Link>
+        </p>
+      </div>
+    </main>
+  )
+}
+
+// Campo redondeado con el ícono adentro, a la derecha (igual que en Ingresar)
+function Campo({ etiqueta, icono, ayuda, children }: { etiqueta: string; icono: ReactNode; ayuda?: string; children: ReactNode }) {
+  return (
+    <label className="campo campo-icono">
+      {etiqueta}
+      <span className="campo-con-icono">
+        {children}
+        {icono}
+      </span>
+      {ayuda && <span className="ayuda">{ayuda}</span>}
+    </label>
   )
 }
