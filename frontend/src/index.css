@@ -3426,8 +3426,6 @@ html[data-turno-portada='visible'] .boton-turno {
     transition-property: opacity, color, background-color, border-color !important;
   }
 
-  .semana-dia:active,
-  .boton-flecha:active,
   .turno-acciones .boton:active {
     transform: none;
   }
@@ -4202,147 +4200,265 @@ html[data-turno-portada='visible'] .boton-turno {
 
 /* ---------- Agenda (panel) ---------- */
 
-.agenda-fecha {
-  font-size: 1.15rem;
-  color: var(--tinta) !important;
-}
-
-/* Semana: un botón por día con nombre, número y cantidad de turnos */
-.semana {
+/* Semana: los días como pestañas, con flechas a los costados */
+.agenda-semana {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  padding: 8px 14px 0;
+  border-bottom: 1px solid var(--panel-borde);
 }
 
-.semana-dias {
+.agenda-dias {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   flex: 1;
-  gap: 6px;
+  gap: 4px;
 }
 
-.semana-dia {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 84px;
-  padding: 8px 4px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio-chico);
-  background: var(--superficie);
+.agenda-dia {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 8px 4px 10px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 10px 10px 0 0;
+  background: none;
   color: var(--tinta);
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 140ms var(--curva-salida);
+  transition: background-color 0.15s;
 }
 
-.semana-dia:active {
-  transform: scale(0.97);
+.agenda-dia:hover {
+  background: #f7f8fb;
 }
 
-.semana-dia-nombre {
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: capitalize;
+.agenda-dia:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: -3px;
+}
+
+.agenda-dia-nombre {
   color: var(--gris);
+  font-size: 0.85rem;
+  text-transform: capitalize;
 }
 
-.semana-dia-numero {
-  font-family: var(--fuente-titulos);
-  font-size: 1.6rem;
-  font-weight: 600;
-  line-height: 1.15;
+.agenda-dia-numero {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.semana-dia-cantidad {
-  font-size: 0.8rem;
+.agenda-dia-cantidad {
   color: var(--gris);
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
-.semana-dia.es-hoy {
-  border-color: var(--amarillo);
+/* El día elegido: subrayado amarillo y en negrita */
+.agenda-dia.activo {
+  border-bottom-color: var(--amarillo);
 }
 
-.semana-dia.es-hoy .semana-dia-nombre {
+.agenda-dia.activo .agenda-dia-nombre,
+.agenda-dia.activo .agenda-dia-cantidad {
   color: var(--tinta);
+  font-weight: 700;
 }
 
-.semana-dia.activo {
-  border-color: var(--azul);
-  background: var(--azul);
-  color: #ffffff;
-}
-
-.semana-dia.activo .semana-dia-nombre,
-.semana-dia.activo .semana-dia-cantidad {
-  color: #dfe6f3;
-}
-
-.semana-dia.cerrado:not(.activo) {
-  background: repeating-linear-gradient(135deg, var(--fondo), var(--fondo) 6px, #efe7da 6px, #efe7da 12px);
-}
-
-.boton-flecha {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio-chico);
-  background: var(--superficie);
+/* Hoy: el número en un círculo amarillo, como en el calendario de Hoy */
+.agenda-dia.es-hoy .agenda-dia-numero {
+  background: var(--amarillo);
   color: var(--azul);
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: transform 140ms var(--curva-salida);
 }
 
-.boton-flecha:active {
-  transform: scale(0.97);
+.agenda-dia.cerrado .agenda-dia-cantidad {
+  color: var(--rojo);
 }
 
-/* El hover solo con mouse: en el celular queda "pegado" después de tocar */
-@media (hover: hover) and (pointer: fine) {
-  .semana-dia:hover,
-  .boton-flecha:hover {
-    border-color: var(--azul);
-  }
-}
-
-.volver-hoy {
-  margin-bottom: 8px;
-  text-decoration: underline;
-}
-
-/* Resumen del día */
-.resumen-dia {
+/* Fecha del día elegido, "Volver a hoy" y el filtro de veterinario */
+.agenda-dia-titulo {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--panel-borde);
 }
 
-.resumen-dia li {
-  padding: 6px 14px;
-  border: 1px solid var(--borde);
-  border-radius: 999px;
-  background: var(--superficie);
+.agenda-dia-titulo h2 {
+  margin: 0 auto 0 0;
+  color: var(--tinta);
+  font-family: var(--fuente-cuerpo, inherit);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.agenda-dia-titulo h2::first-letter {
+  text-transform: uppercase;
+}
+
+.agenda-filtro select {
+  max-width: 180px;
+}
+
+/* Resumen del día: la misma franja que los totales del informe, con 4 números */
+.agenda-totales {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.agenda-totales .agenda-total-pendientes {
+  background: #fffbef;
+  color: #6b4700;
+}
+
+.agenda-cerrado {
+  margin: 12px 18px;
+}
+
+.agenda-vacio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 18px;
   color: var(--gris);
 }
 
-.resumen-dia strong {
+.agenda-vacio p {
+  margin: 0;
+}
+
+/* Rato libre: un renglón punteado con la hora y el botón para dar turno ahí */
+.fila-libre {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--panel-borde);
+  background: repeating-linear-gradient(135deg, #ffffff, #ffffff 8px, #f7f8fb 8px, #f7f8fb 16px);
+  color: var(--gris);
+}
+
+.fila-libre-hora {
+  color: var(--tinta);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-libre-texto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fila-libre-texto strong {
   color: var(--tinta);
   font-variant-numeric: tabular-nums;
 }
 
-.resumen-dia .resumen-pendientes {
-  border-color: var(--amarillo);
-  background: var(--amarillo-suave);
-  color: #6b4700;
+.fila-libre .boton-fila {
+  background: #ffffff;
+}
+
+/* Marca de "ahora": una línea amarilla que separa lo que pasó de lo que viene */
+.fila-ahora {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 14px;
+  color: #8a5a00;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-ahora::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--amarillo);
+}
+
+/* El próximo turno por atender: raya amarilla a la izquierda y la palabra "Sigue" */
+.fila-turno.fila-sigue {
+  background: #fffbef;
+  box-shadow: inset 4px 0 0 var(--amarillo);
+}
+
+.fila-sigue-marca {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--amarillo);
+  color: var(--azul) !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.agenda-cancelados {
+  padding: 12px 14px;
+  border-top: 1px solid var(--panel-borde);
+}
+
+.agenda-cancelados .filas-turnos {
+  margin-top: 10px;
+  border-top: 1px solid var(--panel-borde);
+}
+
+@media (max-width: 760px) {
+  .agenda-semana {
+    padding-inline: 6px;
+    gap: 4px;
+  }
+
+  .agenda-dias {
+    gap: 0;
+  }
+
+  .agenda-dia-cantidad {
+    font-size: 0.7rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .agenda-totales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agenda-totales li:nth-child(n) {
+    border-left: none;
+    border-top: 1px solid var(--panel-borde);
+  }
+
+  .agenda-filtro {
+    width: 100%;
+  }
+
+  .agenda-filtro select {
+    max-width: none;
+  }
+
+  .fila-libre {
+    grid-template-columns: 54px 1fr;
+  }
+
+  .fila-libre .boton-fila {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }
 
 .aviso-cerrado {
@@ -4629,84 +4745,7 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 10px;
 }
 
-/* Rato libre entre turnos */
-.hueco-libre {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  padding: 4px 14px 4px 18px;
-  border: 2px dashed var(--borde);
-  border-radius: var(--radio-chico);
-  color: var(--gris);
-}
-
-.hueco-libre > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hueco-libre strong {
-  color: var(--tinta);
-  font-variant-numeric: tabular-nums;
-}
-
-.hueco-libre .boton-texto {
-  min-height: 44px;
-  color: var(--azul);
-  font-weight: 700;
-}
-
-/* Marca de "ahora": separa lo que ya pasó de lo que viene */
-.marca-ahora {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--rojo);
-  font-size: 0.9rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.marca-ahora::after {
-  content: "";
-  flex: 1;
-  height: 2px;
-  background: var(--rojo);
-}
-
-.cancelados {
-  margin-top: 12px;
-}
-
 @media (max-width: 600px) {
-  .semana,
-  .semana-dias {
-    gap: 4px;
-  }
-
-  .boton-flecha {
-    width: 36px;
-  }
-
-  .semana-dia {
-    min-height: 72px;
-  }
-
-  .semana-dia-numero {
-    font-size: 1.3rem;
-  }
-
-  .semana-dia-cantidad {
-    font-size: 0.75rem;
-  }
-
-  .semana-dia-palabra {
-    display: none;
-  }
-
   .turno {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;

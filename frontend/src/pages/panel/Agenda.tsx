@@ -1,14 +1,15 @@
 import { CalendarPlus, ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { TarjetaTurno } from '../../components/TarjetaTurno'
+import { Ayuda } from '../../components/Ayuda'
+import { Cargando } from '../../components/Cargando'
+import { FilaTurno } from '../../components/FilaTurno'
 import { apiGet } from '../../lib/api'
 import { diaAmigable, diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, sumarDias } from '../../lib/fechas'
 import { useHoraActual } from '../../lib/horaActual'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, huecosLibres, type Hueco } from '../../lib/turnos'
 import type { Turno } from '../../types'
-import { Cargando } from '../../components/Cargando'
 
 const DIA_SEMANA = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
 const NUMERO_DIA = new Intl.DateTimeFormat('es-AR', { day: 'numeric', timeZone: 'UTC' })
@@ -28,6 +29,9 @@ function plural(cantidad: number, uno: string, varios: string) {
   return `${cantidad} ${cantidad === 1 ? uno : varios}`
 }
 
+// Clave del veterinario para el filtro ("sin" = turnos sin veterinario asignado).
+const claveVet = (t: Turno) => (t.veterinario ? String(t.veterinario.id) : 'sin')
+
 export function Agenda() {
   const [parametros, setParametros] = useSearchParams()
   const hoy = hoyArgentina()
@@ -41,6 +45,7 @@ export function Agenda() {
   const turnosSemana = semana?.lunes === lunes ? semana.turnos : null
   const [cerrados, setCerrados] = useState<DiaCerrado[]>([])
   const [verCancelados, setVerCancelados] = useState(false)
+  const [veterinario, setVeterinario] = useState('')
   const [anuncio, setAnuncio] = useState('')
 
   const cargar = useCallback(() => {
@@ -57,16 +62,35 @@ export function Agenda() {
   const irA = (d: string) => setParametros(d === hoyArgentina() ? {} : { dia: d })
 
   const delDia = useMemo(() => (turnosSemana ?? []).filter((t) => diaDe(t.fechaHoraInicio) === dia), [turnosSemana, dia])
-  const activos = useMemo(() => delDia.filter((t) => t.estado !== 'CANCELADO'), [delDia])
-  const cancelados = delDia.filter((t) => t.estado === 'CANCELADO')
+  // Los ratos libres son de la clínica: se calculan con todos los turnos, aunque se filtre por veterinario.
+  const activosTodos = useMemo(() => delDia.filter((t) => t.estado !== 'CANCELADO'), [delDia])
+  const activos = useMemo(
+    () => activosTodos.filter((t) => !veterinario || claveVet(t) === veterinario),
+    [activosTodos, veterinario],
+  )
+  const cancelados = delDia.filter((t) => t.estado === 'CANCELADO' && (!veterinario || claveVet(t) === veterinario))
   const cerradoHoy = cerrados.find((c) => c.fecha === dia)
   const cuenta = (estado: Turno['estado']) => activos.filter((t) => t.estado === estado).length
+
+  // Veterinarios que tienen turnos esta semana, para el filtro.
+  const veterinarios = useMemo(
+    () =>
+      [
+        ...new Map(
+          (turnosSemana ?? []).map((t) => [
+            claveVet(t),
+            t.veterinario ? `${t.veterinario.nombre} ${t.veterinario.apellido}` : 'Sin asignar',
+          ]),
+        ),
+      ].sort((a, b) => a[1].localeCompare(b[1])),
+    [turnosSemana],
+  )
 
   // Línea del día. Los ratos libres solo se muestran para hoy (desde ahora) y días futuros.
   const renglones = useMemo(() => {
     const lista: Renglon[] = activos.map((t) => ({ tipo: 'turno', hora: horaDe(t.fechaHoraInicio), turno: t }))
     if (sitio && !cerradoHoy && dia >= hoy) {
-      for (const hueco of huecosLibres(sitio.clinica.horarios, activos, dia, esHoy ? ahora : undefined)) {
+      for (const hueco of huecosLibres(sitio.clinica.horarios, activosTodos, dia, esHoy ? ahora : undefined)) {
         lista.push({ tipo: 'libre', hora: hueco.inicio, hueco })
       }
     }
@@ -76,7 +100,7 @@ export function Agenda() {
       lista.splice(posicion === -1 ? lista.length : posicion, 0, { tipo: 'ahora', hora: ahora })
     }
     return lista
-  }, [activos, sitio, cerradoHoy, dia, hoy, esHoy, ahora])
+  }, [activos, activosTodos, sitio, cerradoHoy, dia, hoy, esHoy, ahora])
 
   // El próximo turno por atender de hoy, y los que ya pasaron sin que nadie los marque.
   const proximoId = esHoy
@@ -89,169 +113,189 @@ export function Agenda() {
     setAnuncio(`Turno de ${t.mascota.nombre}: ${ESTADOS_TURNO[t.estado].toLowerCase()}.`)
   }
 
-  const pendientes = cuenta('PENDIENTE')
-  const atendidos = cuenta('ATENDIDO')
-  const ausentes = cuenta('AUSENTE')
+  const totales: [string, number, string?][] = [
+    [activos.length === 1 ? 'Turno' : 'Turnos', activos.length],
+    ['Por confirmar', cuenta('PENDIENTE'), 'agenda-total-pendientes'],
+    [cuenta('ATENDIDO') === 1 ? 'Atendido' : 'Atendidos', cuenta('ATENDIDO')],
+    [cuenta('AUSENTE') === 1 ? 'No vino' : 'No vinieron', cuenta('AUSENTE')],
+  ]
 
   return (
     <>
-      <div className="panel-encabezado panel-encabezado-acciones">
-        <div>
-          <h1>Agenda</h1>
-          <p className="agenda-fecha">
-            {diaAmigable(dia) === diaLargo(dia) ? diaLargo(dia) : `${diaAmigable(dia)}, ${diaLargo(dia)}`}
-          </p>
-        </div>
-        <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton boton-grande boton-secundario">
-          <CalendarPlus size={22} aria-hidden="true" /> Dar turno
+      <div className="informe-encabezado">
+        <h1>Agenda</h1>
+        <Ayuda
+          etiqueta="Cómo se usa la agenda"
+          texto="Elegí un día de la semana para ver sus turnos. Los ratos libres tienen el botón para dar un turno a esa hora, y la línea amarilla marca la hora actual."
+        />
+        <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton informe-imprimir">
+          <CalendarPlus size={20} aria-hidden="true" /> Dar turno
         </Link>
       </div>
 
-      {/* ---------- Semana ---------- */}
-      <nav className="semana" aria-label="Días de la semana">
-        <button type="button" className="boton-flecha" onClick={() => irA(sumarDias(dia, -7))} aria-label="Semana anterior">
-          <ChevronLeft size={24} aria-hidden="true" />
-        </button>
-        <div className="semana-dias">
-          {Array.from({ length: 6 }, (_, i) => sumarDias(lunes, i)).map((d) => {
-            const cantidad = (turnosSemana ?? []).filter(
-              (t) => diaDe(t.fechaHoraInicio) === d && t.estado !== 'CANCELADO',
-            ).length
-            const cerrado = cerrados.some((c) => c.fecha === d)
-            const fecha = new Date(`${d}T12:00:00Z`)
-            return (
-              <button
-                key={d}
-                type="button"
-                className={`semana-dia${d === dia ? ' activo' : ''}${d === hoy ? ' es-hoy' : ''}${cerrado ? ' cerrado' : ''}`}
-                aria-current={d === dia ? 'date' : undefined}
-                aria-label={`${diaLargo(d)}${d === hoy ? ' (hoy)' : ''}: ${cerrado ? 'cerrado' : plural(cantidad, 'turno', 'turnos')}`}
-                onClick={() => irA(d)}
-              >
-                <span className="semana-dia-nombre">{d === hoy ? 'Hoy' : DIA_SEMANA.format(fecha).replace('.', '')}</span>
-                <span className="semana-dia-numero">{NUMERO_DIA.format(fecha)}</span>
-                <span className="semana-dia-cantidad" aria-hidden="true">
-                  {cerrado ? (
-                    'Cerrado'
-                  ) : cantidad === 0 ? (
-                    '—'
-                  ) : (
-                    <>
-                      {cantidad}
-                      <span className="semana-dia-palabra"> {cantidad === 1 ? 'turno' : 'turnos'}</span>
-                    </>
-                  )}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        <button type="button" className="boton-flecha" onClick={() => irA(sumarDias(dia, 7))} aria-label="Semana siguiente">
-          <ChevronRight size={24} aria-hidden="true" />
-        </button>
-      </nav>
-      {!esHoy && (
-        <button type="button" className="boton-texto enlace-chico volver-hoy" onClick={() => irA(hoy)}>
-          Volver a hoy
-        </button>
-      )}
-
-      {/* ---------- Resumen del día ---------- */}
-      {activos.length > 0 && (
-        <ul className="resumen-dia" aria-label="Resumen del día">
-          <li>
-            <strong>{activos.length}</strong> {activos.length === 1 ? 'turno' : 'turnos'}
-          </li>
-          {pendientes > 0 && (
-            <li className="resumen-pendientes">
-              <strong>{pendientes}</strong> por confirmar
-            </li>
-          )}
-          {atendidos > 0 && (
-            <li>
-              <strong>{atendidos}</strong> {atendidos === 1 ? 'atendido' : 'atendidos'}
-            </li>
-          )}
-          {ausentes > 0 && (
-            <li>
-              <strong>{ausentes}</strong> no {ausentes === 1 ? 'vino' : 'vinieron'}
-            </li>
-          )}
-        </ul>
-      )}
-
-      {cerradoHoy && (
-        <p className="aviso-cerrado">
-          La clínica no atiende este día{cerradoHoy.motivo ? ` (${cerradoHoy.motivo})` : ''}. No se ofrecen turnos en
-          la web.
-          {activos.length > 0 && ' Los turnos de abajo se dieron antes de cerrarlo: avisales.'}
-        </p>
-      )}
-
-      {/* ---------- Línea del día ---------- */}
-      {turnosSemana === null ? (
-        <Cargando />
-      ) : renglones.length === 0 ? (
-        <div className="tarjeta vacio-con-accion">
-          <p className="vacio">{dia < hoy ? 'Ese día no hubo turnos.' : 'No hay turnos para este día.'}</p>
-          {dia >= hoy && !cerradoHoy && (
-            <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton">
-              <CalendarPlus size={20} aria-hidden="true" /> Dar un turno
-            </Link>
-          )}
-        </div>
-      ) : (
-        <ul className="lista-turnos" aria-label="Turnos del día">
-          {renglones.map((r) =>
-            r.tipo === 'turno' ? (
-              <TarjetaTurno
-                key={r.turno.id}
-                turno={r.turno}
-                alCambiar={reemplazar}
-                marca={r.turno.id === proximoId ? 'sigue' : yaPaso(r.turno) ? 'pasado' : undefined}
-              />
-            ) : r.tipo === 'libre' ? (
-              <li key={`libre-${r.hora}`} className="hueco-libre">
-                <span>
-                  <Clock size={18} aria-hidden="true" /> Libre de <strong>{r.hueco.inicio}</strong> a{' '}
-                  <strong>{r.hueco.fin}</strong>
-                </span>
-                <Link
-                  to={`/panel/agenda/nuevo?fecha=${dia}&hora=${r.hueco.inicio}`}
-                  className="boton-texto enlace-chico"
-                  aria-label={`Dar turno a las ${r.hueco.inicio}`}
-                >
-                  <Plus size={16} aria-hidden="true" /> Dar turno
-                </Link>
-              </li>
-            ) : (
-              <li key="ahora" className="marca-ahora">
-                <span>Ahora · {r.hora}</span>
-              </li>
-            ),
-          )}
-        </ul>
-      )}
-
-      {cancelados.length > 0 && (
-        <div className="cancelados">
+      <div className="informe-caja agenda-caja">
+        {/* ---------- Semana: un día por pestaña ---------- */}
+        <nav className="agenda-semana" aria-label="Días de la semana">
           <button
             type="button"
-            className="boton-texto enlace-chico"
-            aria-expanded={verCancelados}
-            onClick={() => setVerCancelados((v) => !v)}
+            className="hoy-mes-flecha"
+            onClick={() => irA(sumarDias(dia, -7))}
+            aria-label="Semana anterior"
           >
-            {verCancelados ? 'Ocultar' : 'Ver'} cancelados ({cancelados.length})
+            <ChevronLeft size={20} aria-hidden="true" />
           </button>
-          {verCancelados && (
-            <ul className="lista-turnos">
-              {cancelados.map((t) => (
-                <TarjetaTurno key={t.id} turno={t} alCambiar={reemplazar} />
-              ))}
-            </ul>
+          <div className="agenda-dias">
+            {Array.from({ length: 6 }, (_, i) => sumarDias(lunes, i)).map((d) => {
+              const cantidad = (turnosSemana ?? []).filter(
+                (t) => diaDe(t.fechaHoraInicio) === d && t.estado !== 'CANCELADO',
+              ).length
+              const cerrado = cerrados.some((c) => c.fecha === d)
+              const fecha = new Date(`${d}T12:00:00Z`)
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  className={`agenda-dia${d === dia ? ' activo' : ''}${d === hoy ? ' es-hoy' : ''}${cerrado ? ' cerrado' : ''}`}
+                  aria-current={d === dia ? 'date' : undefined}
+                  aria-label={`${diaLargo(d)}${d === hoy ? ' (hoy)' : ''}: ${cerrado ? 'cerrado' : plural(cantidad, 'turno', 'turnos')}`}
+                  onClick={() => irA(d)}
+                >
+                  <span className="agenda-dia-nombre">{DIA_SEMANA.format(fecha).replace('.', '')}</span>
+                  <span className="agenda-dia-numero">{NUMERO_DIA.format(fecha)}</span>
+                  <span className="agenda-dia-cantidad" aria-hidden="true">
+                    {cerrado ? 'Cerrado' : cantidad === 0 ? 'Sin turnos' : plural(cantidad, 'turno', 'turnos')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          <button
+            type="button"
+            className="hoy-mes-flecha"
+            onClick={() => irA(sumarDias(dia, 7))}
+            aria-label="Semana siguiente"
+          >
+            <ChevronRight size={20} aria-hidden="true" />
+          </button>
+        </nav>
+
+        {/* ---------- Día elegido: fecha, volver a hoy y filtro ---------- */}
+        <div className="agenda-dia-titulo">
+          <h2>{diaAmigable(dia) === diaLargo(dia) ? diaLargo(dia) : `${diaAmigable(dia)}, ${diaLargo(dia)}`}</h2>
+          {!esHoy && (
+            <button type="button" className="boton-fila" onClick={() => irA(hoy)}>
+              Volver a hoy
+            </button>
+          )}
+          {veterinarios.length > 1 && (
+            <label className="campo-compacto agenda-filtro">
+              <span>Veterinario</span>
+              <select value={veterinario} onChange={(e) => setVeterinario(e.target.value)}>
+                <option value="">Todos</option>
+                {veterinarios.map(([id, nombre]) => (
+                  <option key={id} value={id}>
+                    {nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
         </div>
-      )}
+
+        {activos.length > 0 && (
+          <ul className="informe-totales agenda-totales" aria-label="Resumen del día">
+            {totales.map(([texto, valor, clase]) => (
+              <li key={texto} className={valor > 0 ? clase : undefined}>
+                <strong>{valor}</strong>
+                {texto}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {cerradoHoy && (
+          <p className="aviso-cerrado agenda-cerrado">
+            La clínica no atiende este día{cerradoHoy.motivo ? ` (${cerradoHoy.motivo})` : ''}. No se ofrecen turnos en
+            la web.
+            {activos.length > 0 && ' Los turnos de abajo se dieron antes de cerrarlo: avisales.'}
+          </p>
+        )}
+
+        {/* ---------- Línea del día ---------- */}
+        {turnosSemana === null ? (
+          <Cargando />
+        ) : renglones.length === 0 ? (
+          <div className="agenda-vacio">
+            <p>{dia < hoy ? 'Ese día no hubo turnos.' : 'No hay turnos para este día.'}</p>
+            {dia >= hoy && !cerradoHoy && (
+              <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton-fila">
+                <CalendarPlus size={18} aria-hidden="true" /> Dar un turno
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="fila-encabezado" aria-hidden="true">
+              <span>Hora</span>
+              <span>Mascota</span>
+              <span>La trae</span>
+              <span>Estado</span>
+              <span />
+            </div>
+            <ul className="filas-turnos" aria-label="Turnos del día">
+              {renglones.map((r) =>
+                r.tipo === 'turno' ? (
+                  <FilaTurno
+                    key={r.turno.id}
+                    turno={r.turno}
+                    alCambiar={reemplazar}
+                    paso={yaPaso(r.turno)}
+                    sigue={r.turno.id === proximoId}
+                  />
+                ) : r.tipo === 'libre' ? (
+                  <li key={`libre-${r.hora}`} className="fila-libre">
+                    <span className="fila-libre-hora">{r.hueco.inicio}</span>
+                    <span className="fila-libre-texto">
+                      <Clock size={16} aria-hidden="true" /> Libre hasta las <strong>{r.hueco.fin}</strong>
+                    </span>
+                    <Link
+                      to={`/panel/agenda/nuevo?fecha=${dia}&hora=${r.hueco.inicio}`}
+                      className="boton-fila"
+                      aria-label={`Dar turno a las ${r.hueco.inicio}`}
+                    >
+                      <Plus size={16} aria-hidden="true" /> Dar turno
+                    </Link>
+                  </li>
+                ) : (
+                  <li key="ahora" className="fila-ahora">
+                    <span>Ahora · {r.hora}</span>
+                  </li>
+                ),
+              )}
+            </ul>
+          </>
+        )}
+
+        {cancelados.length > 0 && (
+          <div className="agenda-cancelados">
+            <button
+              type="button"
+              className="boton-fila"
+              aria-expanded={verCancelados}
+              onClick={() => setVerCancelados((v) => !v)}
+            >
+              {verCancelados ? 'Ocultar' : 'Ver'} cancelados ({cancelados.length})
+            </button>
+            {verCancelados && (
+              <ul className="filas-turnos">
+                {cancelados.map((t) => (
+                  <FilaTurno key={t.id} turno={t} alCambiar={reemplazar} />
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       <p className="solo-lectores" role="status" aria-atomic="true">
         {anuncio}

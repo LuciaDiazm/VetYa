@@ -12,11 +12,13 @@ interface Props {
   alCambiar: (t: Turno) => void
   // Ya pasó la hora y sigue sin marcar: se avisa "Pasó la hora".
   paso?: boolean
+  // Es el próximo turno por atender (Agenda de hoy).
+  sigue?: boolean
 }
 
 // Un turno como renglón de tabla (pantalla Hoy): hora, mascota y a qué viene, quién la trae, estado
 // y las acciones. Las dos más usadas van a la vista; las demás, en el menú "Más".
-export function FilaTurno({ turno, alCambiar, paso }: Props) {
+export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
   const { datos } = useSitio()
   const [cambiando, setCambiando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,10 +44,14 @@ export function FilaTurno({ turno, alCambiar, paso }: Props) {
   const avisoAusente = `Hola ${cliente.nombre}, hoy te esperábamos con ${turno.mascota.nombre} a las ${horaDe(turno.fechaHoraInicio)} en ${nombreClinica}. ¿Querés que te demos otro turno?`
 
   return (
-    <li className={`fila-turno fila-${turno.estado}`} aria-busy={cambiando || undefined}>
+    <li
+      className={`fila-turno fila-${turno.estado}${sigue ? ' fila-sigue' : ''}`}
+      aria-busy={cambiando || undefined}
+    >
       <div className="fila-hora">
         <strong>{horaDe(turno.fechaHoraInicio)}</strong>
         <span>a {horaDe(turno.fechaHoraFin)}</span>
+        {sigue && <span className="fila-sigue-marca">Sigue</span>}
       </div>
 
       <div className="fila-mascota">
