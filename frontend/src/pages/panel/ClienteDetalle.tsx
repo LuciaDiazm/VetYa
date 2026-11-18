@@ -1,4 +1,4 @@
-import { ArrowLeft, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { ArrowLeft, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CamposCliente } from '../../components/CamposCliente'
@@ -12,7 +12,7 @@ import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types
 import { IconoEspecie } from './Clientes'
 import { Cargando } from '../../components/Cargando'
 
-// Ficha del dueño: sus datos, contacto rápido y sus mascotas.
+// Ficha del dueño: sus datos y botones de contacto al costado; sus mascotas y turnos al lado.
 export function ClienteDetalle() {
   const { id } = useParams()
   const navegar = useNavigate()
@@ -91,195 +91,196 @@ export function ClienteDetalle() {
         <ArrowLeft size={20} aria-hidden="true" /> Volver a clientes
       </Link>
 
-      <div className="panel-encabezado panel-encabezado-acciones">
-        <div>
+      {error && <p className="mensaje-error">{error}</p>}
+
+      {/* Datos del dueño al costado (con los botones para contactarlo) y, al lado, sus mascotas y sus turnos */}
+      <div className="ficha-cliente">
+        <aside className="tarjeta ficha-cliente-datos" aria-label="Datos del dueño">
           <h1>
             {cliente.nombre} {cliente.apellido}
           </h1>
-          <p>
-            {formatearTelefono(cliente.telefono)}
-            {cliente.usuario ? '. Tiene cuenta en la web' : ''}
-          </p>
-        </div>
-        <div className="acciones-contacto">
-          <a href={enlaceWhatsapp(cliente.telefono, `Hola ${cliente.nombre}, te escribimos de la veterinaria.`)} target="_blank" rel="noreferrer" className="boton boton-whatsapp">
-            <MessageCircle size={20} aria-hidden="true" /> WhatsApp
-          </a>
-          <a href={`tel:+${cliente.telefono}`} className="boton boton-contorno">
-            <Phone size={20} aria-hidden="true" /> Llamar
-          </a>
-        </div>
-      </div>
-
-      {error && <p className="mensaje-error">{error}</p>}
-
-      <section className="tarjeta bloque-ficha">
-        <div className="bloque-ficha-titulo">
-          <h2>Mascotas</h2>
-          {!agregando && (
-            <button type="button" className="boton boton-secundario" onClick={() => setAgregando(true)}>
-              <Plus size={20} aria-hidden="true" /> Agregar mascota
-            </button>
+          {cliente.usuario && (
+            <p className="ficha-cliente-cuenta">
+              <Globe size={16} aria-hidden="true" /> Tiene cuenta en la web
+            </p>
           )}
-        </div>
 
-        {agregando && (
-          <form className="formulario subformulario" onSubmit={guardarMascota}>
-            <CamposMascota datos={nuevaMascota} cambiar={setNuevaMascota} />
-            <div className="formulario-botones">
-              <button type="submit" className="boton" disabled={guardando}>
-                {guardando ? 'Guardando…' : 'Guardar mascota'}
-              </button>
-              <button type="button" className="boton-texto" onClick={() => setAgregando(false)}>
-                Cancelar
-              </button>
-            </div>
-          </form>
-        )}
-
-        {activas.length === 0 && !agregando ? (
-          <p className="vacio">Todavía no tiene mascotas cargadas.</p>
-        ) : (
-          <ul className="lista-mascotas">
-            {activas.map((m) => (
-              <li key={m.id}>
-                <Link to={`/panel/mascotas/${m.id}`} className="mascota-fila">
-                  <span className="icono-circulo">
-                    <IconoEspecie especie={m.especie} size={22} />
-                  </span>
-                  <span>
-                    <strong>{m.nombre}</strong>
-                    <span className="mascota-fila-detalle">
-                      {[ESPECIES[m.especie], m.sexo === 'HEMBRA' ? 'hembra' : 'macho', edadTexto(m.fechaNacimiento)]
-                        .filter(Boolean)
-                        .join(', ')}
-                    </span>
-                  </span>
-                  <span className="mascota-fila-ver">Ver ficha</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {inactivas.length > 0 && (
-          <p className="ayuda">
-            Ya no se atienden: {inactivas.map((m) => (
-              <Link key={m.id} to={`/panel/mascotas/${m.id}`}>
-                {m.nombre}{' '}
-              </Link>
-            ))}
-          </p>
-        )}
-      </section>
-
-      <TurnosDelCliente cliente={cliente} alCambiar={(cambios) => setCliente({ ...cliente, ...cambios })} />
-
-      <section className="tarjeta bloque-ficha">
-        <div className="bloque-ficha-titulo">
-          <h2>Datos del dueño</h2>
-          {!editando && (
-            <button
-              type="button"
-              className="boton boton-contorno"
-              onClick={() => {
-                setDatos(datosDeCliente(cliente))
-                setEditando(true)
-              }}
-            >
-              <Pencil size={18} aria-hidden="true" /> Editar
-            </button>
-          )}
-        </div>
-
-        {editando && datos ? (
-          <form className="formulario" onSubmit={guardarCliente}>
-            <CamposCliente datos={datos} cambiar={setDatos} />
-            <div className="formulario-botones">
-              <button type="submit" className="boton" disabled={guardando}>
-                {guardando ? 'Guardando…' : 'Guardar cambios'}
-              </button>
-              <button type="button" className="boton-texto" onClick={() => setEditando(false)}>
-                Cancelar
-              </button>
-            </div>
-          </form>
-        ) : (
-          <dl className="ficha-tabla">
-            <div>
-              <dt>Teléfono</dt>
-              <dd>{formatearTelefono(cliente.telefono)}</dd>
-            </div>
-            <div>
-              <dt>DNI</dt>
-              <dd>{cliente.dni ?? 'Sin cargar'}</dd>
-            </div>
-            <div>
-              <dt>Email</dt>
-              <dd>{cliente.email ?? 'Sin cargar'}</dd>
-            </div>
-            <div>
-              <dt>Dirección</dt>
-              <dd>{cliente.direccion ?? 'Sin cargar'}</dd>
-            </div>
-          </dl>
-        )}
-      </section>
-
-      {cliente.usuario && (
-        <section className="tarjeta bloque-ficha">
-          <div className="bloque-ficha-titulo">
-            <h2>Cuenta en la web</h2>
-            {!cambiandoClave && (
-              <button
-                type="button"
-                className="boton boton-contorno"
-                onClick={() => {
-                  setClaveNueva('')
-                  setClaveLista(false)
-                  setCambiandoClave(true)
-                }}
-              >
-                <KeyRound size={18} aria-hidden="true" /> Darle una contraseña nueva
-              </button>
-            )}
-          </div>
-          <p>
-            Entra con <strong>{cliente.usuario.email}</strong>. Si se olvidó la contraseña, dale una nueva y pasásela por
-            WhatsApp o en persona.
-          </p>
-          {cambiandoClave && (
-            <form className="formulario subformulario" onSubmit={guardarClave}>
-              <label className="campo">
-                Contraseña nueva (mínimo 8 caracteres)
-                {/* Se ve mientras se escribe, para poder dictarla o copiarla. */}
-                <input
-                  type="text"
-                  value={claveNueva}
-                  onChange={(e) => setClaveNueva(e.target.value)}
-                  minLength={8}
-                  required
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-              </label>
+          {editando && datos ? (
+            <form className="formulario" onSubmit={guardarCliente}>
+              <CamposCliente datos={datos} cambiar={setDatos} />
               <div className="formulario-botones">
                 <button type="submit" className="boton" disabled={guardando}>
-                  {guardando ? 'Guardando…' : 'Guardar contraseña'}
+                  {guardando ? 'Guardando…' : 'Guardar cambios'}
                 </button>
-                <button type="button" className="boton-texto" onClick={() => setCambiandoClave(false)}>
+                <button type="button" className="boton-texto" onClick={() => setEditando(false)}>
                   Cancelar
                 </button>
               </div>
             </form>
+          ) : (
+            <>
+              <dl className="ficha-cliente-lista">
+                <div>
+                  <dt>Teléfono</dt>
+                  <dd>{formatearTelefono(cliente.telefono)}</dd>
+                </div>
+                <div>
+                  <dt>DNI</dt>
+                  <dd className={cliente.dni ? undefined : 'sin-cargar'}>{cliente.dni ?? 'Sin cargar'}</dd>
+                </div>
+                <div>
+                  <dt>Email</dt>
+                  <dd className={cliente.email ? undefined : 'sin-cargar'}>{cliente.email ?? 'Sin cargar'}</dd>
+                </div>
+                <div>
+                  <dt>Dirección</dt>
+                  <dd className={cliente.direccion ? undefined : 'sin-cargar'}>{cliente.direccion ?? 'Sin cargar'}</dd>
+                </div>
+              </dl>
+              <div className="ficha-cliente-botones">
+                <a
+                  href={enlaceWhatsapp(cliente.telefono, `Hola ${cliente.nombre}, te escribimos de la veterinaria.`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="boton boton-whatsapp"
+                >
+                  <MessageCircle size={20} aria-hidden="true" /> WhatsApp
+                </a>
+                <a href={`tel:+${cliente.telefono}`} className="boton boton-contorno">
+                  <Phone size={20} aria-hidden="true" /> Llamar
+                </a>
+                <button
+                  type="button"
+                  className="boton boton-contorno"
+                  onClick={() => {
+                    setDatos(datosDeCliente(cliente))
+                    setEditando(true)
+                  }}
+                >
+                  <Pencil size={18} aria-hidden="true" /> Editar datos
+                </button>
+              </div>
+            </>
           )}
-          {claveLista && (
-            <p className="mensaje-exito" role="status">
-              Listo. Ya puede entrar con la contraseña nueva.
-            </p>
+
+          {cliente.usuario && (
+            <section className="ficha-cliente-clave" aria-labelledby="titulo-cuenta-web">
+              <h2 id="titulo-cuenta-web">Cuenta en la web</h2>
+              <p>
+                Entra con <strong>{cliente.usuario.email}</strong>. Si se olvidó la contraseña, dale una nueva y
+                pasásela por WhatsApp o en persona.
+              </p>
+              {!cambiandoClave && (
+                <button
+                  type="button"
+                  className="boton boton-contorno"
+                  onClick={() => {
+                    setClaveNueva('')
+                    setClaveLista(false)
+                    setCambiandoClave(true)
+                  }}
+                >
+                  <KeyRound size={18} aria-hidden="true" /> Contraseña nueva
+                </button>
+              )}
+              {cambiandoClave && (
+                <form className="formulario subformulario" onSubmit={guardarClave}>
+                  <label className="campo">
+                    Contraseña nueva (mínimo 8 caracteres)
+                    {/* Se ve mientras se escribe, para poder dictarla o copiarla. */}
+                    <input
+                      type="text"
+                      value={claveNueva}
+                      onChange={(e) => setClaveNueva(e.target.value)}
+                      minLength={8}
+                      required
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  </label>
+                  <div className="formulario-botones">
+                    <button type="submit" className="boton" disabled={guardando}>
+                      {guardando ? 'Guardando…' : 'Guardar contraseña'}
+                    </button>
+                    <button type="button" className="boton-texto" onClick={() => setCambiandoClave(false)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              )}
+              {claveLista && (
+                <p className="mensaje-exito" role="status">
+                  Listo. Ya puede entrar con la contraseña nueva.
+                </p>
+              )}
+            </section>
           )}
-        </section>
-      )}
+        </aside>
+
+        <div className="ficha-cliente-principal">
+          <section className="tarjeta bloque-ficha">
+            <div className="bloque-ficha-titulo">
+              <h2>Mascotas</h2>
+              {!agregando && (
+                <button type="button" className="boton boton-secundario" onClick={() => setAgregando(true)}>
+                  <Plus size={20} aria-hidden="true" /> Agregar mascota
+                </button>
+              )}
+            </div>
+
+            {agregando && (
+              <form className="formulario subformulario" onSubmit={guardarMascota}>
+                <CamposMascota datos={nuevaMascota} cambiar={setNuevaMascota} />
+                <div className="formulario-botones">
+                  <button type="submit" className="boton" disabled={guardando}>
+                    {guardando ? 'Guardando…' : 'Guardar mascota'}
+                  </button>
+                  <button type="button" className="boton-texto" onClick={() => setAgregando(false)}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {activas.length === 0 && !agregando ? (
+              <p className="vacio">Todavía no tiene mascotas cargadas.</p>
+            ) : (
+              <ul className="lista-mascotas">
+                {activas.map((m) => (
+                  <li key={m.id}>
+                    <Link to={`/panel/mascotas/${m.id}`} className="mascota-fila">
+                      <span className="icono-circulo">
+                        <IconoEspecie especie={m.especie} size={22} />
+                      </span>
+                      <span>
+                        <strong>{m.nombre}</strong>
+                        <span className="mascota-fila-detalle">
+                          {[ESPECIES[m.especie], m.sexo === 'HEMBRA' ? 'hembra' : 'macho', edadTexto(m.fechaNacimiento)]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </span>
+                      </span>
+                      <span className="mascota-fila-ver">Ver ficha</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {inactivas.length > 0 && (
+              <p className="ayuda">
+                Ya no se atienden: {inactivas.map((m) => (
+                  <Link key={m.id} to={`/panel/mascotas/${m.id}`}>
+                    {m.nombre}{' '}
+                  </Link>
+                ))}
+              </p>
+            )}
+          </section>
+
+          <TurnosDelCliente cliente={cliente} alCambiar={(cambios) => setCliente({ ...cliente, ...cambios })} />
+        </div>
+      </div>
     </>
   )
 }

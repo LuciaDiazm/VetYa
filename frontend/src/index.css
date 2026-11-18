@@ -3771,6 +3771,98 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-bottom: 16px;
 }
 
+/* Ficha del cliente: datos del dueño en una columna al costado y sus mascotas y turnos a la derecha */
+.ficha-cliente {
+  display: grid;
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.ficha-cliente-datos {
+  padding: 22px 20px;
+}
+
+.ficha-cliente-datos h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.ficha-cliente-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.ficha-cliente-lista {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.ficha-cliente-lista dt {
+  color: var(--gris);
+  font-size: 0.85rem;
+}
+
+.ficha-cliente-lista dd {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.ficha-cliente-lista dd.sin-cargar {
+  color: var(--gris);
+  font-weight: 400;
+}
+
+.ficha-cliente-botones {
+  display: grid;
+  gap: 8px;
+}
+
+.ficha-cliente-datos .formulario {
+  margin-top: 18px;
+}
+
+.ficha-cliente-datos .fila-campos {
+  grid-template-columns: 1fr;
+}
+
+/* Cuenta en la web: debajo de los datos, separada por una línea */
+.ficha-cliente-clave {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--panel-borde);
+}
+
+.ficha-cliente-clave h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.ficha-cliente-clave p {
+  margin: 0 0 12px;
+  color: var(--gris);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.ficha-cliente-clave .boton {
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .ficha-cliente {
+    grid-template-columns: 1fr;
+  }
+}
+
 .bloque-ficha-titulo {
   display: flex;
   align-items: center;
