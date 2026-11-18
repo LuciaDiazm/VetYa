@@ -3096,12 +3096,6 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
-.grilla-resumen {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
 .resumen-titulo {
   display: flex;
   align-items: center;
@@ -3335,6 +3329,7 @@ html[data-turno-portada='visible'] .boton-turno {
     position: absolute;
     top: 2px;
     right: 6px;
+    left: auto;
     margin: 0;
   }
 
@@ -5310,15 +5305,6 @@ html[data-turno-portada='visible'] .boton-turno {
    Recordatorios
    ========================================================= */
 
-.lista-avisos {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .aviso {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -5369,37 +5355,171 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 700;
 }
 
-.resumen-numero {
+/* Notificaciones: pestañas con su número y los avisos como tabla, igual que la lista de clientes */
+.pestanas-avisos {
   display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--panel-borde);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pestanas-avisos a {
+  display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 14px;
-  color: var(--tinta);
+  gap: 8px;
+  min-height: 52px;
+  margin-bottom: -2px;
+  padding: 0 16px;
+  border-bottom: 3px solid transparent;
+  color: var(--gris);
+  font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.resumen-numero:hover {
-  border-color: var(--azul);
-}
-
-/* En Notificaciones: la tarjeta cuya lista se está viendo */
-.resumen-numero.elegida {
-  border: 2px solid var(--azul);
-  background: var(--azul-suave);
-}
-
-.resumen-numero strong {
-  font-family: var(--fuente-titulos);
-  font-size: 1.6rem;
+.pestanas-avisos a.activa {
+  border-bottom-color: var(--azul);
   color: var(--azul);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .pestanas-avisos a:hover {
+    color: var(--azul);
+  }
+}
+
+.pestana-numero {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--azul);
+  color: #ffffff;
+  font-size: 0.85rem;
+}
+
+.pestana-numero.en-cero {
+  background: #e3e6ee;
+  color: var(--gris);
+}
+
+.tabla-avisos {
+  overflow: hidden;
+  padding: 0;
+}
+
+.tabla-avisos-ayuda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 18px;
+  color: var(--gris);
+}
+
+.tabla-avisos-ayuda svg {
+  flex: none;
+  color: var(--azul);
+}
+
+.tabla-avisos > .vacio {
+  margin: 0;
+  padding: 0 18px 20px;
+}
+
+.tabla-avisos-encabezado,
+.aviso-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding-inline: 18px;
+}
+
+.tabla-avisos-encabezado {
+  padding-block: 10px;
+  border-block: 1px solid var(--panel-borde);
+  background: #f7f8fb;
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.lista-avisos-tabla {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-avisos-tabla li + li {
+  border-top: 1px solid var(--panel-borde);
+}
+
+.aviso-fila {
+  padding-block: 12px;
+}
+
+.aviso-fila-quien {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.aviso-fila-quien .icono-circulo {
+  flex: none;
+}
+
+.aviso-fila-mascota {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.aviso-fila-dueno {
+  display: block;
+  color: var(--gris);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.aviso-fila .aviso-detalle {
+  margin: 0;
+}
+
+/* Botón de WhatsApp más liviano para la tabla: verde clarito con texto verde */
+.boton.boton-wa-suave {
+  padding-inline: 16px;
+  border: 1px solid #b9dcc6;
+  background: #e8f4ec;
+  color: #1f6b3c;
+  font-size: 0.95rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .boton.boton-wa-suave:hover {
+    border-color: #1f7a46;
+    background: #d6ecdf;
+  }
+}
+
+/* En el celular, cada aviso muestra quién, qué y el botón uno debajo del otro */
 @media (max-width: 860px) {
-  .aviso {
-    grid-template-columns: auto 1fr;
+  .tabla-avisos-encabezado {
+    display: none;
   }
 
-  .aviso-acciones {
-    grid-column: 1 / -1;
+  .aviso-fila {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .aviso-fila .aviso-acciones {
     align-items: flex-start;
   }
 }

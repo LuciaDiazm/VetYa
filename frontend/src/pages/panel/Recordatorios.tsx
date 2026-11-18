@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { apiGet, apiPost } from '../../lib/api'
 import { diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
-import { formatearTelefono } from '../../lib/mascotas'
 import { avisarCambioRecordatorios, mensajeDosis, mensajeRecupero, mensajeTurnoManana } from '../../lib/recordatorios'
 import { enlaceWhatsapp, useSitio } from '../../lib/sitio'
 import type { Pendientes } from '../../types'
@@ -12,11 +11,12 @@ import { Cargando } from '../../components/Cargando'
 
 // Las tres listas de avisos. Cada una tiene su tarjeta arriba y se ve por separado.
 type Lista = 'manana' | 'vacunas' | 'recuperar'
-const LISTAS: { id: Lista; icono: LucideIcon; titulo: string; explicacion: string; vacio: string }[] = [
+const LISTAS: { id: Lista; icono: LucideIcon; titulo: string; columna: string; explicacion: string; vacio: string }[] = [
   {
     id: 'manana',
     icono: CalendarClock,
     titulo: 'Turnos de mañana',
+    columna: 'Turno',
     explicacion: 'Personas con turno para mañana a las que todavía no se les recordó.',
     vacio: 'No hay turnos para mañana que recordar.',
   },
@@ -24,6 +24,7 @@ const LISTAS: { id: Lista; icono: LucideIcon; titulo: string; explicacion: strin
     id: 'vacunas',
     icono: Syringe,
     titulo: 'Vacunas y desparasitaciones',
+    columna: 'Qué le toca',
     explicacion: 'Dosis que tocan en los próximos 7 días o que vencieron hace menos de un mes.',
     vacio: 'No hay vacunas ni desparasitaciones por vencer.',
   },
@@ -31,6 +32,7 @@ const LISTAS: { id: Lista; icono: LucideIcon; titulo: string; explicacion: strin
     id: 'recuperar',
     icono: HeartPulse,
     titulo: 'Clientes para recuperar',
+    columna: 'Por qué',
     explicacion:
       'Mascotas que no vienen hace más de 6 meses o con una dosis vencida hace más de un mes (ya pasaron de "por vencer").',
     vacio: 'No hay clientes para recuperar.',
@@ -65,20 +67,21 @@ function ItemAviso({
   alAvisar: (clave: string, aviso: Aviso) => void
 }) {
   return (
-    <li className={`aviso${hecho ? ' aviso-hecho' : ''}`}>
-      <span className="icono-circulo">
-        <IconoEspecie especie={mascota.especie} size={22} />
-      </span>
-      <div className="aviso-datos">
-        <p className="aviso-titulo">
-          <Link to={`/panel/mascotas/${mascota.id}`}>{mascota.nombre}</Link>
-          <span>
-            {' '}
-            de {mascota.cliente.nombre} {mascota.cliente.apellido} ({formatearTelefono(telefono)})
+    <li className={`aviso-fila${hecho ? ' aviso-hecho' : ''}`}>
+      <div className="aviso-fila-quien">
+        <span className="icono-circulo">
+          <IconoEspecie especie={mascota.especie} size={20} />
+        </span>
+        <span>
+          <Link to={`/panel/mascotas/${mascota.id}`} className="aviso-fila-mascota">
+            {mascota.nombre}
+          </Link>
+          <span className="aviso-fila-dueno">
+            de {mascota.cliente.nombre} {mascota.cliente.apellido}
           </span>
-        </p>
-        <p className="aviso-detalle">{detalle}</p>
+        </span>
       </div>
+      <p className="aviso-detalle">{detalle}</p>
       <div className="aviso-acciones">
         {hecho ? (
           <span className="aviso-listo">
@@ -90,13 +93,15 @@ function ItemAviso({
               href={enlaceWhatsapp(telefono, aviso.mensaje)}
               target="_blank"
               rel="noreferrer"
-              className="boton boton-whatsapp"
+              className="boton boton-wa-suave"
               onClick={() => alAvisar(clave, aviso)}
             >
-              <MessageCircle size={18} aria-hidden="true" /> Avisar por WhatsApp
+              <MessageCircle size={18} aria-hidden="true" /> WhatsApp
+              <span className="solo-lectores"> para avisarle a {mascota.cliente.nombre}</span>
             </a>
             <button type="button" className="boton-texto enlace-chico" onClick={() => alAvisar(clave, aviso)}>
-              <Phone size={16} aria-hidden="true" /> Ya le avisé por teléfono
+              <Phone size={16} aria-hidden="true" /> Ya le avisé
+              <span className="solo-lectores"> por teléfono</span>
             </button>
           </>
         )}
@@ -120,6 +125,11 @@ export function Recordatorios() {
       .catch(() => setError('No se pudieron cargar los recordatorios.'))
   }, [])
   useEffect(cargar, [cargar])
+
+  // En el celular las pestañas se desplazan de costado: la elegida queda siempre a la vista.
+  useEffect(() => {
+    document.querySelector('.pestanas-avisos .activa')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [hash, pendientes])
 
   // Se registra el aviso; el ítem queda tildado hasta que se recarga la página.
   async function avisar(clave: string, aviso: Aviso) {
@@ -150,42 +160,45 @@ export function Recordatorios() {
     <>
       <div className="panel-encabezado">
         <h1>Notificaciones</h1>
-        <p>A quién hay que avisarle. Elegí una tarjeta: cada botón abre WhatsApp con el mensaje listo.</p>
+        <p>A quién hay que avisarle. Elegí una pestaña: cada botón abre WhatsApp con el mensaje listo.</p>
       </div>
       {error && <p className="mensaje-error">{error}</p>}
 
-      {/* Las tres tarjetas: la elegida queda marcada y abajo se ve solo su lista */}
-      <nav className="grilla-resumen" aria-label="Tipos de aviso">
+      {/* Las tres listas como pestañas, cada una con cuántos avisos tiene; abajo se ve solo la elegida */}
+      <nav className="pestanas-avisos" aria-label="Tipos de aviso">
         {LISTAS.map(({ id, icono: Icono, titulo }) => (
           <Link
             key={id}
             to={`#${id}`}
             replace
-            className={`tarjeta resumen-numero${id === elegida ? ' elegida' : ''}`}
+            className={id === elegida ? 'activa' : undefined}
             aria-current={id === elegida ? 'true' : undefined}
           >
-            <span className="icono-circulo">
-              <Icono size={22} aria-hidden="true" />
-            </span>
-            <span>
-              <strong>{cantidades[id]}</strong> {titulo}
-            </span>
+            <Icono size={20} aria-hidden="true" />
+            {titulo}
+            <span className={`pestana-numero${cantidades[id] === 0 ? ' en-cero' : ''}`}>{cantidades[id]}</span>
           </Link>
         ))}
       </nav>
 
-      <section className="tarjeta bloque-ficha">
-        <div className="bloque-ficha-titulo">
-          <h2>
-            <lista.icono size={22} aria-hidden="true" /> {lista.titulo} ({cantidades[elegida]})
-          </h2>
-        </div>
-        <p className="ayuda">{lista.explicacion}</p>
-        {cantidades[elegida] === 0 && <p className="vacio">{lista.vacio}</p>}
+      {/* Los avisos como tabla: quién, qué le toca y el botón para avisarle */}
+      <section className="tarjeta tabla-avisos" aria-label={lista.titulo}>
+        <p className="tabla-avisos-ayuda">
+          <lista.icono size={18} aria-hidden="true" /> {lista.explicacion}
+        </p>
+        {cantidades[elegida] === 0 ? (
+          <p className="vacio">{lista.vacio}</p>
+        ) : (
+          <div className="tabla-avisos-encabezado" aria-hidden="true">
+            <span>Mascota y dueño</span>
+            <span>{lista.columna}</span>
+            <span>Avisar</span>
+          </div>
+        )}
 
       {/* ---------- Turnos de mañana ---------- */}
       {elegida === 'manana' && turnosManana.length > 0 && (
-          <ul className="lista-avisos">
+          <ul className="lista-avisos-tabla">
             {turnosManana.map((t) => {
               const clave = `turno-${t.id}`
               return (
@@ -210,7 +223,7 @@ export function Recordatorios() {
 
       {/* ---------- Vacunas y desparasitaciones ---------- */}
       {elegida === 'vacunas' && dosis.length > 0 && (
-          <ul className="lista-avisos">
+          <ul className="lista-avisos-tabla">
             {dosis.map((d) => {
               const clave = `dosis-${d.id}`
               const fecha = d.fechaProximaDosis!.slice(0, 10)
@@ -250,7 +263,7 @@ export function Recordatorios() {
 
       {/* ---------- Clientes para recuperar ---------- */}
       {elegida === 'recuperar' && recuperar.length > 0 && (
-          <ul className="lista-avisos">
+          <ul className="lista-avisos-tabla">
             {recuperar.map((r) => {
               const clave = `recupero-${r.mascota.id}`
               return (
