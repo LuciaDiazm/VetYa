@@ -84,7 +84,9 @@ export function DatosClinica() {
   }
 
   return (
-    <form className="formulario formulario-animal" onSubmit={guardar}>
+    <form className="formulario" onSubmit={guardar}>
+      {/* Las cuatro tarjetas de a dos, para usar el ancho de la pantalla */}
+      <div className="ajustes-clinica-grilla">
       <section className="tarjeta formulario">
         <h2>Datos de contacto</h2>
         <label className="campo">
@@ -212,6 +214,7 @@ export function DatosClinica() {
           </label>
         </div>
       </section>
+      </div>
 
       {error && (
         <p className="mensaje-error" role="alert">

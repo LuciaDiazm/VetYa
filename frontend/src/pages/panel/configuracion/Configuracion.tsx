@@ -24,7 +24,6 @@ export function Configuracion() {
     <>
       <div className="panel-encabezado">
         <h1>Ajustes</h1>
-        <p>Los datos de la clínica, cuándo atiende, qué servicios ofrece y quiénes trabajan.</p>
       </div>
 
       <div className="pestanas pestanas-desplazables" role="tablist">
@@ -42,7 +41,10 @@ export function Configuracion() {
         ))}
       </div>
 
-      <Seccion />
+      {/* Todas las secciones con los títulos del mismo tamaño */}
+      <div className="ajustes">
+        <Seccion />
+      </div>
     </>
   )
 }
