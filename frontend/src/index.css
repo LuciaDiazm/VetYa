@@ -6932,3 +6932,11 @@ form.campo-en-linea {
   ) {
   border-radius: 6px;
 }
+
+/* Celulares muy chicos (menos de 375 px, como el iPhone SE): el encabezado no entraba.
+   Se oculta solo el dibujito del perro y el gato; quedan "VetYa", "Urgencias" y "Menú" enteros y grandes. */
+@media (max-width: 374px) {
+  .encabezado .logo-marca {
+    display: none;
+  }
+}
