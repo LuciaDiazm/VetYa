@@ -35,7 +35,8 @@
 
   /* Tipografía */
   --fuente: 'DM Sans', system-ui, sans-serif;
-  --fuente-titulos: 'Prompt', 'DM Sans', system-ui, sans-serif;
+  /* Títulos de la parte pública: serif suave y cálida, como un cartel pintado */
+  --fuente-titulos: 'Fraunces', Georgia, serif;
   --fuente-logo: 'Fredoka', 'Trebuchet MS', sans-serif;
 
   /* Formas */
@@ -75,7 +76,19 @@ h3 {
   font-family: var(--fuente-titulos);
   font-weight: 600;
   line-height: 1.15;
+  letter-spacing: -0.01em;
   margin: 0 0 0.5em;
+}
+
+/* El panel de la clínica conserva su letra de títulos (Prompt) */
+.panel {
+  --fuente-titulos: 'Prompt', 'DM Sans', system-ui, sans-serif;
+}
+
+.panel h1,
+.panel h2,
+.panel h3 {
+  letter-spacing: normal;
 }
 
 h1 {
@@ -256,9 +269,9 @@ svg {
 }
 
 .boton-grande {
-  min-height: 58px;
-  padding: 12px 30px;
-  font-size: 1.1rem;
+  min-height: 48px;
+  padding: 10px 26px;
+  font-size: 1.05rem;
 }
 
 .boton-secundario {
@@ -867,7 +880,7 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
-/* Título de la portada: la letra de títulos del sitio, recta y grande, fácil de leer */
+/* Título de la portada: la letra de títulos del sitio (Fraunces), grande y fácil de leer */
 .titulo-portada {
   max-width: 11ch;
   font-family: var(--fuente-titulos);
@@ -1841,7 +1854,7 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .barra-contacto .boton {
-    min-height: 52px;
+    min-height: 48px;
     justify-content: center;
   }
 
@@ -2143,7 +2156,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .acceso-formulario .boton {
   width: 100%;
-  min-height: 56px;
+  min-height: 48px;
   font-size: 1.1rem;
 }
 
