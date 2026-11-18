@@ -14,7 +14,7 @@ import {
   Star,
   Syringe,
 } from 'lucide-react'
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { IconoDiente } from '../components/IconoDiente'
 import { Mapa } from '../components/Mapa'
@@ -78,34 +78,6 @@ function iniciales(nombre: string, apellido: string) {
 // La huella de la portada, girada un poco a la izquierda (y achicada apenas para que no se corte al girar)
 const GIRO_HUELLA = 'rotate(-14 .5 .6) translate(.5 .58) scale(.92) translate(-.5 -.58)'
 
-// Unas huellitas cruzan la tarjeta de contacto una sola vez, como si pasara un perrito.
-// Van de abajo a la izquierda hacia arriba a la derecha, alternando pata izquierda y derecha.
-function HuellitasQueCruzan() {
-  return (
-    <span className="huellitas-cruzan" aria-hidden="true">
-      {Array.from({ length: 9 }, (_, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 24 24"
-          style={
-            {
-              left: `${4 + i * 11}%`,
-              top: `${78 - i * 8 + (i % 2 ? -4 : 4)}%`,
-              '--orden': i,
-            } as CSSProperties
-          }
-        >
-          <ellipse cx="12" cy="16" rx="5.2" ry="4.4" />
-          <ellipse cx="5.6" cy="10.4" rx="2" ry="2.5" />
-          <ellipse cx="9.4" cy="6.4" rx="2" ry="2.6" />
-          <ellipse cx="14.6" cy="6.4" rx="2" ry="2.6" />
-          <ellipse cx="18.4" cy="10.4" rx="2" ry="2.5" />
-        </svg>
-      ))}
-    </span>
-  )
-}
-
 export function Inicio() {
   const { datos, error } = useSitio()
   const { hash } = useLocation()
@@ -139,22 +111,18 @@ export function Inicio() {
   const mapaGoogle = `https://www.google.com/maps/search/?api=1&query=${clinica.latitud},${clinica.longitud}`
 
   return (
-    <main className="fondo-huellas">
+    <main className="inicio">
       {/* ---------- Portada (franja de vidrio esmerilado, de borde a borde, sobre manchas de color) ---------- */}
       <div className="portada-escena">
         <div className="portada-vidrio">
           <section className="contenedor portada" aria-labelledby="titulo-portada">
             <div className="portada-texto">
               <h1 id="titulo-portada" className="titulo-portada">
-                {/* Cada palabra sube apenas después de la anterior (ver .palabra en index.css) */}
-                <span className="palabra" style={{ '--orden': 0 } as CSSProperties}>Clínica</span>{' '}
-                <span className="palabra" style={{ '--orden': 1 } as CSSProperties}>veterinaria</span>{' '}
-                <span className="palabra" style={{ '--orden': 2 } as CSSProperties}>en</span>{' '}
-                <span className="palabra" style={{ '--orden': 3 } as CSSProperties}>Goya</span>
+                Clínica veterinaria en Goya
               </h1>
               <p className="portada-bajada">Cuidamos a tu mascota como parte de tu familia.</p>
               <div className="portada-acciones">
-                <Link to="/turno" className="boton boton-grande boton-brillo" ref={observarBotonTurno}>
+                <Link to="/turno" className="boton boton-grande" ref={observarBotonTurno}>
                   <CalendarCheck size={22} aria-hidden="true" />
                   Pedir turno
                 </Link>
@@ -172,10 +140,10 @@ export function Inicio() {
                   {/* Cada parte va girada un poco a la izquierda (en clipPath no se puede agrupar con <g>) */}
                   <clipPath id="forma-huella" clipPathUnits="objectBoundingBox">
                     <path d="M .5 .35 C .68 .35 .82 .51 .88 .68 C .95 .86 .83 .99 .67 .98 C .59 .975 .55 .94 .5 .94 C .45 .94 .41 .975 .33 .98 C .17 .99 .05 .86 .12 .68 C .18 .51 .32 .35 .5 .35 Z" transform={GIRO_HUELLA} />
-                    <ellipse cx=".11" cy=".42" rx=".1" ry=".115" transform={GIRO_HUELLA} className="dedo" style={{ '--orden': 0 } as CSSProperties} />
-                    <ellipse cx=".32" cy=".19" rx=".115" ry=".13" transform={GIRO_HUELLA} className="dedo" style={{ '--orden': 1 } as CSSProperties} />
-                    <ellipse cx=".68" cy=".19" rx=".115" ry=".13" transform={GIRO_HUELLA} className="dedo" style={{ '--orden': 2 } as CSSProperties} />
-                    <ellipse cx=".89" cy=".42" rx=".1" ry=".115" transform={GIRO_HUELLA} className="dedo" style={{ '--orden': 3 } as CSSProperties} />
+                    <ellipse cx=".11" cy=".42" rx=".1" ry=".115" transform={GIRO_HUELLA} />
+                    <ellipse cx=".32" cy=".19" rx=".115" ry=".13" transform={GIRO_HUELLA} />
+                    <ellipse cx=".68" cy=".19" rx=".115" ry=".13" transform={GIRO_HUELLA} />
+                    <ellipse cx=".89" cy=".42" rx=".1" ry=".115" transform={GIRO_HUELLA} />
                   </clipPath>
                 </defs>
               </svg>
@@ -187,13 +155,13 @@ export function Inicio() {
 
               <ul className="portada-ventajas">
                 <li>
-                  <span className="punto" aria-hidden="true" /> Turnos online
+                  <span className="punto" aria-hidden="true" /> Sacá turno sin llamar
                 </li>
                 <li>
                   <span className="punto" aria-hidden="true" /> Te avisamos las vacunas
                 </li>
                 <li>
-                  <span className="punto" aria-hidden="true" /> Historia clínica online
+                  <span className="punto" aria-hidden="true" /> Carnet de vacunas online
                 </li>
                 <li>
                   <span className="punto" aria-hidden="true" /> Atendemos urgencias
@@ -210,9 +178,9 @@ export function Inicio() {
       {/* ---------- Servicios ---------- */}
       <section id="servicios" className="contenedor seccion servicios" aria-labelledby="titulo-servicios">
         <h2 id="titulo-servicios" className="titulo-centrado">
-          Todo lo que tu mascota necesita
+          Qué atendemos en la clínica
         </h2>
-        <div className="mosaico revelar-costados" ref={revelarAlBajar}>
+        <div className="mosaico revelar" ref={revelarAlBajar}>
           {TARJETAS.map((c) => {
             const lista = servicios.filter((s) =>
               c.clave === 'LIMPIEZA' ? esLimpiezaDental(s) : s.categoria === c.clave && !esLimpiezaDental(s),
@@ -248,14 +216,13 @@ export function Inicio() {
       {/* ---------- Quiénes somos ---------- */}
       <section className="contenedor seccion sobre" aria-labelledby="titulo-sobre">
         <h2 id="titulo-sobre" className="sobre-frase">
-          Veterinarios de Goya que atienden a cada mascota <strong>con tiempo, cariño</strong> y{' '}
-          <strong>sin vueltas</strong>.
+          Veterinarios de Goya que atienden a cada mascota con tiempo, cariño y sin vueltas
         </h2>
         {/* Equipo: sigue directo después de la frase, sin título aparte */}
         {equipo.length > 0 && (
           <div id="equipo" className="sobre-equipo">
             <p className="sobre-capacitacion">Nos capacitamos en forma permanente para cuidar mejor a tu mascota.</p>
-            <ul className="grilla-equipo revelar-subir" ref={revelarAlBajar}>
+            <ul className="grilla-equipo revelar" ref={revelarAlBajar}>
               {equipo.map((m) => (
                 <li key={m.id} className="miembro">
                   {m.fotoUrl ? (
@@ -293,7 +260,7 @@ export function Inicio() {
           <h2 id="titulo-opiniones" className="titulo-centrado">
             Lo que dicen las familias
           </h2>
-          <ul className="grilla-opiniones">
+          <ul className="grilla-opiniones revelar" ref={revelarAlBajar}>
             {opiniones.map((o) => (
               <li key={o.id} className="opinion">
                 <span className="estrellas" aria-label={`${o.puntaje} de 5 estrellas`}>
@@ -314,7 +281,6 @@ export function Inicio() {
 
       {/* ---------- Preguntas frecuentes ---------- */}
       {preguntas.length > 0 && (
-        // Franja de lado a lado; el dálmata espía desde el borde derecho.
         <section id="preguntas" className="preguntas-banda" aria-labelledby="titulo-preguntas">
           <div className="contenedor seccion preguntas-seccion">
             <div>
@@ -332,7 +298,6 @@ export function Inicio() {
               </div>
             </div>
           </div>
-          <img src="/fotos/dalmata-espia.webp" alt="" className="preguntas-foto" loading="lazy" />
         </section>
       )}
 
@@ -345,72 +310,68 @@ export function Inicio() {
       </section>
 
       {/* ---------- Contacto ---------- */}
-      {/* Franja de vidrio esmerilado de borde a borde, sobre manchas de color (como la portada) */}
-      <section id="contacto" className="contacto-escena" aria-labelledby="titulo-contacto">
-        <div className="contacto-vidrio">
-          <div className="contenedor seccion">
-            <h2 id="titulo-contacto" className="titulo-centrado">
-              Dónde estamos
-            </h2>
-            <div className="contacto" ref={revelarAlBajar}>
-              <div className="contacto-tarjeta">
-                <HuellitasQueCruzan />
-                <div className="dato-contacto">
-                  <MapPin size={24} aria-hidden="true" />
-                  <div>
-                    <h3>Dirección</h3>
-                    <p>{clinica.direccion}</p>
-                  </div>
-                </div>
-                <div className="dato-contacto">
-                  <Clock size={24} aria-hidden="true" />
-                  <div>
-                    <h3>Horarios</h3>
-                    {agruparHorarios(clinica.horarios).map((r) => (
-                      <p key={r.dias}>
-                        {r.dias}: {r.horas}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-                <div className="dato-contacto">
-                  <Phone size={24} aria-hidden="true" />
-                  <div>
-                    <h3>Teléfono</h3>
-                    <p className="sin-corte">{clinica.telefono}</p>
-                  </div>
-                </div>
-                {formasPago.length > 0 && (
-                  <div className="dato-contacto">
-                    <CreditCard size={24} aria-hidden="true" />
-                    <div>
-                      <h3>Formas de pago</h3>
-                      <p>{formasPago.map((f) => f.nombre).join(', ')}.</p>
-                    </div>
-                  </div>
-                )}
-                <div className="contacto-botones">
-                  <Link to="/turno" className="boton boton-brillo" ref={observarBotonTurno}>
-                    <CalendarCheck size={20} aria-hidden="true" />
-                    Pedir turno
-                  </Link>
-                  <a href={enlaceTelefono(clinica.telefono)} className="boton boton-contorno">
-                    <Phone size={20} aria-hidden="true" />
-                    Llamar
-                  </a>
-                  <a href={mapaGoogle} target="_blank" rel="noreferrer" className="boton boton-contorno">
-                    <MapPin size={20} aria-hidden="true" />
-                    Cómo llegar
-                  </a>
+      <section id="contacto" aria-labelledby="titulo-contacto">
+        <div className="contenedor seccion">
+          <h2 id="titulo-contacto" className="titulo-centrado">
+            Dónde estamos
+          </h2>
+          <div className="contacto revelar" ref={revelarAlBajar}>
+            <div className="contacto-tarjeta">
+              <div className="dato-contacto">
+                <MapPin size={24} aria-hidden="true" />
+                <div>
+                  <h3>Dirección</h3>
+                  <p>{clinica.direccion}</p>
                 </div>
               </div>
-              <Mapa
-                latitud={Number(clinica.latitud)}
-                longitud={Number(clinica.longitud)}
-                nombre={clinica.nombre}
-                direccion={clinica.direccion}
-              />
+              <div className="dato-contacto">
+                <Clock size={24} aria-hidden="true" />
+                <div>
+                  <h3>Horarios</h3>
+                  {agruparHorarios(clinica.horarios).map((r) => (
+                    <p key={r.dias}>
+                      {r.dias}: {r.horas}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <div className="dato-contacto">
+                <Phone size={24} aria-hidden="true" />
+                <div>
+                  <h3>Teléfono</h3>
+                  <p className="sin-corte">{clinica.telefono}</p>
+                </div>
+              </div>
+              {formasPago.length > 0 && (
+                <div className="dato-contacto">
+                  <CreditCard size={24} aria-hidden="true" />
+                  <div>
+                    <h3>Formas de pago</h3>
+                    <p>{formasPago.map((f) => f.nombre).join(', ')}.</p>
+                  </div>
+                </div>
+              )}
+              <div className="contacto-botones">
+                <Link to="/turno" className="boton" ref={observarBotonTurno}>
+                  <CalendarCheck size={20} aria-hidden="true" />
+                  Pedir turno
+                </Link>
+                <a href={enlaceTelefono(clinica.telefono)} className="boton boton-contorno">
+                  <Phone size={20} aria-hidden="true" />
+                  Llamar
+                </a>
+                <a href={mapaGoogle} target="_blank" rel="noreferrer" className="boton boton-contorno">
+                  <MapPin size={20} aria-hidden="true" />
+                  Cómo llegar
+                </a>
+              </div>
             </div>
+            <Mapa
+              latitud={Number(clinica.latitud)}
+              longitud={Number(clinica.longitud)}
+              nombre={clinica.nombre}
+              direccion={clinica.direccion}
+            />
           </div>
         </div>
       </section>
@@ -480,7 +441,6 @@ function Dudas({ whatsapp }: { whatsapp: string }) {
           Escribir por WhatsApp
         </a>
       </div>
-      <img src="/fotos/gatito-papel.webp" alt="" className="dudas-foto" loading="lazy" />
     </div>
   )
 }

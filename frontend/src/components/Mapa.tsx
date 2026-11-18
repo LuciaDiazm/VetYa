@@ -6,8 +6,7 @@ import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 // que no carga bien cuando la app se compila con Vite).
 const icono = L.divIcon({
   className: 'mapa-marcador',
-  // La onda (b) solo se ve en el inicio, cuando aparece la sección "Dónde estamos" (ver index.css)
-  html: '<b class="pin-onda"></b><span></span>',
+  html: '<span></span>',
   iconSize: [36, 36],
   iconAnchor: [18, 36],
   popupAnchor: [0, -34],
