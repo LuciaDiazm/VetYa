@@ -1,7 +1,9 @@
 import { Router } from "express";
+import { z } from "zod";
 import { aFechaUTC, diaArgentina, esFechaValida, sumarDias } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { prisma } from "../lib/prisma";
+import { CANTIDAD_COLUMNAS, escribirInforme } from "../lib/informe";
 
 // Estadísticas de la clínica para un período (fechas en hora argentina, ambas inclusive).
 export const estadisticasRouter = Router();
@@ -73,6 +75,27 @@ estadisticasRouter.get("/turnos", async (req, res) => {
     orderBy: { fechaHoraInicio: "asc" },
   });
   res.json(turnos);
+});
+
+// El mismo informe en PDF. La pantalla manda las filas ya filtradas y escritas como se ven,
+// así el papel muestra exactamente lo mismo que el panel.
+const esquemaInforme = z.object({
+  subtitulo: z.string().max(300),
+  totales: z.array(z.object({ texto: z.string().max(40), valor: z.number().int().min(0) })).max(10),
+  filas: z.array(z.array(z.string().max(200)).length(CANTIDAD_COLUMNAS)).max(5000),
+});
+
+estadisticasRouter.post("/informe.pdf", async (req, res) => {
+  const datos = esquemaInforme.safeParse(req.body);
+  if (!datos.success) {
+    res.status(400).json({ error: "No se pudo armar el PDF con esos datos" });
+    return;
+  }
+  const clinica = await prisma.clinica.findUniqueOrThrow({ where: { id: req.usuario!.clinicaId } });
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", 'attachment; filename="informe-de-turnos.pdf"');
+  res.setHeader("Cache-Control", "no-store");
+  escribirInforme(datos.data, clinica, res);
 });
 
 estadisticasRouter.get("/", async (req, res) => {

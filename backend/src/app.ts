@@ -15,7 +15,8 @@ import { usuariosRouter } from "./routes/usuarios";
 export const app = express();
 
 app.use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:5173" }));
-app.use(express.json());
+// 2 MB alcanzan para mandar un informe de turnos largo y armar su PDF.
+app.use(express.json({ limit: "2mb" }));
 
 // Fotos que sube la clínica (por ejemplo, las del personal).
 app.use("/uploads", express.static(CARPETA_SUBIDAS, { maxAge: "7d" }));

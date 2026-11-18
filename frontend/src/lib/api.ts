@@ -1,3 +1,5 @@
+import { descargarArchivo } from './descargas'
+
 // Funciones para comunicarse con el backend.
 
 const CLAVE_TOKEN = 'vetya_token'
@@ -65,6 +67,21 @@ export function apiPut<T>(ruta: string, datos: unknown): Promise<T> {
 
 export function apiDelete<T>(ruta: string): Promise<T> {
   return apiFetch<T>(ruta, { method: 'DELETE' })
+}
+
+// Pide un archivo armado por el servidor (por ejemplo, un PDF) y lo baja con el nombre dado.
+export async function apiDescargar(ruta: string, datos: unknown, nombre: string) {
+  const token = leerToken()
+  const respuesta = await fetch(`/api${ruta}`, {
+    method: 'POST',
+    body: JSON.stringify(datos),
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  })
+  if (!respuesta.ok) {
+    const cuerpo = await respuesta.json().catch(() => null)
+    throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
+  }
+  descargarArchivo(await respuesta.blob(), nombre)
 }
 
 // Envía archivos (por ejemplo, fotos). No se fija el Content-Type: el navegador lo arma con el FormData.

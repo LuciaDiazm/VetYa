@@ -1,8 +1,9 @@
-import { Printer } from 'lucide-react'
+import { FileDown, FileSpreadsheet, Printer } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ElegirFechas } from '../../components/ElegirFechas'
-import { apiGet } from '../../lib/api'
+import { apiDescargar, apiGet } from '../../lib/api'
+import { descargarPlanilla } from '../../lib/descargas'
 import { diaDe, horaDe, hoyArgentina, lunesDe, problemaDePeriodo, sumarDias } from '../../lib/fechas'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, ICONOS_ESTADO, ORIGENES } from '../../lib/turnos'
@@ -36,6 +37,23 @@ const aFecha = (f: string) => new Date(`${f}T12:00:00Z`)
 // "2026-10-05" → "lun 05/10"
 const fechaCorta = (f: string) => `${SEMANA.format(aFecha(f)).replace('.', '')} ${f.slice(8)}/${f.slice(5, 7)}`
 const nombreVet = (v: TurnoInforme['veterinario']) => (v ? `${v.nombre} ${v.apellido}` : 'Sin asignar')
+// "2026-10-05" → "05/10/2026", para que Excel la tome como fecha
+const fechaPlanilla = (f: string) => `${f.slice(8)}/${f.slice(5, 7)}/${f.slice(0, 4)}`
+const COLUMNAS = ['Fecha', 'Hora', 'Mascota', 'Dueño', 'Servicio', 'Veterinario', 'Estado', 'Cómo se pidió']
+
+// Una fila del informe como texto, igual que en la tabla (para el PDF y la planilla).
+function filaDeTexto(t: TurnoInforme, fecha: (f: string) => string) {
+  return [
+    fecha(diaDe(t.fechaHoraInicio)),
+    horaDe(t.fechaHoraInicio),
+    t.mascota.nombre,
+    `${t.mascota.cliente.nombre} ${t.mascota.cliente.apellido}`,
+    t.servicio.nombre,
+    nombreVet(t.veterinario),
+    ESTADOS_TURNO[t.estado],
+    ORIGENES[t.origen].texto,
+  ]
+}
 
 const TURNOS_POR_PAGINA = 20
 
@@ -56,6 +74,8 @@ export function InformeTurnos() {
   // Se guarda para qué fechas es cada respuesta: si no coinciden con las elegidas, se está consultando.
   const [resultado, setResultado] = useState<{ periodo: string; turnos: TurnoInforme[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [armandoPdf, setArmandoPdf] = useState(false)
+  const [errorPdf, setErrorPdf] = useState<string | null>(null)
   const turnos = resultado?.turnos ?? null
   const consultando = !problema && !error && resultado !== null && resultado.periodo !== `${desde}|${hasta}`
 
@@ -129,6 +149,33 @@ export function InformeTurnos() {
     veterinario && veterinarios.find(([id]) => id === veterinario)?.[1],
   ].filter(Boolean)
 
+  const periodoEscrito = `Del ${FECHA_LARGA.format(aFecha(desde))} al ${FECHA_LARGA.format(aFecha(hasta))}`
+  const nombreArchivo = `informe-de-turnos-${desde}-al-${hasta}`
+
+  function bajarExcel() {
+    descargarPlanilla([COLUMNAS, ...filtrados.map((t) => filaDeTexto(t, fechaPlanilla))], `${nombreArchivo}.csv`)
+  }
+
+  async function bajarPdf() {
+    setArmandoPdf(true)
+    setErrorPdf(null)
+    try {
+      await apiDescargar(
+        '/estadisticas/informe.pdf',
+        {
+          subtitulo: [periodoEscrito, ...filtrosAplicados].join(' · '),
+          totales: totales.map(([texto, valor]) => ({ texto, valor })),
+          filas: filtrados.map((t) => filaDeTexto(t, fechaCorta)),
+        },
+        `${nombreArchivo}.pdf`,
+      )
+    } catch {
+      setErrorPdf('No se pudo armar el PDF. Probá de nuevo o usá Imprimir.')
+    } finally {
+      setArmandoPdf(false)
+    }
+  }
+
   return (
     <>
       {/* Encabezado que solo sale en el papel */}
@@ -136,7 +183,7 @@ export function InformeTurnos() {
         <strong>{sitio?.clinica.nombre}</strong>
         <h1>Informe de turnos</h1>
         <p>
-          Del {FECHA_LARGA.format(aFecha(desde))} al {FECHA_LARGA.format(aFecha(hasta))}
+          {periodoEscrito}
           {filtrosAplicados.length > 0 && ` · ${filtrosAplicados.join(' · ')}`}
         </p>
         <p>Impreso el {FECHA_LARGA.format(aFecha(hoy))}</p>
@@ -146,17 +193,26 @@ export function InformeTurnos() {
         <h1>Informe de turnos</h1>
         <Ayuda
           etiqueta="Qué es el informe de turnos"
-          texto="Todos los turnos entre dos fechas. Podés filtrarlos por estado, servicio o veterinario, y después imprimirlos o guardarlos en PDF."
+          texto="Todos los turnos entre dos fechas. Podés filtrarlos por estado, servicio o veterinario, y después bajarlos en Excel o PDF, o imprimirlos."
         />
-        <button
-          type="button"
-          className="boton informe-imprimir"
-          onClick={() => window.print()}
-          disabled={!filtrados.length}
-        >
-          <Printer size={20} aria-hidden="true" /> Imprimir o guardar en PDF
-        </button>
+        {/* Las tres salidas del informe, con lo que esté filtrado */}
+        <div className="informe-acciones" role="group" aria-label="Bajar o imprimir el informe">
+          <button type="button" className="informe-accion" onClick={bajarExcel} disabled={!filtrados.length}>
+            <FileSpreadsheet size={20} aria-hidden="true" /> Excel
+          </button>
+          <button type="button" className="informe-accion" onClick={() => window.print()} disabled={!filtrados.length}>
+            <Printer size={20} aria-hidden="true" /> Imprimir
+          </button>
+          <button type="button" className="informe-accion" onClick={bajarPdf} disabled={!filtrados.length || armandoPdf}>
+            <FileDown size={20} aria-hidden="true" /> {armandoPdf ? 'Armando…' : 'PDF'}
+          </button>
+        </div>
       </div>
+      {errorPdf && (
+        <p className="mensaje-error no-imprimir" role="alert">
+          {errorPdf}
+        </p>
+      )}
 
       <div className="informe-caja">
       <section className="informe-filtros no-imprimir" aria-label="Filtros del informe">

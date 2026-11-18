@@ -2163,6 +2163,7 @@ html[data-turno-portada='visible'] .boton-turno {
       .boton-fila,
       .chip,
       .casilla,
+      .informe-accion,
       .enlace-con-icono,
       .campo-compacto,
       .hoy-mes-dia,
@@ -5992,7 +5993,7 @@ form.campo-en-linea {
   font-weight: 700;
 }
 
-/* Encabezado: título, el "?" y el botón amarillo de imprimir a la derecha */
+/* Encabezado: título, el "?" y a la derecha los botones Excel, Imprimir y PDF */
 .informe-encabezado {
   display: flex;
   flex-wrap: wrap;
@@ -6018,6 +6019,46 @@ form.campo-en-linea {
 
 .boton.informe-imprimir:hover {
   background: #f0b829;
+}
+
+.informe-acciones {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Botones blancos con borde, ícono y una palabra: tres iguales, ninguno más fuerte que otro */
+.informe-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--panel-borde);
+  background: #ffffff;
+  color: var(--azul);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.informe-accion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.informe-accion:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .informe-accion:not(:disabled):hover {
+    border-color: var(--azul);
+    background: #f7f8fb;
+  }
 }
 
 /* Todo el informe en una sola caja blanca: filtros, totales y tabla */
@@ -6230,6 +6271,15 @@ form.campo-en-linea {
   .informe-encabezado .informe-imprimir {
     width: 100%;
     margin-left: 0;
+  }
+
+  .informe-acciones {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .informe-accion {
+    flex: 1;
   }
 
   .informe-totales {
