@@ -3695,7 +3695,6 @@ html[data-turno-portada='visible'] .boton-turno {
   gap: 16px;
 }
 
-.lista-clientes,
 .lista-mascotas {
   display: flex;
   flex-direction: column;
@@ -3705,7 +3704,6 @@ html[data-turno-portada='visible'] .boton-turno {
   list-style: none;
 }
 
-.cliente-fila,
 .mascota-fila {
   display: flex;
   align-items: center;
@@ -3718,31 +3716,85 @@ html[data-turno-portada='visible'] .boton-turno {
   text-decoration: none;
 }
 
-.cliente-fila:hover,
 .mascota-fila:hover {
   border-color: var(--azul);
 }
 
-.cliente-fila-datos {
-  display: flex;
-  flex-direction: column;
-  min-width: 180px;
+/* Lista de clientes como tabla: una sola tarjeta, encabezado gris y una línea entre fila y fila */
+.tabla-clientes {
+  overflow: hidden;
+  padding: 0;
 }
 
-.cliente-fila-datos strong {
-  font-size: 1.1rem;
+.tabla-clientes-encabezado,
+.cliente-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.6fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-inline: 18px;
 }
 
-.cliente-fila-datos span {
+.tabla-clientes-encabezado {
+  padding-block: 10px;
+  border-bottom: 1px solid var(--panel-borde);
+  background: #f7f8fb;
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.lista-clientes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-clientes li + li {
+  border-top: 1px solid var(--panel-borde);
+}
+
+.cliente-fila {
+  min-height: 60px;
+  padding-block: 8px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.cliente-fila-nombre {
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.cliente-fila-telefono,
+.cliente-sin-mascotas {
   color: var(--gris);
 }
 
 .cliente-fila-mascotas {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 6px;
-  margin-left: auto;
+}
+
+.cliente-fila-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--azul);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cliente-fila:hover {
+    background: #f7f8fb;
+  }
+}
+
+.cliente-fila:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: -3px;
 }
 
 .chip-mascota {
@@ -4087,15 +4139,27 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 700;
 }
 
+/* En el celular, cada fila muestra los datos uno debajo del otro y no hay encabezado */
 @media (max-width: 860px) {
-  .cliente-fila {
-    flex-wrap: wrap;
+  .tabla-clientes-encabezado {
+    display: none;
   }
 
+  .cliente-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    padding-block: 12px;
+  }
+
+  .cliente-fila-nombre,
+  .cliente-fila-telefono,
   .cliente-fila-mascotas {
-    justify-content: flex-start;
-    margin-left: 0;
-    width: 100%;
+    grid-column: 1;
+  }
+
+  .cliente-fila-ver {
+    grid-column: 2;
+    grid-row: 1 / span 3;
   }
 }
 

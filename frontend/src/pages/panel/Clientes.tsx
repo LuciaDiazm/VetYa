@@ -1,4 +1,4 @@
-import { Cat, Dog, PawPrint, Plus, Search, UserRound } from 'lucide-react'
+import { Cat, ChevronRight, Dog, PawPrint, Plus, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Cargando } from '../../components/Cargando'
@@ -110,34 +110,40 @@ export function Clientes() {
             </div>
           )}
           {!q && <p className="subtitulo-lista">Últimos clientes cargados</p>}
-          <ul className={`lista-clientes${buscando ? ' recargando' : ''}`} aria-busy={buscando}>
-            {clientes.map((c) => (
-              <li key={c.id}>
-                <Link to={`/panel/clientes/${c.id}`} className="cliente-fila">
-                  <span className="icono-circulo">
-                    <UserRound size={22} aria-hidden="true" />
-                  </span>
-                  <span className="cliente-fila-datos">
-                    <strong>
+          {/* Una sola tarjeta, como una tabla: cliente, teléfono y mascotas; toda la fila abre la ficha */}
+          <div className={`tarjeta tabla-clientes${buscando ? ' recargando' : ''}`}>
+            <div className="tabla-clientes-encabezado" aria-hidden="true">
+              <span>Cliente</span>
+              <span>Teléfono</span>
+              <span>Mascotas</span>
+            </div>
+            <ul className="lista-clientes" aria-busy={buscando}>
+              {clientes.map((c) => (
+                <li key={c.id}>
+                  <Link to={`/panel/clientes/${c.id}`} className="cliente-fila">
+                    <strong className="cliente-fila-nombre">
                       {c.apellido}, {c.nombre}
                     </strong>
-                    <span>{formatearTelefono(c.telefono)}</span>
-                  </span>
-                  <span className="cliente-fila-mascotas">
-                    {c.mascotas.length === 0 ? (
-                      <span className="chip-dato">Sin mascotas</span>
-                    ) : (
-                      c.mascotas.map((m) => (
-                        <span key={m.id} className="chip-dato chip-mascota">
-                          <IconoEspecie especie={m.especie} size={16} /> {m.nombre}
-                        </span>
-                      ))
-                    )}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    <span className="cliente-fila-telefono">{formatearTelefono(c.telefono)}</span>
+                    <span className="cliente-fila-mascotas">
+                      {c.mascotas.length === 0 ? (
+                        <span className="cliente-sin-mascotas">Sin mascotas</span>
+                      ) : (
+                        c.mascotas.map((m) => (
+                          <span key={m.id} className="chip-dato chip-mascota">
+                            <IconoEspecie especie={m.especie} size={16} /> {m.nombre}
+                          </span>
+                        ))
+                      )}
+                    </span>
+                    <span className="cliente-fila-ver">
+                      Ver ficha <ChevronRight size={18} aria-hidden="true" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
           <Paginacion
             pagina={resultado.pagina}
             total={resultado.total}
