@@ -143,7 +143,7 @@ export function Panel() {
               <h2>Veterinarios</h2>
             </div>
             {equipo.length === 0 ? (
-              <p className="hoy-vacio">Todavía no hay veterinarios cargados en Configuración.</p>
+              <p className="hoy-vacio">Todavía no hay veterinarios cargados en Ajustes.</p>
             ) : (
               <ul className="hoy-equipo">
                 {equipo.map((m) => (

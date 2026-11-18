@@ -23,7 +23,7 @@ export function Configuracion() {
   return (
     <>
       <div className="panel-encabezado">
-        <h1>Configuración</h1>
+        <h1>Ajustes</h1>
         <p>Los datos de la clínica, cuándo atiende, qué servicios ofrece y quiénes trabajan.</p>
       </div>
 

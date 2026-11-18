@@ -2138,9 +2138,48 @@ html[data-turno-portada='visible'] .boton-turno {
   --panel-fondo: #f2f4f8;
   --panel-borde: #e2e6ee;
   display: grid;
-  grid-template-columns: 76px 1fr;
+  grid-template-columns: 200px 1fr;
   min-height: 100vh;
   background: var(--panel-fondo);
+}
+
+/* En la compu, el panel se ve más chico y aireado (como con el zoom al 80 %).
+   La altura de pantalla se divide por 0,8 para que la barra azul siga llegando hasta abajo,
+   y los botones se agrandan antes de achicar para seguir midiendo unos 45 px de alto. */
+@media (min-width: 861px) {
+  .panel {
+    zoom: 0.8;
+    min-height: calc(100vh / 0.8);
+  }
+
+  .panel .panel-menu {
+    height: calc(100vh / 0.8);
+  }
+
+  .panel .panel-enlace,
+  .panel .panel-contenido
+    :is(
+      .boton,
+      .boton-fila,
+      .chip,
+      .casilla,
+      .informe-pestana,
+      .enlace-con-icono,
+      .campo-compacto,
+      .hoy-mes-dia,
+      .agenda-dia,
+      .menu-mas-lista button,
+      input:not([type='checkbox'], [type='radio']),
+      select
+    ) {
+    min-height: 56px;
+  }
+
+  /* Los botoncitos redondos (WhatsApp de la fila y flechas del calendario) mantienen su tamaño de antes */
+  .panel .panel-contenido :is(.fila-whatsapp, .hoy-mes-flecha) {
+    min-width: 46px;
+    min-height: 46px;
+  }
 }
 
 /* Barra azul de arriba a abajo, pegada al borde; queda fija mientras se baja la página */
@@ -2154,7 +2193,7 @@ html[data-turno-portada='visible'] .boton-turno {
   align-items: center;
   gap: 0;
   height: 100vh;
-  padding: 14px 0 13px;
+  padding: 14px 12px 13px;
   background: var(--azul);
   color: #ffffff;
 }
@@ -2182,23 +2221,29 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-navegacion {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 32px;
+  gap: 6px;
+  width: 100%;
+  margin-top: 28px;
 }
 
-/* Cada sección es un cuadrado redondeado con su ícono */
+/* Cada sección: el ícono y su nombre escrito al lado, para no tener que adivinar */
 .panel-enlace {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 50px;
-  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
   border: none;
   border-radius: 12px;
   background: none;
   color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
   font: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  text-align: left;
   cursor: pointer;
   transition:
     background-color 0.15s,
@@ -2206,6 +2251,7 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .panel-enlace svg {
+  flex: none;
   width: 24px;
   height: 24px;
 }
@@ -2224,10 +2270,10 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-enlace.active::after {
   content: '';
   position: absolute;
-  left: -13px;
+  left: -12px;
   top: 50%;
   width: 5px;
-  height: 36px;
+  height: 32px;
   border-radius: 0 4px 4px 0;
   background: var(--amarillo);
   transform: translateY(-50%);
@@ -2239,79 +2285,20 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .panel-salir {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 72px;
-  height: auto;
-  min-height: 50px;
   margin-top: auto;
-  padding: 5px 0;
   color: #ffffff;
 }
 
-/* "Salir" va siempre escrito, para que se encuentre sin pasar el mouse */
-.panel-salir-texto {
-  font-size: 0.81rem;
-  font-weight: 600;
-}
-
-/* El nombre de la sección: un cartelito a la derecha del ícono, al pasar el mouse o con el teclado */
 .panel-enlace-nombre {
-  position: absolute;
-  left: calc(100% + 18px);
-  top: 50%;
-  z-index: 30;
-  padding: 6px 11px;
-  border-radius: 10px;
-  background: var(--azul-oscuro);
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 600;
+  min-width: 0;
   white-space: nowrap;
-  box-shadow: 0 8px 20px rgba(9, 22, 48, 0.25);
-  opacity: 0;
-  transform: translate(-6px, -50%);
-  pointer-events: none;
-  transition:
-    opacity 150ms var(--curva-salida),
-    transform 150ms var(--curva-salida);
-}
-
-/* La flechita del cartel, apuntando al ícono */
-.panel-enlace-nombre::before {
-  content: '';
-  position: absolute;
-  left: -5px;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  background: inherit;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.panel-enlace:hover .panel-enlace-nombre,
-.panel-enlace:focus-visible .panel-enlace-nombre {
-  opacity: 1;
-  transform: translate(0, -50%);
-}
-
-/* Con "reducir movimiento" el cartel aparece sin deslizarse */
-@media (prefers-reduced-motion: reduce) {
-  .panel-enlace-nombre,
-  .panel-enlace:hover .panel-enlace-nombre,
-  .panel-enlace:focus-visible .panel-enlace-nombre {
-    transform: translateY(-50%);
-  }
 }
 
 /* El globito de avisos: amarillo, en la esquina del ícono */
 .panel-enlace .globo {
   position: absolute;
-  top: -2px;
-  right: -4px;
+  top: 2px;
+  left: 26px;
   min-width: 24px;
   height: 24px;
   margin: 0;
@@ -2500,7 +2487,7 @@ html[data-turno-portada='visible'] .boton-turno {
 .fila-encabezado,
 .fila-turno {
   display: grid;
-  grid-template-columns: 54px minmax(100px, 1fr) minmax(150px, 1.1fr) 96px 284px;
+  grid-template-columns: 54px minmax(100px, 1fr) minmax(150px, 1.1fr) 96px minmax(150px, 284px);
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
@@ -3328,12 +3315,27 @@ html[data-turno-portada='visible'] .boton-turno {
 
   /* En pantallas táctiles no hay "pasar el mouse": el nombre va escrito debajo del ícono */
   .panel-enlace {
+    flex-direction: column;
+    justify-content: center;
     width: auto;
     min-width: 76px;
     height: auto;
     min-height: 58px;
     padding: 6px 8px;
     gap: 2px;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .panel-enlace-nombre {
+    white-space: normal;
+  }
+
+  .panel-enlace .globo {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    margin: 0;
   }
 
   .panel-enlace svg {
@@ -3345,30 +3347,8 @@ html[data-turno-portada='visible'] .boton-turno {
     display: none;
   }
 
-  .panel-enlace-nombre,
-  .panel-enlace:hover .panel-enlace-nombre,
-  .panel-enlace:focus-visible .panel-enlace-nombre {
-    position: static;
-    padding: 0;
-    background: none;
-    box-shadow: none;
-    color: inherit;
-    font-size: 0.75rem;
-    font-weight: 600;
-    opacity: 1;
-    transform: none;
-  }
-
-  .panel-enlace-nombre::before {
-    display: none;
-  }
-
   .panel-salir {
-    width: auto;
-    min-width: 76px;
-    min-height: 58px;
     margin-top: 0;
-    padding: 6px 8px;
   }
 
   .panel-contenido {

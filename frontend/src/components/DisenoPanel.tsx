@@ -6,8 +6,8 @@ import type { ResumenRecordatorios } from '../types'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from './Logo'
 
-// Estructura del panel interno: barra azul angosta con íconos (el nombre aparece al pasar el mouse
-// o al llegar con el teclado; en el celular va arriba y con el nombre siempre escrito) y el contenido.
+// Estructura del panel interno: barra azul a la izquierda con cada sección (ícono y nombre escrito;
+// en el celular va arriba, con el nombre debajo del ícono) y el contenido.
 export function DisenoPanel() {
   const { usuario, salir } = useAuth()
   const navegar = useNavigate()
@@ -25,12 +25,12 @@ export function DisenoPanel() {
   const secciones: { ruta: string; nombre: string; icono: typeof House; fin?: boolean; globo?: number }[] = [
     { ruta: '/panel', nombre: 'Hoy', icono: House, fin: true },
     { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
-    { ruta: '/panel/clientes', nombre: 'Clientes y mascotas', icono: PawPrint },
+    { ruta: '/panel/clientes', nombre: 'Clientes', icono: PawPrint },
     { ruta: '/panel/recordatorios', nombre: 'Notificaciones', icono: Bell, globo: avisosPendientes },
     { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
-    { ruta: '/panel/informe', nombre: 'Informe de turnos', icono: FileText },
+    { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
     ...(usuario?.rol === 'ADMIN'
-      ? [{ ruta: '/panel/configuracion', nombre: 'Configuración', icono: Settings }]
+      ? [{ ruta: '/panel/configuracion', nombre: 'Ajustes', icono: Settings }]
       : []),
   ]
 
@@ -55,7 +55,7 @@ export function DisenoPanel() {
         </nav>
         <button type="button" className="panel-enlace panel-salir" onClick={cerrarSesion}>
           <LogOut size={24} aria-hidden="true" />
-          <span className="panel-salir-texto">Salir</span>
+          <span className="panel-enlace-nombre">Salir</span>
         </button>
       </aside>
       <main className="panel-contenido">
