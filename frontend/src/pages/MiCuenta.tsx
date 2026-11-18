@@ -273,10 +273,7 @@ Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a pod
       <div className="contenedor mi-cuenta">
         {/* Saludo simple: a la izquierda el nombre, a la derecha "Pedir turno" (el del encabezado se oculta acá) */}
         <section className="bienvenida">
-          <div>
-            <h1>Hola, {usuario?.nombre}</h1>
-            <p>Tus turnos, las vacunas de tus mascotas y sus visitas.</p>
-          </div>
+          <h1>Hola, {usuario?.nombre}</h1>
           {!datos?.suspendidoHasta && (
             <Link to="/turno" className="boton boton-grande boton-brillo">
               <CalendarPlus size={22} aria-hidden="true" /> Pedir turno
