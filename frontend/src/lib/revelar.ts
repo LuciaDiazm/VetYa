@@ -14,7 +14,9 @@ export function revelarAlBajar(elemento: HTMLElement | null) {
         observador.disconnect()
       }
     },
-    { threshold: 0.2 },
+    // Apenas asoma el bloque (un poco por encima del borde de abajo), sin esperar a que se vea una parte:
+    // en el celular los bloques son altos y la primera tarjeta quedaba en blanco.
+    { threshold: 0, rootMargin: '0px 0px -10% 0px' },
   )
   observador.observe(elemento)
   return () => observador.disconnect()

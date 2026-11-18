@@ -1181,20 +1181,12 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .mosaico-tarjeta:hover {
-    transform: translateY(-2px);
-  }
-
   .mosaico-tarjeta:hover::after {
     opacity: 1;
   }
 
   .mosaico-tarjeta:hover .mosaico-enlace svg {
     transform: translateX(4px);
-  }
-
-  .mosaico-tarjeta:hover .mosaico-enlace {
-    background: #dde3f3;
   }
 }
 
@@ -6764,15 +6756,15 @@ form.campo-en-linea {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Botones de la portada: se hunden un poquito al apretarlos */
-  .portada-acciones .boton {
+  /* Botones del inicio: se hunden apenas al apretarlos, para confirmar el toque */
+  .inicio .boton {
     transition:
       background-color 0.15s,
       transform 160ms var(--curva-salida);
   }
 
-  .portada-acciones .boton:active {
-    transform: scale(0.96);
+  .inicio .boton:active {
+    transform: scale(0.97);
   }
 
   /* Servicios, equipo, opiniones y contacto: cada bloque aparece una sola vez, suave, al llegar */
@@ -6781,24 +6773,40 @@ form.campo-en-linea {
   }
 
   .revelar.visible {
-    animation: aparece-suave 500ms var(--curva-salida) backwards;
+    animation: aparece-suave 400ms var(--curva-salida) backwards;
   }
 
   /* Preguntas: se abren suave y la flechita gira */
   .preguntas details::details-content {
     transition:
-      block-size 350ms var(--curva-salida),
-      content-visibility 350ms allow-discrete;
+      block-size 250ms var(--curva-salida),
+      content-visibility 250ms allow-discrete;
   }
 
   .pregunta-flecha {
-    transition: transform 300ms var(--curva-salida);
+    transition: transform 250ms var(--curva-salida);
   }
 
   .preguntas details[open] .pregunta-flecha {
     transform: rotate(180deg);
   }
 
+}
+
+/* Con "menos movimiento": los bloques igual aparecen, pero solo con un fundido, sin subir */
+@media (prefers-reduced-motion: reduce) {
+  .revelar:not(.visible) {
+    opacity: 0;
+  }
+
+  .revelar.visible {
+    animation: aparece-fundido 300ms ease backwards;
+  }
+}
+
+/* Sin el destello gris del navegador al tocar un botón en el celular (ya se hunde al apretarlo) */
+.inicio .boton {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Botón con brillo: un reflejo cruza "Pedir turno" de la portada */
@@ -6828,21 +6836,7 @@ form.campo-en-linea {
 
 }
 
-/* Con mouse: el brillo vuelve a pasar cada vez que se pasa por encima */
-@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  .boton-brillo:hover::after {
-    animation: brillo-cruza-otra-vez 800ms ease-out;
-  }
-}
-
 @keyframes brillo-cruza {
-  to {
-    transform: translateX(320%) skewX(-20deg);
-  }
-}
-
-/* Mismo movimiento con otro nombre, para que se repita al pasar el mouse */
-@keyframes brillo-cruza-otra-vez {
   to {
     transform: translateX(320%) skewX(-20deg);
   }
@@ -6851,7 +6845,13 @@ form.campo-en-linea {
 @keyframes aparece-suave {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
+  }
+}
+
+@keyframes aparece-fundido {
+  from {
+    opacity: 0;
   }
 }
 
