@@ -31,7 +31,7 @@ export function Pie() {
         <div>
           <h2 className="pie-titulo">Contacto</h2>
           <p className="pie-texto">
-            Teléfono: <a href={enlaceTelefono(clinica.telefono)}>{clinica.telefono}</a>
+            <a href={enlaceTelefono(clinica.telefono)}>Llamar a la clínica</a>
           </p>
           {clinica.email && <p className="pie-texto">{clinica.email}</p>}
           <p className="pie-texto">
