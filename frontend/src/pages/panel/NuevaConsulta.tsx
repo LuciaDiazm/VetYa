@@ -111,6 +111,8 @@ export function NuevaConsulta() {
     (d) => !yaAgregados.has(`${d.datos.tipo}-${d.datos.producto.toLowerCase()}`),
   )
   const pesoAnterior = ultimoPeso ? Number(ultimoPeso.pesoKg).toLocaleString('es-AR') : null
+  // La temperatura no se completa sola (se mide en cada visita): solo se muestra la anterior para comparar.
+  const ultimaTemperatura = mascota.consultas.find((c) => c.temperatura)
   const ojoAlergia = alergiasMencionadas(
     mascota.alergias,
     [tratamiento, diagnostico, ...aplicaciones.map((a) => a.producto)].join(' '),
@@ -171,6 +173,12 @@ export function NuevaConsulta() {
             <label className="campo">
               Temperatura (°C)
               <input inputMode="decimal" value={temperatura} onChange={(e) => setTemperatura(e.target.value)} placeholder="Ej.: 38,5" />
+              {ultimaTemperatura?.temperatura && (
+                <span className="ayuda">
+                  La última vez: {Number(ultimaTemperatura.temperatura).toLocaleString('es-AR')} °C (
+                  {fechaCortaDe(ultimaTemperatura.fecha)}).
+                </span>
+              )}
             </label>
           </div>
           <label className="campo">
