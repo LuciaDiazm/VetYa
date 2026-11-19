@@ -197,7 +197,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
                 : `${diaAmigable(confirmado.dia)}, ${diaLargo(confirmado.dia)}`}{' '}
               a las <strong>{confirmado.hora}</strong>
             </p>
-            <p>Te vamos a recordar por WhatsApp el día anterior. Si no podés venir, avisanos con tiempo.</p>
+            <p>El día anterior la clínica te lo recuerda por WhatsApp. Si no podés venir, avisanos con tiempo.</p>
             {sitio && <p className="turno-listo-direccion">Te esperamos en {sitio.clinica.direccion}.</p>}
             <div className="turno-listo-botones">
               <Link to="/mi-cuenta" className="boton boton-grande">
@@ -628,7 +628,7 @@ function FormularioDatos({
           {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
         </button>
       </div>
-      <p className="ayuda">El día anterior te llega un recordatorio al WhatsApp de tu cuenta.</p>
+      <p className="ayuda">El día anterior la clínica te escribe al WhatsApp de tu cuenta para recordártelo.</p>
     </form>
   )
 }

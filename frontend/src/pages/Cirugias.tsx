@@ -9,7 +9,7 @@ import { Cargando } from '../components/Cargando'
 const PASOS = [
   ['Llamanos', 'Nos contás qué necesita tu mascota y acordamos el día.'],
   ['Preparala', 'Seguí las recomendaciones. Podés descargarlas para tenerlas a mano.'],
-  ['Te lo recordamos', 'El día anterior te llega un WhatsApp con lo más importante.'],
+  ['Te lo recordamos', 'El día anterior la clínica te escribe por WhatsApp con lo más importante.'],
 ]
 
 const TEXTOS = {

@@ -1,4 +1,4 @@
-import { Armchair, Ban, Check, ChevronDown, DoorOpen, MessageCircle, StickyNote, Stethoscope, Undo2, UserX } from 'lucide-react'
+import { Armchair, Ban, Check, ChevronDown, DoorOpen, MessageCircle, Siren, StickyNote, Stethoscope, Undo2, UserX } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -60,6 +60,25 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
     }
   }
 
+  async function marcarEnConsulta(enConsulta: boolean) {
+    setCambiando(true)
+    setError(null)
+    try {
+      alCambiar(await apiPatch<Turno>(`/turnos/${turno.id}/en-consulta`, { enConsulta }))
+    } catch {
+      setError('No se pudo guardar el cambio. Probá de nuevo.')
+    } finally {
+      setCambiando(false)
+    }
+  }
+
+  // Pizarra del día: sala de espera → en consulta. "Atender" lo marca solo; esto es para corregir.
+  const opcionConsulta = turno.enConsultaEn
+    ? [{ texto: 'Volvió a la sala', alElegir: () => marcarEnConsulta(false) }]
+    : turno.llegoEn
+      ? [{ texto: 'Pasó a consulta', alElegir: () => marcarEnConsulta(true) }]
+      : []
+
   const opcionMover = mueve ? [{ texto: 'Cambiar día u hora', alElegir: () => setMoviendo(true) }] : []
   const opcionLlegada = turno.llegoEn
     ? { texto: 'Todavía no llegó', alElegir: () => marcarLlegada(false) }
@@ -70,7 +89,7 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
 
   return (
     <li
-      className={`fila-turno fila-${turno.estado}${sigue ? ' fila-sigue' : ''}`}
+      className={`fila-turno fila-${turno.estado}${sigue ? ' fila-sigue' : ''}${turno.urgente ? ' fila-con-urgencia' : ''}`}
       aria-busy={cambiando || undefined}
     >
       <div className="fila-hora">
@@ -81,6 +100,11 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
 
       <div className="fila-mascota">
         <Link to={`/panel/mascotas/${turno.mascota.id}`}>{turno.mascota.nombre}</Link>
+        {turno.urgente && (
+          <span className="fila-urgencia">
+            <Siren size={15} aria-hidden="true" /> Urgencia
+          </span>
+        )}
         <span>{turno.servicio.nombre}</span>
         {turno.observaciones && (
           <span className="fila-nota">
@@ -124,7 +148,11 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
         ) : (
           <>
             <strong>{turno.estado === 'PENDIENTE' ? 'Sin confirmar' : 'Confirmado'}</strong>
-            {turno.llegoEn ? (
+            {turno.enConsultaEn ? (
+              <span className="fila-en-consulta">
+                <Stethoscope size={16} aria-hidden="true" /> En consulta {horaDe(turno.enConsultaEn)}
+              </span>
+            ) : turno.llegoEn ? (
               <span className="fila-llego">
                 <Armchair size={16} aria-hidden="true" /> En sala {horaDe(turno.llegoEn)}
               </span>
@@ -160,7 +188,14 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
 
         {turno.estado === 'CONFIRMADO' && atiende && (
           <>
-            <Link to={rutaConsulta} className="boton-fila">
+            <Link
+              to={rutaConsulta}
+              className="boton-fila"
+              // Queda "En consulta" en la pizarra de Hoy; si falla, igual se puede atender.
+              onClick={() => {
+                if (!turno.enConsultaEn) apiPatch(`/turnos/${turno.id}/en-consulta`, { enConsulta: true }).catch(() => {})
+              }}
+            >
               <Stethoscope size={18} aria-hidden="true" /> Atender
             </Link>
             {!turno.llegoEn && (
@@ -170,7 +205,8 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
             )}
             <MenuMas
               opciones={[
-                opcionLlegada,
+                ...(turno.enConsultaEn ? [] : [opcionLlegada]),
+                ...opcionConsulta,
                 ...opcionMover,
                 { texto: 'Atendido sin consulta', alElegir: () => cambiar('ATENDIDO') },
                 { texto: 'Cancelar turno', peligro: true, alElegir: () => cambiar('CANCELADO') },
@@ -195,7 +231,8 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
             )}
             <MenuMas
               opciones={[
-                ...(turno.llegoEn ? [opcionLlegada] : []),
+                ...(turno.llegoEn && !turno.enConsultaEn ? [opcionLlegada] : []),
+                ...opcionConsulta,
                 ...opcionMover,
                 { texto: 'Atendido', alElegir: () => cambiar('ATENDIDO') },
                 { texto: 'Cancelar turno', peligro: true, alElegir: () => cambiar('CANCELADO') },

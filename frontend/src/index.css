@@ -8326,3 +8326,60 @@ form.campo-en-linea {
   margin: 4px 0 8px;
   text-align: left;
 }
+
+/* ---------- Urgencias y pizarra del día (Hoy) ---------- */
+.fila-urgencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--rojo) !important;
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+
+.fila-turno.fila-con-urgencia.fila-PENDIENTE,
+.fila-turno.fila-con-urgencia.fila-CONFIRMADO {
+  box-shadow: inset 4px 0 0 var(--rojo);
+}
+
+.fila-estado .fila-en-consulta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--azul);
+  font-size: 0.83rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hoy-pizarra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0 14px 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--fondo);
+  color: var(--gris);
+  font-size: 0.92rem;
+}
+
+.hoy-pizarra span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hoy-pizarra strong {
+  color: var(--tinta);
+  font-size: 1.05rem;
+}
+
+.casilla.casilla-urgencia {
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+.casilla.casilla-urgencia svg {
+  flex-shrink: 0;
+}

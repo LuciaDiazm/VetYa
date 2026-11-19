@@ -97,15 +97,15 @@ const PASOS: { titulo: string; texto: string; foto: string }[] = [
     foto: '/fotos/paso-dia.webp',
   },
   {
-    titulo: 'Te avisamos el día anterior',
-    texto: 'Te escribimos por WhatsApp para recordarte el turno.',
+    titulo: 'Te recordamos el turno',
+    texto: 'El día anterior, la clínica te escribe por WhatsApp.',
     foto: '/fotos/paso-aviso.webp',
   },
 ]
 
 // La frase de las vacunas: cada palabra se enciende a medida que la sección sube (ver .palabras-encienden).
 const FRASE_VACUNAS =
-  'Anotamos cada vacuna con la fecha de la próxima. Cuando se acerca, te escribimos por WhatsApp. En tu cuenta ves todas sus vacunas y bajás el carnet en PDF.'
+  'Anotamos cada vacuna con la fecha de la próxima. Cuando se acerca, la clínica te escribe por WhatsApp. En tu cuenta ves todas sus vacunas y bajás el carnet en PDF.'
 
 // Para no repetir "Pedir turno": mientras se ve el de la portada o el de "Dónde estamos",
 // el del encabezado se oculta (ver index.css). Se anotan los botones que están a la vista.

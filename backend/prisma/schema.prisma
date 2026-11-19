@@ -281,6 +281,8 @@ model Turno {
   canceladoEn           DateTime?     @map("cancelado_en")
   canceladoPor          CanceladoPor? @map("cancelado_por")
   llegoEn               DateTime?     @map("llego_en") // Recepción marca "Llegó": queda en la sala de espera
+  enConsultaEn          DateTime?     @map("en_consulta_en") // la veterinaria lo hizo pasar (pizarra del día)
+  urgente               Boolean       @default(false) // urgencia cargada por el personal: va primero en Hoy
   creadoEn              DateTime      @default(now()) @map("creado_en")
 
   clinica       Clinica             @relation(fields: [clinicaId], references: [id])

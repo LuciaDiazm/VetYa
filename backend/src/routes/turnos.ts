@@ -266,6 +266,8 @@ const esquemaTurnoPersonal = z.object({
   veterinarioId: z.number().int().nullable().optional(),
   observaciones: z.string().trim().max(500).optional(),
   sobreturno: z.boolean().optional(),
+  // Urgencia: se agrega aunque no haya lugar (ni sea día de atención) y va primero en Hoy.
+  urgente: z.boolean().optional(),
 });
 
 turnosRouter.post("/", requierePermiso("turnos.dar"), async (req, res) => {
@@ -289,10 +291,12 @@ turnosRouter.post("/", requierePermiso("turnos.dar"), async (req, res) => {
     turno = await prisma.$transaction(async (tx) => {
       // Igual que en la web: una reserva por vez, así dos personas no se quedan con el mismo horario.
       await bloquearAgenda(tx, clinicaId);
-      const problema = await validarHorario(clinicaId, servicio.id, datos.fecha, datos.hora, {
-        sobreturno: datos.sobreturno,
-      });
-      if (problema) throw new ProblemaReserva(problema);
+      if (!datos.urgente) {
+        const problema = await validarHorario(clinicaId, servicio.id, datos.fecha, datos.hora, {
+          sobreturno: datos.sobreturno,
+        });
+        if (problema) throw new ProblemaReserva(problema);
+      }
 
       return tx.turno.create({
         data: {
@@ -306,6 +310,7 @@ turnosRouter.post("/", requierePermiso("turnos.dar"), async (req, res) => {
           estado: "CONFIRMADO",
           origen: datos.origen,
           observaciones: datos.observaciones || null,
+          urgente: datos.urgente ?? false,
         },
         include: incluirDetalle,
       });
@@ -389,9 +394,39 @@ turnosRouter.patch("/:id/llego", requierePermiso("turnos.estado"), async (req, r
     where: { id },
     data: {
       llegoEn: resultado.data.llego ? (turno.llegoEn ?? new Date()) : null,
+      ...(resultado.data.llego ? {} : { enConsultaEn: null }),
       // Si estaba marcado como ausente por error, al llegar vuelve a confirmado.
       ...(resultado.data.llego && turno.estado === "AUSENTE" ? { estado: "CONFIRMADO" as const } : {}),
     },
+    include: incluirDetalle,
+  });
+  res.json(actualizado);
+});
+
+// "En consulta": la veterinaria lo hizo pasar (se marca solo al tocar "Atender"). Con la sala de espera
+// arman la pizarra del día en Hoy. Se puede deshacer ("Volvió a la sala").
+turnosRouter.patch("/:id/en-consulta", requierePermiso("turnos.estado"), async (req, res) => {
+  const resultado = z.object({ enConsulta: z.boolean() }).safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: "Dato inválido" });
+    return;
+  }
+  const id = Number(req.params.id);
+  const turno = await prisma.turno.findFirst({ where: { id, clinicaId: req.usuario!.clinicaId } });
+  if (!turno) {
+    res.status(404).json({ error: "Turno no encontrado" });
+    return;
+  }
+  if (turno.estado !== "CONFIRMADO" && turno.estado !== "PENDIENTE") {
+    res.status(409).json({ error: "Ese turno ya no está por atender" });
+    return;
+  }
+  const ahora = new Date();
+  const actualizado = await prisma.turno.update({
+    where: { id },
+    data: resultado.data.enConsulta
+      ? { enConsultaEn: turno.enConsultaEn ?? ahora, llegoEn: turno.llegoEn ?? ahora, estado: "CONFIRMADO" }
+      : { enConsultaEn: null },
     include: incluirDetalle,
   });
   res.json(actualizado);
@@ -437,6 +472,7 @@ turnosRouter.patch("/:id/mover", requierePermiso("turnos.dar"), async (req, res)
           // Si ya se le había mandado el recordatorio, se le vuelve a mandar con la fecha nueva.
           recordatorioEnviadoEn: null,
           llegoEn: null,
+          enConsultaEn: null,
         },
         include: incluirDetalle,
       });

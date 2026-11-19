@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter } from 'lucide-react'
+import { Armchair, Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter, Stethoscope } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -52,7 +52,13 @@ export function Panel() {
   const porAtender = activos.filter((t) => t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADO')
   // "Ver solo los que faltan": esconde los atendidos y los que no vinieron
   const sePuedeFiltrar = porAtender.length > 0 && porAtender.length < activos.length
-  const lista = soloFaltan && sePuedeFiltrar ? porAtender : activos
+  // Las urgencias que faltan atender van primero; el resto sigue por hora.
+  const lista = [...(soloFaltan && sePuedeFiltrar ? porAtender : activos)].sort(
+    (a, b) => Number(urgenciaPendiente(b)) - Number(urgenciaPendiente(a)),
+  )
+  // Pizarra del día: quién espera en la sala y quién está en consulta.
+  const enSala = porAtender.filter((t) => t.llegoEn && !t.enConsultaEn).length
+  const enConsulta = porAtender.filter((t) => t.enConsultaEn).length
   const avisos = resumen ? resumen.turnosManana + resumen.dosis + resumen.recuperar : 0
   const equipo = sitio?.equipo ?? []
 
@@ -119,6 +125,16 @@ export function Panel() {
               </button>
             )}
           </div>
+          {(enSala > 0 || enConsulta > 0) && (
+            <p className="hoy-pizarra">
+              <span>
+                <Armchair size={18} aria-hidden="true" /> En sala <strong>{enSala}</strong>
+              </span>
+              <span>
+                <Stethoscope size={18} aria-hidden="true" /> En consulta <strong>{enConsulta}</strong>
+              </span>
+            </p>
+          )}
           {turnos === null ? (
             <Cargando />
           ) : activos.length === 0 ? (
@@ -331,4 +347,8 @@ function CalendarioMes({ hoy }: { hoy: string }) {
       </ol>
     </section>
   )
+}
+
+function urgenciaPendiente(t: Turno) {
+  return Boolean(t.urgente) && (t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADO')
 }

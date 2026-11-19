@@ -265,6 +265,8 @@ export interface Turno {
   observaciones: string | null
   canceladoPor?: 'DUENIO' | 'CLINICA' | null
   llegoEn?: string | null // recepción marcó "Llegó": está en la sala de espera
+  enConsultaEn?: string | null // la veterinaria lo hizo pasar
+  urgente?: boolean // urgencia cargada por el personal: va primero en Hoy
   mascota: Mascota & { cliente: { id: number; nombre: string; apellido: string; telefono: string } }
   servicio: { id: number; nombre: string; duracionMin: number; categoria: CategoriaServicio }
   veterinario: { id: number; nombre: string; apellido: string } | null

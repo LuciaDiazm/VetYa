@@ -7,7 +7,7 @@ import { useAuth, type DatosRegistro } from '../context/AuthContext'
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
 
 // Lo que gana el dueño al crear la cuenta (tres renglones cortos, arriba del formulario)
-const VENTAJAS = ['Pedís turnos sin llamar', 'Ves las vacunas y bajás el carnet', 'Te recordamos cada turno por WhatsApp']
+const VENTAJAS = ['Pedís turnos sin llamar', 'Ves las vacunas y bajás el carnet', 'La clínica te recuerda cada turno por WhatsApp']
 
 // Registro de dueños de mascotas. Hace falta para pedir turno por la web.
 export function Registro() {

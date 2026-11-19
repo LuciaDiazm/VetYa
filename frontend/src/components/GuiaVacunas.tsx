@@ -17,7 +17,7 @@ export function GuiaVacunas({ planes, especies }: { planes: PlanSanitario[]; esp
       </summary>
       <p className="guia-vacunas-aviso">
         Es una guía general para cachorros y gatitos. Las fechas exactas de tu mascota las indica el veterinario en la
-        consulta, y te avisamos por WhatsApp antes de cada una.
+        consulta, y la clínica te escribe por WhatsApp antes de cada una.
       </p>
       <div className="grilla-planes">
         {visibles.map((plan) => (

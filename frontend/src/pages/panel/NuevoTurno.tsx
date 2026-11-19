@@ -1,9 +1,10 @@
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Siren } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { apiGet, apiPost } from '../../lib/api'
 import { diaAmigable, diaLargo, hoyArgentina, sumarDias } from '../../lib/fechas'
+import { useHoraActual } from '../../lib/horaActual'
 import { formatearTelefono } from '../../lib/mascotas'
 import type { Cliente, FichaMascota, Mascota, Servicio, Turno } from '../../types'
 import { IconoEspecie } from './Clientes'
@@ -24,6 +25,9 @@ export function NuevoTurno() {
   // Si viene de un rato libre de la agenda, la hora ya queda elegida (si está disponible para el servicio).
   const [hora, setHora] = useState<string | null>(parametros.get('hora'))
   const [sobreturno, setSobreturno] = useState(false)
+  // Urgencia: hoy, ahora, aunque no haya lugar. Aparece primero en Hoy.
+  const [urgente, setUrgente] = useState(false)
+  const ahora = useHoraActual()
   const [origen, setOrigen] = useState<'TELEFONO' | 'MOSTRADOR'>('TELEFONO')
   const [observaciones, setObservaciones] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -68,8 +72,10 @@ export function NuevoTurno() {
         hora,
         origen,
         observaciones: observaciones || undefined,
-        sobreturno,
+        sobreturno: sobreturno || urgente,
+        urgente,
       })
+      if (urgente) return navegar('/panel', { replace: true })
       navegar(fecha === hoyArgentina() ? '/panel/agenda' : `/panel/agenda?dia=${fecha}`, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar el turno')
@@ -135,6 +141,29 @@ export function NuevoTurno() {
         {mascota && servicio && (
           <section className="tarjeta formulario">
             <h2>Día y horario</h2>
+            <label className="casilla casilla-urgencia">
+              <input
+                type="checkbox"
+                checked={urgente}
+                onChange={(e) => {
+                  setUrgente(e.target.checked)
+                  setSobreturno(false)
+                  if (e.target.checked) {
+                    setFecha(hoyArgentina())
+                    setHora(ahora)
+                  } else {
+                    setHora(null)
+                  }
+                }}
+              />
+              <Siren size={18} aria-hidden="true" /> Es una urgencia: viene ahora
+            </label>
+            {urgente ? (
+              <p className="ayuda">
+                Se agrega hoy a las {hora}, aunque no haya lugar, y aparece primero en Hoy con la marca Urgencia.
+              </p>
+            ) : (
+            <>
             <label className="campo campo-fecha">
               Día
               <input
@@ -206,6 +235,8 @@ export function NuevoTurno() {
                 <input type="time" step={300} onChange={(e) => setHora(e.target.value || null)} required />
               </label>
             )}
+            </>
+            )}
           </section>
         )}
 
@@ -252,7 +283,11 @@ export function NuevoTurno() {
         {mascota && servicio && hora && (
           <div className="formulario-botones">
             <button type="submit" className="boton boton-grande" disabled={guardando}>
-              {guardando ? 'Guardando…' : `Dar turno a ${mascota.nombre} a las ${hora}`}
+              {guardando
+                ? 'Guardando…'
+                : urgente
+                  ? `Dar turno de urgencia a ${mascota.nombre}`
+                  : `Dar turno a ${mascota.nombre} a las ${hora}`}
             </button>
           </div>
         )}

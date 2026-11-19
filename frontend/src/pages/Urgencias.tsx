@@ -27,6 +27,9 @@ const NO_HACER = [
   'No le des agua ni comida si está inconsciente.',
 ]
 
+// Empieza con URGENCIA para que se vea entre los demás chats, y deja lugar para lo que la clínica necesita saber.
+const MENSAJE_URGENCIA = 'URGENCIA. Hola, mi mascota necesita atención urgente.\n' + 'Nombre y especie: \n' + 'Qué le pasa: \n' + 'Estamos yendo / Estamos en casa: '
+
 export function Urgencias() {
   const { datos } = useSitio()
   const clinica = datos?.clinica
@@ -45,7 +48,7 @@ export function Urgencias() {
                 Llamar ahora
               </a>
               <a
-                href={enlaceWhatsapp(telefono, 'Hola, tengo una urgencia con mi mascota.')}
+                href={enlaceWhatsapp(telefono, MENSAJE_URGENCIA)}
                 target="_blank"
                 rel="noreferrer"
                 className="boton boton-whatsapp"
