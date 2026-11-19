@@ -2075,88 +2075,6 @@ html[data-turno-portada='visible'] .boton-turno {
   text-align: center;
 }
 
-/* ---------- Crear cuenta ---------- */
-
-.registro {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: calc(100dvh - 81px);
-  background: #ffffff;
-}
-
-.registro-ventajas {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 32px;
-  overflow: hidden;
-  padding: 64px clamp(24px, 5vw, 72px);
-  background: var(--azul);
-  color: #ffffff;
-}
-
-/* Un círculo apenas más claro arriba a la derecha, para que el azul no quede plano */
-.registro-ventajas::before {
-  content: '';
-  position: absolute;
-  top: -140px;
-  right: -140px;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  pointer-events: none;
-}
-
-.registro-lema {
-  max-width: 14ch;
-  margin: 0;
-  font-family: var(--fuente-titulos);
-  font-size: clamp(2rem, 3.4vw, 2.8rem);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
-
-.registro-ventajas ul {
-  display: grid;
-  gap: 24px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.registro-ventajas li {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  font-size: 1.05rem;
-  line-height: 1.4;
-}
-
-.registro-ventajas li span:last-child {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.registro-ventajas li strong {
-  display: block;
-  color: #ffffff;
-  font-size: 1.15rem;
-}
-
-.registro-tilde {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--amarillo);
-  color: var(--azul);
-}
-
 /* Ingresar: la tarjeta con el formulario al centro, sobre el crema con una mancha amarilla y otra azul */
 .ingreso {
   position: relative;
@@ -2207,6 +2125,45 @@ html[data-turno-portada='visible'] .boton-turno {
   box-shadow: 0 24px 60px -24px rgba(28, 45, 99, 0.3);
 }
 
+/* Crear cuenta: la tarjeta un poco más ancha (nombre y apellido van uno al lado del otro) */
+.ingreso-amplio .ingreso-formulario {
+  max-width: 520px;
+}
+
+/* Lo que se gana con la cuenta, en tres renglones cortos */
+.acceso-ventajas {
+  display: grid;
+  gap: 6px;
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--amarillo-suave);
+  list-style: none;
+  font-size: 0.98rem;
+}
+
+.acceso-ventajas li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.acceso-ventajas svg {
+  flex-shrink: 0;
+  color: var(--azul);
+}
+
+/* El gato se asoma por detrás del borde izquierdo de la tarjeta */
+.ingreso-gato {
+  position: absolute;
+  z-index: 0;
+  top: calc(50% - 260px);
+  left: calc(50% - 260px - 130px);
+  width: 180px;
+  height: auto;
+  pointer-events: none;
+}
+
 /* El cachorro se asoma por detrás del borde derecho de la tarjeta */
 .ingreso-perro {
   position: absolute;
@@ -2234,6 +2191,13 @@ html[data-turno-portada='visible'] .boton-turno {
     right: -6px;
     left: auto;
     width: 116px;
+    transform: scaleX(-1);
+  }
+
+  .ingreso-gato {
+    top: 4px;
+    left: -6px;
+    width: 96px;
     transform: scaleX(-1);
   }
 }
@@ -3368,8 +3332,7 @@ html[data-turno-portada='visible'] .boton-turno {
   .preguntas-grilla,
   .pasos,
   .urgencias-cuerpo,
-  .pie-columnas,
-  .registro {
+  .pie-columnas {
     grid-template-columns: 1fr;
   }
 
@@ -3388,21 +3351,6 @@ html[data-turno-portada='visible'] .boton-turno {
 
   .mapa {
     min-height: 320px;
-  }
-
-  /* En el celular las ventajas van arriba, más compactas */
-  .registro-ventajas {
-    gap: 20px;
-    padding: 28px 20px;
-  }
-
-  .registro-ventajas li {
-    font-size: 0.98rem;
-  }
-
-  .registro-tilde {
-    width: 34px;
-    height: 34px;
   }
 
   .registro-formulario h1 {

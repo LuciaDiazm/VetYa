@@ -1,17 +1,13 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
 import { CampoClave } from '../components/CampoClave'
-import { PanelVentajas } from '../components/PanelVentajas'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
 const VACIO: DatosRegistro = { nombre: '', apellido: '', email: '', telefono: '', password: '' }
 
-// Lo que gana el dueño al crear la cuenta (se muestra en la mitad azul)
-const VENTAJAS = [
-  { titulo: 'Pedí turnos sin llamar', detalle: 'Elegís el día y la hora, y queda confirmado.' },
-  { titulo: 'Mirá las vacunas de tus mascotas', detalle: 'Y descargá el carnet cuando lo necesites.' },
-  { titulo: 'Te recordamos cada turno', detalle: 'Por WhatsApp, el día anterior.' },
-]
+// Lo que gana el dueño al crear la cuenta (tres renglones cortos, arriba del formulario)
+const VENTAJAS = ['Pedís turnos sin llamar', 'Ves las vacunas y bajás el carnet', 'Te recordamos cada turno por WhatsApp']
 
 // Registro de dueños de mascotas. Hace falta para pedir turno por la web.
 export function Registro() {
@@ -43,13 +39,20 @@ export function Registro() {
   }
 
   return (
-    // Mitad azul con lo que se gana al tener cuenta; mitad blanca con el formulario.
-    <main className="registro">
-      <PanelVentajas lema="Tu mascota, a un toque de la clínica" ventajas={VENTAJAS} />
-
-      <div className="acceso-formulario registro-formulario">
+    // Igual que Ingresar: el formulario en una tarjeta blanca sobre el crema,
+    // con un gato que se asoma por detrás (del otro lado que el cachorro de Ingresar).
+    <main className="ingreso ingreso-amplio">
+      <img src="/fotos/gato-asoma.webp" alt="" className="ingreso-gato" />
+      <div className="acceso-formulario registro-formulario ingreso-formulario">
         <h1>Crear cuenta</h1>
         <p className="acceso-bajada">Se crea una sola vez y te sirve para todas tus mascotas.</p>
+        <ul className="acceso-ventajas" aria-label="Con tu cuenta">
+          {VENTAJAS.map((v) => (
+            <li key={v}>
+              <Check size={18} aria-hidden="true" /> {v}
+            </li>
+          ))}
+        </ul>
         <form onSubmit={enviar} className="formulario">
           <div className="fila-campos">
             <Campo etiqueta="Nombre">
