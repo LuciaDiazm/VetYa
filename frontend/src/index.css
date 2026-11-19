@@ -7369,3 +7369,74 @@ form.campo-en-linea {
 .ficha-ver {
   margin: 0 0 4px;
 }
+
+/* Panel: botones más chicos y con colores suaves (fondo claro y letra oscura del mismo color).
+   Siguen midiendo unos 44 px de alto para tocarlos bien; lo que baja es la letra, el relleno y el color.
+   El azul lleno queda para la acción principal (Guardar, Atender); urgencias sigue en rojo. */
+.panel .panel-contenido .boton {
+  gap: 7px;
+  padding: 6px 16px;
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+.panel .panel-contenido .boton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.panel .panel-contenido .boton.boton-secundario {
+  border: 1px solid #f0d27e;
+  background: var(--amarillo-suave);
+  color: var(--azul-oscuro);
+}
+
+.panel .panel-contenido .boton.boton-whatsapp {
+  border: 1px solid #b9dcc6;
+  background: #e8f4ec;
+  color: #1f6b3c;
+}
+
+.panel .panel-contenido .boton.boton-contorno {
+  border: 1px solid #c9d1e3;
+  background: var(--superficie);
+  color: var(--azul);
+  box-shadow: none;
+}
+
+.panel .panel-contenido .boton-fila-whatsapp {
+  border-color: #b9dcc6;
+  background: #e8f4ec;
+  color: #1f6b3c;
+}
+
+.panel .panel-contenido .chip {
+  padding: 6px 14px;
+  border-width: 1px;
+  font-size: 0.9rem;
+}
+
+.panel .panel-contenido .chip-activo {
+  border-color: #9fb0d6;
+  background: var(--azul-suave);
+  color: var(--azul);
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .panel .panel-contenido .boton.boton-secundario:hover {
+    border-color: #e4bb4a;
+    background: #fbe7ad;
+  }
+
+  .panel .panel-contenido .boton.boton-whatsapp:hover,
+  .panel .panel-contenido .boton-fila-whatsapp:hover {
+    border-color: #7fbf98;
+    background: #d6ecdf;
+  }
+
+  .panel .panel-contenido .boton.boton-contorno:hover {
+    border-color: var(--azul);
+    background: var(--azul-suave);
+  }
+}
