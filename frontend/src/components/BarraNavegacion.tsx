@@ -132,11 +132,12 @@ export function BarraNavegacion() {
               {s.nombre}
             </Link>
           ))}
-          <Link to="/turno" className="barra-enlace" onClick={cerrarMenu}>
-            Pedir turno
-          </Link>
           <Link to="/urgencias" className="barra-enlace" onClick={cerrarMenu}>
             Urgencias
+          </Link>
+          <Link to="/turno" className="boton menu-movil-turno" onClick={cerrarMenu}>
+            <CalendarCheck size={20} aria-hidden="true" />
+            Pedir turno
           </Link>
           {cuentaMovil}
         </nav>
