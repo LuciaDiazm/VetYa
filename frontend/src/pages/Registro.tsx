@@ -1,6 +1,6 @@
-import { KeyRound, Mail, Smartphone, UserRound } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { CampoClave } from '../components/CampoClave'
 import { PanelVentajas } from '../components/PanelVentajas'
 import { useAuth, type DatosRegistro } from '../context/AuthContext'
 
@@ -49,9 +49,10 @@ export function Registro() {
 
       <div className="acceso-formulario registro-formulario">
         <h1>Crear cuenta</h1>
+        <p className="acceso-bajada">Se crea una sola vez y te sirve para todas tus mascotas.</p>
         <form onSubmit={enviar} className="formulario">
           <div className="fila-campos">
-            <Campo etiqueta="Nombre" icono={<UserRound size={22} aria-hidden="true" />}>
+            <Campo etiqueta="Nombre">
               <input
                 value={datos.nombre}
                 onChange={(e) => cambiar('nombre', e.target.value)}
@@ -59,7 +60,7 @@ export function Registro() {
                 autoComplete="given-name"
               />
             </Campo>
-            <Campo etiqueta="Apellido" icono={<UserRound size={22} aria-hidden="true" />}>
+            <Campo etiqueta="Apellido">
               <input
                 value={datos.apellido}
                 onChange={(e) => cambiar('apellido', e.target.value)}
@@ -68,7 +69,7 @@ export function Registro() {
               />
             </Campo>
           </div>
-          <Campo etiqueta="Email" icono={<Mail size={22} aria-hidden="true" />}>
+          <Campo etiqueta="Email">
             <input
               type="email"
               value={datos.email}
@@ -79,7 +80,6 @@ export function Registro() {
           </Campo>
           <Campo
             etiqueta="Teléfono con WhatsApp"
-            icono={<Smartphone size={22} aria-hidden="true" />}
             ayuda="Con código de área. Si ya te atendiste en la clínica, usá ese mismo teléfono y vas a ver a tus mascotas."
           >
             <input
@@ -91,16 +91,12 @@ export function Registro() {
               autoComplete="tel"
             />
           </Campo>
-          <Campo etiqueta="Contraseña" icono={<KeyRound size={22} aria-hidden="true" />} ayuda="Mínimo 8 caracteres.">
-            <input
-              type="password"
-              value={datos.password}
-              onChange={(e) => cambiar('password', e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </Campo>
+          <CampoClave
+            nueva
+            valor={datos.password}
+            onCambiar={(v) => cambiar('password', v)}
+            ayuda="Mínimo 8 caracteres."
+          />
           {error && (
             <p className="mensaje-error" role="alert">
               {error}
@@ -121,15 +117,12 @@ export function Registro() {
   )
 }
 
-// Campo redondeado con el ícono adentro, a la derecha (igual que en Ingresar)
-function Campo({ etiqueta, icono, ayuda, children }: { etiqueta: string; icono: ReactNode; ayuda?: string; children: ReactNode }) {
+// Campo con su nombre arriba y, si hace falta, una ayuda corta debajo (igual que en Ingresar)
+function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string; children: ReactNode }) {
   return (
-    <label className="campo campo-icono">
+    <label className="campo">
       {etiqueta}
-      <span className="campo-con-icono">
-        {children}
-        {icono}
-      </span>
+      {children}
       {ayuda && <span className="ayuda">{ayuda}</span>}
     </label>
   )

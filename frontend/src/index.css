@@ -1995,57 +1995,83 @@ html[data-turno-portada='visible'] .boton-turno {
   margin-top: 8px;
 }
 
-/* ---------- Ingresar y Crear cuenta: campos grises y redondeados, con el ícono adentro a la derecha ---------- */
+/* ---------- Ingresar y Crear cuenta: campos blancos con borde fino, sin dibujitos ---------- */
 
 .registro-formulario .campo {
   color: var(--gris);
   font-size: 0.95rem;
 }
 
-.campo-con-icono {
+.registro-formulario .campo input {
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 1px solid #d9d2c5;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 1.05rem;
+}
+
+/* Contraseña: el botón "Mostrar" va adentro del campo, a la derecha */
+.campo-con-boton {
   position: relative;
   display: block;
 }
 
-.registro-formulario .campo input {
-  min-height: 58px;
-  padding: 12px 58px 12px 24px;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background: #f1f3f6;
+.registro-formulario .campo-con-boton input {
+  padding-right: 104px;
+}
+
+.ver-clave {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ver-clave:hover {
+    background: var(--azul-suave);
+  }
+}
+
+/* Una línea corta debajo del título: qué hay que poner */
+.acceso-bajada {
+  margin: 6px 0 0;
+  color: var(--gris);
   font-size: 1.05rem;
 }
 
-.registro-formulario .campo input:focus {
-  background: #ffffff;
-}
-
-.campo-con-icono svg {
-  position: absolute;
-  top: 50%;
-  right: 22px;
-  color: #8a96ad;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
+/* "¿Te olvidaste la contraseña?" a la derecha, debajo del campo */
 .registro-formulario .boton-texto {
-  align-self: flex-start;
-  margin: -4px 0 0 12px;
+  align-self: flex-end;
+  margin: -6px 0 0;
   font-size: 0.95rem;
 }
 
-/* Botón centrado, con una sombra suave debajo */
+/* Botón de todo el ancho, con las mismas esquinas que los campos */
 .acceso-formulario .boton.ingreso-boton {
-  align-self: center;
-  width: auto;
-  min-width: 230px;
-  margin-top: 10px;
-  box-shadow: 0 14px 28px rgba(28, 45, 99, 0.32);
+  align-self: stretch;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 6px;
+  border-radius: 12px;
 }
 
+/* "¿Todavía no tenés cuenta?" separado por una línea suave */
 .ingreso-registro {
   margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid #eee6d9;
   text-align: center;
 }
 
@@ -2193,7 +2219,7 @@ html[data-turno-portada='visible'] .boton-turno {
   margin: 24px 0;
 }
 
-/* Ingresar y crear cuenta: el campo donde se escribe se ilumina (borde azul y un halo amarillo suave) */
+/* Ingresar y crear cuenta: el campo donde se escribe se marca con borde azul y un halo amarillo suave */
 .acceso-formulario .campo input {
   transition:
     border-color 200ms var(--curva-salida),
@@ -2202,9 +2228,7 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .acceso-formulario .campo input:focus {
   border-color: var(--azul);
-  box-shadow:
-    0 0 0 4px rgba(246, 195, 67, 0.45),
-    0 0 22px rgba(246, 195, 67, 0.55);
+  box-shadow: 0 0 0 4px rgba(246, 195, 67, 0.4);
 }
 
 .acceso-formulario .campo:focus-within {

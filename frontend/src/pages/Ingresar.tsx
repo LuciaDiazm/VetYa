@@ -1,6 +1,7 @@
-import { KeyRound, Mail, MessageCircle, Phone } from 'lucide-react'
+import { MessageCircle, Phone } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { CampoClave } from '../components/CampoClave'
 import { rutaInicial, useAuth } from '../context/AuthContext'
 import { enlaceTelefono, enlaceWhatsapp, useSitio } from '../lib/sitio'
 
@@ -41,33 +42,19 @@ export function Ingresar() {
       </section>
       <div className="acceso-formulario registro-formulario ingreso-formulario">
         <h1>Ingresar</h1>
+        <p className="acceso-bajada">Con el email y la contraseña de tu cuenta.</p>
         <form onSubmit={enviar} className="formulario">
-          <label className="campo campo-icono">
+          <label className="campo">
             Email
-            <span className="campo-con-icono">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-              <Mail size={22} aria-hidden="true" />
-            </span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
           </label>
-          <label className="campo campo-icono">
-            Contraseña
-            <span className="campo-con-icono">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-              <KeyRound size={22} aria-hidden="true" />
-            </span>
-          </label>
+          <CampoClave valor={password} onCambiar={setPassword} />
 
           {/* Sin emails automáticos: la clínica le da una contraseña nueva desde la ficha del cliente. */}
           {!olvido ? (
