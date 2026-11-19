@@ -1,4 +1,4 @@
-import { CalendarPlus, ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, ChevronRight, Clock, ListFilter, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Ayuda } from '../../components/Ayuda'
@@ -46,6 +46,7 @@ export function Agenda() {
   const [cerrados, setCerrados] = useState<DiaCerrado[]>([])
   const [verCancelados, setVerCancelados] = useState(false)
   const [veterinario, setVeterinario] = useState('')
+  const [soloFaltan, setSoloFaltan] = useState(false)
   const [anuncio, setAnuncio] = useState('')
 
   const cargar = useCallback(() => {
@@ -71,6 +72,10 @@ export function Agenda() {
   const cancelados = delDia.filter((t) => t.estado === 'CANCELADO' && (!veterinario || claveVet(t) === veterinario))
   const cerradoHoy = cerrados.find((c) => c.fecha === dia)
   const cuenta = (estado: Turno['estado']) => activos.filter((t) => t.estado === estado).length
+  // "Ver solo los que faltan": esconde los atendidos y los que no vinieron (los ratos libres quedan)
+  const porAtender = activos.filter((t) => t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADO').length
+  const sePuedeFiltrar = porAtender > 0 && porAtender < activos.length
+  const filtrar = soloFaltan && sePuedeFiltrar
 
   // Veterinarios que tienen turnos esta semana, para el filtro.
   const veterinarios = useMemo(
@@ -88,7 +93,9 @@ export function Agenda() {
 
   // Línea del día. Los ratos libres solo se muestran para hoy (desde ahora) y días futuros.
   const renglones = useMemo(() => {
-    const lista: Renglon[] = activos.map((t) => ({ tipo: 'turno', hora: horaDe(t.fechaHoraInicio), turno: t }))
+    const lista: Renglon[] = activos
+      .filter((t) => !filtrar || t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADO')
+      .map((t) => ({ tipo: 'turno', hora: horaDe(t.fechaHoraInicio), turno: t }))
     if (sitio && !cerradoHoy && dia >= hoy) {
       for (const hueco of huecosLibres(sitio.clinica.horarios, activosTodos, dia, esHoy ? ahora : undefined)) {
         lista.push({ tipo: 'libre', hora: hueco.inicio, hueco })
@@ -100,7 +107,7 @@ export function Agenda() {
       lista.splice(posicion === -1 ? lista.length : posicion, 0, { tipo: 'ahora', hora: ahora })
     }
     return lista
-  }, [activos, activosTodos, sitio, cerradoHoy, dia, hoy, esHoy, ahora])
+  }, [activos, activosTodos, filtrar, sitio, cerradoHoy, dia, hoy, esHoy, ahora])
 
   // El próximo turno por atender de hoy, y los que ya pasaron sin que nadie los marque.
   const proximoId = esHoy
@@ -185,6 +192,11 @@ export function Agenda() {
           {!esHoy && (
             <button type="button" className="boton-fila" onClick={() => irA(hoy)}>
               Volver a hoy
+            </button>
+          )}
+          {sePuedeFiltrar && (
+            <button type="button" className="boton-fila" onClick={() => setSoloFaltan((v) => !v)}>
+              <ListFilter size={16} aria-hidden="true" /> {soloFaltan ? 'Ver todos' : 'Ver solo los que faltan'}
             </button>
           )}
           {veterinarios.length > 1 && (

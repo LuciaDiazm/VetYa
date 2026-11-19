@@ -7326,3 +7326,46 @@ form.campo-en-linea {
     display: none;
   }
 }
+
+/* Clientes: atajo a la lista de vacunas vencidas o por vencer (Notificaciones) */
+.atajo-vacunas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-height: 48px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--panel-borde, var(--borde));
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.atajo-vacunas > svg {
+  color: var(--azul);
+}
+
+.atajo-vacunas-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  color: var(--azul);
+  font-weight: 600;
+}
+
+.atajo-vacunas:hover .atajo-vacunas-accion {
+  text-decoration: underline;
+}
+
+.atajo-vacunas:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+/* Ficha de la mascota: Todo / Solo vacunas / Solo consultas */
+.ficha-ver {
+  margin: 0 0 4px;
+}

@@ -1,11 +1,11 @@
-import { Cat, ChevronRight, Dog, PawPrint, Plus, Search } from 'lucide-react'
+import { Cat, ChevronRight, Dog, PawPrint, Plus, Search, Syringe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Cargando } from '../../components/Cargando'
 import { Paginacion } from '../../components/Paginacion'
 import { apiGet } from '../../lib/api'
 import { formatearTelefono } from '../../lib/mascotas'
-import type { Cliente, EspecieMascota } from '../../types'
+import type { Cliente, EspecieMascota, ResumenRecordatorios } from '../../types'
 
 export function IconoEspecie({ especie, size = 18 }: { especie: EspecieMascota; size?: number }) {
   if (especie === 'PERRO') return <Dog size={size} aria-hidden="true" />
@@ -31,6 +31,14 @@ export function Clientes() {
   const clave = `${q}|${pagina}`
   const [resultado, setResultado] = useState<(PaginaClientes & { clave: string }) | null>(null)
   const [error, setError] = useState(false)
+  // Cuántas mascotas tienen vacunas o desparasitaciones vencidas o por vencer (la lista para avisar está en Notificaciones)
+  const [dosis, setDosis] = useState<number | null>(null)
+
+  useEffect(() => {
+    apiGet<ResumenRecordatorios>('/recordatorios/resumen')
+      .then((r) => setDosis(r.dosis))
+      .catch(() => {})
+  }, [])
 
   // Mientras se escribe, espera un momento para no consultar en cada tecla. Una búsqueda nueva vuelve a la página 1.
   useEffect(() => {
@@ -87,6 +95,18 @@ export function Clientes() {
           autoFocus
         />
       </label>
+
+      {!q && dosis !== null && dosis > 0 && (
+        <Link to="/panel/recordatorios#vacunas" className="atajo-vacunas">
+          <Syringe size={20} aria-hidden="true" />
+          <span>
+            <strong>{dosis}</strong> {dosis === 1 ? 'mascota tiene' : 'mascotas tienen'} vacunas vencidas o por vencer
+          </span>
+          <span className="atajo-vacunas-accion">
+            Ver a quién avisar <ChevronRight size={18} aria-hidden="true" />
+          </span>
+        </Link>
+      )}
 
       {error && <p className="mensaje-error">No se pudo buscar. Revisá la conexión y probá de nuevo.</p>}
 

@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -36,6 +36,7 @@ export function Panel() {
   const [saludo] = useState(saludoSegunHora)
   const [turnos, setTurnos] = useState<Turno[] | null>(null)
   const [resumen, setResumen] = useState<ResumenRecordatorios | null>(null)
+  const [soloFaltan, setSoloFaltan] = useState(false)
   const ahora = useHoraActual()
 
   useEffect(() => {
@@ -47,6 +48,9 @@ export function Panel() {
 
   const activos = (turnos ?? []).filter((t) => t.estado !== 'CANCELADO')
   const porAtender = activos.filter((t) => t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADO')
+  // "Ver solo los que faltan": esconde los atendidos y los que no vinieron
+  const sePuedeFiltrar = porAtender.length > 0 && porAtender.length < activos.length
+  const lista = soloFaltan && sePuedeFiltrar ? porAtender : activos
   const avisos = resumen ? resumen.turnosManana + resumen.dosis + resumen.recuperar : 0
   const equipo = sitio?.equipo ?? []
 
@@ -105,6 +109,11 @@ export function Panel() {
                 )}
               </span>
             )}
+            {turnos && sePuedeFiltrar && (
+              <button type="button" className="boton-fila" onClick={() => setSoloFaltan((v) => !v)}>
+                <ListFilter size={16} aria-hidden="true" /> {soloFaltan ? 'Ver todos' : 'Ver solo los que faltan'}
+              </button>
+            )}
           </div>
           {turnos === null ? (
             <Cargando />
@@ -122,7 +131,7 @@ export function Panel() {
                 <span />
               </div>
               <ul className="filas-turnos">
-                {activos.map((t) => (
+                {lista.map((t) => (
                   <FilaTurno
                     key={t.id}
                     turno={t}

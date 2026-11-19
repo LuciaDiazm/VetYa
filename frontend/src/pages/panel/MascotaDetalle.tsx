@@ -31,6 +31,8 @@ export function MascotaDetalle() {
   const [mascota, setMascota] = useState<FichaMascota | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
+  // Qué se muestra de la historia: todo, solo vacunas o solo consultas
+  const [ver, setVer] = useState<'todo' | 'vacunas' | 'consultas'>('todo')
   const [datos, setDatos] = useState<DatosMascota | null>(null)
   const [guardando, setGuardando] = useState(false)
   const [hoy] = useState(hoyArgentina)
@@ -223,7 +225,31 @@ export function MascotaDetalle() {
             </section>
           )}
 
+          {/* ---------- Ver todo, solo vacunas o solo consultas (si tiene de las dos cosas) ---------- */}
+          {dosis.length > 0 && mascota.consultas.length > 0 && (
+            <div className="chips ficha-ver" role="group" aria-label="Qué mostrar">
+              {(
+                [
+                  ['todo', 'Todo'],
+                  ['vacunas', 'Solo vacunas'],
+                  ['consultas', 'Solo consultas'],
+                ] as const
+              ).map(([valor, texto]) => (
+                <button
+                  key={valor}
+                  type="button"
+                  className={`chip${ver === valor ? ' chip-activo' : ''}`}
+                  aria-pressed={ver === valor}
+                  onClick={() => setVer(valor)}
+                >
+                  {texto}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* ---------- Vacunas y desparasitaciones ---------- */}
+          {ver !== 'consultas' && (
           <section className="tarjeta bloque-ficha">
             <div className="bloque-ficha-titulo">
               <h2>
@@ -271,8 +297,10 @@ export function MascotaDetalle() {
             {mascota.activo && <AplicacionAnterior mascota={mascota} alGuardar={cargar} />}
             {dosis.length > 0 && <BotonesCarnet mascota={mascota} cliente={cliente} />}
           </section>
+          )}
 
           {/* ---------- Historia clínica: una línea con un punto por consulta, la más nueva arriba ---------- */}
+          {ver !== 'vacunas' && (
           <section className="tarjeta bloque-ficha">
             <div className="bloque-ficha-titulo">
               <h2>
@@ -336,6 +364,7 @@ export function MascotaDetalle() {
               </ol>
             )}
           </section>
+          )}
         </div>
       </div>
     </>
