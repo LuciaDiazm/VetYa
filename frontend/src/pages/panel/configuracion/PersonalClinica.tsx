@@ -7,7 +7,14 @@ import { olvidarSitio } from '../../../lib/sitio'
 import type { Personal } from '../../../types'
 import { Cargando } from '../../../components/Cargando'
 
-const ROLES = { VETERINARIO: 'Veterinaria/o', ADMIN: 'Veterinaria/o a cargo' } as const
+const ROLES = { ADMIN: 'Administración', VETERINARIO: 'Veterinaria/o', RECEPCION: 'Recepción' } as const
+
+// Lo que hace cada perfil, en una línea (la misma tabla de permisos que usa el servidor).
+const QUE_HACE = {
+  ADMIN: 'Hace todo: atiende, cobra, ve estadísticas y cambia estos ajustes. Ve el registro de cambios.',
+  VETERINARIO: 'Atiende: historia clínica, vacunas, análisis y avisos. Ve la agenda y la caja, pero no cobra ni da turnos.',
+  RECEPCION: 'Da y mueve turnos, carga clientes y mascotas, anota quién llegó y cobra. No ve el detalle clínico.',
+} as const
 
 interface Formulario {
   nombre: string
@@ -114,14 +121,11 @@ function FormularioPersona({
             onChange={(e) => poner('rol', e.target.value as Formulario['rol'])}
             disabled={esUnoMismo}
           >
-            <option value="ADMIN">Veterinaria/o a cargo</option>
-            <option value="VETERINARIO">Veterinaria/o</option>
+            <option value="ADMIN">{ROLES.ADMIN}</option>
+            <option value="VETERINARIO">{ROLES.VETERINARIO}</option>
+            <option value="RECEPCION">{ROLES.RECEPCION}</option>
           </select>
-          <span className="ayuda">
-            {datos.rol === 'ADMIN'
-              ? 'Hace todo, también cambiar estos ajustes. Es la cuenta de quien está a cargo de la clínica.'
-              : 'Para un segundo profesional: agenda, clientes, historia clínica, pagos y avisos, sin Ajustes.'}
-          </span>
+          <span className="ayuda">{QUE_HACE[datos.rol]}</span>
         </label>
         {esNueva && (
           <label className="campo">

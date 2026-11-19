@@ -2847,6 +2847,78 @@ html[data-turno-portada='visible'] .boton-turno {
   margin: 0;
 }
 
+.fila-estado .fila-llego {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1e7a46;
+  font-size: 0.83rem;
+  white-space: nowrap;
+}
+
+/* Cambiar día u hora: se abre debajo del turno, sin salir de la pantalla. */
+.mover-turno {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 4px 0 6px;
+  padding: 12px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 12px;
+  background: #f7f8fb;
+}
+
+.mover-campo {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mover-campo input,
+.mover-campo select {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid #d3d8e2;
+  border-radius: 10px;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 400;
+}
+
+.mover-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mover-listo {
+  display: inline-flex;
+  flex-basis: 100%;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #1e7a46;
+}
+
+.mover-turno .mensaje-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.boton-fila-principal {
+  border-color: var(--azul);
+  background: var(--azul);
+  color: #ffffff;
+}
+
+.boton-fila-principal:hover {
+  background: var(--azul);
+  opacity: 0.92;
+}
+
 /* ---------- Veterinarios ---------- */
 .hoy-equipo {
   margin: 0;
@@ -8047,4 +8119,210 @@ form.campo-en-linea {
     padding: 0;
     border: none;
   }
+}
+
+/* Veterinaria/o: ve lo que falta cobrar, sin botones (cobra recepción). */
+.cobro-solo-ver {
+  margin: 0;
+  color: var(--gris);
+  font-weight: 600;
+}
+
+/* ---------- Ficha de la mascota: foto, alergias, anuladas, adjuntos ---------- */
+.foto-mascota {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.foto-mascota-imagen {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--fondo);
+}
+
+.foto-mascota-botones {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.foto-mascota-botones .boton-texto {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+}
+
+.aviso-alergia {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid #f1b4b4;
+  border-left: 5px solid var(--rojo);
+  border-radius: 12px;
+  background: #fdf1f1;
+  color: #8a1c1c;
+}
+
+.aviso-alergia svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--rojo);
+}
+
+.dato-numero {
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.dosis-anuladas {
+  margin: 10px 0 4px;
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.dosis-anuladas summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dosis-anuladas ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.adjuntos-lista {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.adjuntos-lista li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+.adjunto-icono {
+  flex: none;
+  color: var(--azul);
+}
+
+.adjunto-texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.adjunto-texto a {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.adjuntos-subir {
+  display: grid;
+  gap: 10px;
+}
+
+.adjuntos-subir > .boton {
+  justify-self: start;
+  cursor: pointer;
+}
+
+.adjuntos-subir input[type='file']:focus-visible + .boton {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+.adjunto-elegido {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Registro de cambios (Ajustes) ---------- */
+.registro-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.registro-filtros .campo {
+  flex: 1 1 150px;
+}
+
+.registro-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.registro-lista li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+.registro-lista p {
+  margin: 0;
+}
+
+.registro-cuando {
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.registro-que {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.registro-detalle summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--azul);
+  cursor: pointer;
+}
+
+.registro-detalle dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.registro-detalle dt {
+  color: var(--gris);
+  font-size: 0.85rem;
+}
+
+.registro-detalle dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mascota-dueno-foto {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.aviso-alergia-costado {
+  margin: 4px 0 8px;
+  text-align: left;
 }

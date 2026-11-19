@@ -1,13 +1,14 @@
-import { Plus } from 'lucide-react'
+import { Paperclip, Plus, ShieldAlert, X } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
-import { apiGet, apiPost } from '../../lib/api'
+import { apiGet, apiPost, apiSubir } from '../../lib/api'
+import { esImagen, pesoArchivo, prepararArchivo, TAMANIO_MAXIMO } from '../../lib/imagenes'
 import { fechaCortaDe, hoyArgentina } from '../../lib/fechas'
 import { hayPantallaAnterior } from '../../lib/navegacion'
 import { edadTexto, nombreEspecie } from '../../lib/mascotas'
-import { dosisQueTocan, vacunaNueva } from '../../lib/sanitario'
+import { alergiasMencionadas, dosisQueTocan, vacunaNueva } from '../../lib/sanitario'
 import type { FichaMascota } from '../../types'
 import { Cargando } from '../../components/Cargando'
 
@@ -33,6 +34,7 @@ export function NuevaConsulta() {
   const [tratamiento, setTratamiento] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [aplicaciones, setAplicaciones] = useState<DatosAplicacion[]>([])
+  const [archivos, setArchivos] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
 
@@ -56,7 +58,7 @@ export function NuevaConsulta() {
     }
     setGuardando(true)
     try {
-      await apiPost('/consultas', {
+      const consulta = await apiPost<{ id: number }>('/consultas', {
         mascotaId: Number(id),
         turnoId,
         motivo,
@@ -72,6 +74,24 @@ export function NuevaConsulta() {
           fechaProximaDosis: a.fechaProximaDosis || undefined,
         })),
       })
+      // Los análisis o fotos se suben después, ya asociados a esta consulta.
+      const fallaron: string[] = []
+      for (const archivo of archivos) {
+        try {
+          const listo = await prepararArchivo(archivo)
+          if (listo.size > TAMANIO_MAXIMO) throw new Error('muy pesado')
+          const formulario = new FormData()
+          formulario.append('mascotaId', String(id))
+          formulario.append('consultaId', String(consulta.id))
+          formulario.append('archivo', listo)
+          await apiSubir('/consultas/adjuntos', formulario)
+        } catch {
+          fallaron.push(archivo.name)
+        }
+      }
+      if (fallaron.length > 0) {
+        window.alert(`La consulta se guardó, pero no se pudo subir: ${fallaron.join(', ')}. Probá adjuntarlo desde la ficha.`)
+      }
       // Vuelve a donde se tocó "Atender" o "Nueva consulta" (Hoy, Agenda o la ficha)
       if (hayPantallaAnterior()) navegar(-1)
       else navegar(`/panel/mascotas/${id}`, { replace: true })
@@ -91,6 +111,17 @@ export function NuevaConsulta() {
     (d) => !yaAgregados.has(`${d.datos.tipo}-${d.datos.producto.toLowerCase()}`),
   )
   const pesoAnterior = ultimoPeso ? Number(ultimoPeso.pesoKg).toLocaleString('es-AR') : null
+  const ojoAlergia = alergiasMencionadas(
+    mascota.alergias,
+    [tratamiento, diagnostico, ...aplicaciones.map((a) => a.producto)].join(' '),
+  )
+
+  function agregarArchivos(lista: FileList | null) {
+    if (!lista) return
+    const validos = [...lista].filter((f) => esImagen(f) || f.type === 'application/pdf')
+    if (validos.length < lista.length) setError('Solo se pueden adjuntar fotos (JPG, PNG, WEBP) o PDF')
+    setArchivos((actuales) => [...actuales, ...validos].slice(0, 5))
+  }
 
   return (
     <>
@@ -105,6 +136,14 @@ export function NuevaConsulta() {
         </p>
       </div>
 
+      {mascota.alergias && (
+        <p className="aviso-alergia" role="note">
+          <ShieldAlert size={22} aria-hidden="true" />
+          <span>
+            <strong>Alergias:</strong> {mascota.alergias}
+          </span>
+        </p>
+      )}
       {mascota.observaciones && <p className="observaciones">⚠ {mascota.observaciones}</p>}
       {turno?.observaciones && <p className="aviso-pendientes">El dueño escribió al pedir el turno: “{turno.observaciones}”</p>}
 
@@ -142,6 +181,15 @@ export function NuevaConsulta() {
             Tratamiento e indicaciones
             <textarea value={tratamiento} onChange={(e) => setTratamiento(e.target.value)} rows={3} />
           </label>
+          {ojoAlergia.length > 0 && (
+            <p className="aviso-alergia" role="alert">
+              <ShieldAlert size={20} aria-hidden="true" />
+              <span>
+                Ojo: {mascota.nombre} es alérgic{mascota.sexo === 'HEMBRA' ? 'a' : 'o'} a <strong>{ojoAlergia.join(', ')}</strong> y
+                lo escribiste en la consulta. Revisalo antes de guardar.
+              </span>
+            </p>
+          )}
           <label className="campo">
             Observaciones (opcional)
             <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} rows={2} />
@@ -186,6 +234,47 @@ export function NuevaConsulta() {
           >
             <Plus size={20} aria-hidden="true" /> Agregar vacuna o desparasitación
           </button>
+        </section>
+
+        <section className="tarjeta formulario">
+          <h2>Análisis o estudios (opcional)</h2>
+          <p className="ayuda">Fotos o PDF de hasta 8 MB: análisis, ecografías, radiografías.</p>
+          {archivos.length > 0 && (
+            <ul className="adjuntos-lista">
+              {archivos.map((f, i) => (
+                <li key={`${f.name}-${i}`}>
+                  <Paperclip size={18} aria-hidden="true" className="adjunto-icono" />
+                  <span className="adjunto-texto">
+                    {f.name} <span className="ayuda">{pesoArchivo(f.size)}</span>
+                  </span>
+                  <button
+                    type="button"
+                    className="boton-icono"
+                    onClick={() => setArchivos((lista) => lista.filter((_, j) => j !== i))}
+                    aria-label={`Quitar ${f.name}`}
+                  >
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="adjuntos-subir">
+            <input
+              id="consulta-archivos"
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              className="solo-lectores"
+              onChange={(e) => {
+                agregarArchivos(e.target.files)
+                e.target.value = ''
+              }}
+            />
+            <label htmlFor="consulta-archivos" className="boton boton-contorno">
+              <Paperclip size={18} aria-hidden="true" /> Adjuntar archivo
+            </label>
+          </div>
         </section>
 
         {error && (

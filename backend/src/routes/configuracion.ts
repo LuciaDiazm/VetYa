@@ -2,12 +2,13 @@ import { Router, type Response } from "express";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina, esFechaValida, horaArgentina, sumarDias } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
 import { normalizarTelefono } from "../lib/telefono";
 
 // Configuración de la clínica: datos de contacto, horarios, días cerrados y servicios. Solo administradores.
 export const configuracionRouter = Router();
-configuracionRouter.use(requiereSesion, requiereRol("ADMIN"));
+configuracionRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("ajustes"));
 
 const MAX_DIAS_CERRADOS_SEGUIDOS = 60;
 

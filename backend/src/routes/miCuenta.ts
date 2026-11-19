@@ -3,6 +3,7 @@ import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { tokenDeCarnet } from "../lib/carnet";
 import { prisma } from "../lib/prisma";
+import { urlArchivo } from "../lib/subidas";
 import { cancelacionesWebRecientes, revisarAbuso, suspensionVigente } from "../lib/sanciones";
 
 // "Mi cuenta" del dueño: sus mascotas, vacunas, consultas y turnos.
@@ -25,7 +26,7 @@ miCuentaRouter.get("/", async (req, res) => {
     where: { clienteId: cliente.id, activo: true },
     orderBy: { nombre: "asc" },
     include: {
-      aplicaciones: { orderBy: { fechaAplicacion: "desc" } },
+      aplicaciones: { where: { anulada: false }, orderBy: { fechaAplicacion: "desc" } },
       // Para el dueño, la historia clínica se muestra resumida: fecha, motivo e indicaciones.
       consultas: {
         orderBy: { fecha: "desc" },
@@ -49,6 +50,7 @@ miCuentaRouter.get("/", async (req, res) => {
   const conCarnet = await Promise.all(
     mascotas.map(async ({ tokenCarnet: _t, ...m }) => ({
       ...m,
+      fotoUrl: m.fotoId ? urlArchivo(m.fotoId) : null,
       carnetUrl: `/api/publico/carnet/${await tokenDeCarnet(m.id)}`,
     })),
   );

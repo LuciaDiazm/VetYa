@@ -5,7 +5,9 @@
 // Así se puede volver a correr cada vez que se agregan tablas nuevas.
 //
 // Usuarios de prueba (solo para desarrollo, no usar en producción):
-//   martin.rodriguez@vetya.test / vetya-vet-2026 (ADMIN: el veterinario a cargo, la única cuenta de la clínica)
+//   martin.rodriguez@vetya.test / vetya-vet-2026 (ADMIN: el veterinario a cargo; en pantalla, Administración)
+//   paula.ferreyra@vetya.test / vetya-veterinaria-2026 (VETERINARIO: atiende y carga la historia clínica)
+//   natalia.ojeda@vetya.test    / vetya-recepcion-2026   (RECEPCION: turnos, clientes y cobros; no ve lo clínico)
 //   duenio@vetya.test       / vetya-duenio-2026  (DUENIO: "Prueba Turnos", para probar Pedir turno y Mi cuenta)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
@@ -194,6 +196,28 @@ async function main() {
       prisma.pago.updateMany({ where: { anuladoPorId: { in: ids } }, data: { anuladoPorId: martin.id } }),
       prisma.usuario.deleteMany({ where: { id: { in: ids } } }),
     ]);
+  }
+
+  // (19/11) Los tres perfiles del personal: Martín (administración), una veterinaria y una recepcionista.
+  // Nombres inventados. No aparecen en la web hasta que la administración lo elija en Configuración.
+  for (const p of [
+    { nombre: "Paula", apellido: "Ferreyra", email: "paula.ferreyra@vetya.test", clave: "vetya-veterinaria-2026", rol: "VETERINARIO" as const, matricula: "M.P. 0003" },
+    { nombre: "Natalia", apellido: "Ojeda", email: "natalia.ojeda@vetya.test", clave: "vetya-recepcion-2026", rol: "RECEPCION" as const, matricula: null },
+  ]) {
+    await prisma.usuario.upsert({
+      where: { email: p.email },
+      update: {},
+      create: {
+        clinicaId,
+        nombre: p.nombre,
+        apellido: p.apellido,
+        email: p.email,
+        passwordHash: await bcrypt.hash(p.clave, 10),
+        rol: p.rol,
+        visibleEnWeb: false,
+        matricula: p.matricula,
+      },
+    });
   }
 
   // Foto de cada profesional, solo si todavía no tiene una (si la clínica subió otra, se respeta).

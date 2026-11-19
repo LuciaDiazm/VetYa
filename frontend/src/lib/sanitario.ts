@@ -55,7 +55,9 @@ export function estadoDosis(a: AplicacionSanitaria, hoy: string) {
 // Solo se muestra la última aplicación de cada producto: es la que dice cuándo toca la próxima.
 export function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
   const vistas = new Set<string>()
+  // Las anuladas (cargadas por error) no cuentan.
   return aplicaciones.filter((a) => {
+    if (a.anulada) return false
     const clave = `${a.tipo}-${a.producto.toLowerCase()}`
     if (vistas.has(clave)) return false
     vistas.add(clave)
@@ -91,4 +93,16 @@ export function vacunaNueva(): DatosAplicacion {
 // Edad de una dosis del calendario: 6 semanas → "6 semanas"; 16 semanas → "4 meses"
 export function edadDosis(semanas: number) {
   return semanas >= 12 && semanas % 4 === 0 ? `${semanas / 4} meses` : `${semanas} semanas`
+}
+
+// Palabras de las alergias que aparecen en un texto (tratamiento, vacunas). Es solo un aviso: no frena nada.
+// "Penicilina, pollo" + "Amoxicilina y penicilina 5 días" → ["penicilina"]
+const sinTildes = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+export function alergiasMencionadas(alergias: string | null | undefined, texto: string) {
+  if (!alergias || !texto.trim()) return []
+  const donde = sinTildes(texto)
+  return alergias
+    .split(/[,;/\n]|\sy\s/)
+    .map((a) => a.trim())
+    .filter((a) => a.length >= 4 && donde.includes(sinTildes(a)))
 }

@@ -11,6 +11,7 @@ import { AvisosSuspension } from '../components/AvisosSuspension'
 import { CajaDeHoy } from '../components/CajaDeHoy'
 import { FilaTurno } from '../components/FilaTurno'
 import { Cargando } from '../components/Cargando'
+import { puede } from '../lib/permisos'
 
 const NOMBRE_MES = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 const DIAS_SEMANA = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']
@@ -80,14 +81,16 @@ export function Panel() {
               {avisos === 1 ? '1 aviso para mandar' : `${avisos} avisos para mandar`}
             </Link>
           )}
-          <Link to="/panel/agenda/nuevo" className="boton hoy-boton-turno">
-            <CalendarPlus size={22} aria-hidden="true" /> Dar turno
-          </Link>
+          {puede(usuario, 'turnos.dar') && (
+            <Link to="/panel/agenda/nuevo" className="boton hoy-boton-turno">
+              <CalendarPlus size={22} aria-hidden="true" /> Dar turno
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* Decidir sobre una suspensión le toca al administrador */}
-      {usuario?.rol === 'ADMIN' && <AvisosSuspension />}
+      {/* Decidir sobre una suspensión le toca a la administración */}
+      {puede(usuario, 'clientes.sanciones') && <AvisosSuspension />}
 
       {/* Turnos de días anteriores que quedaron sin marcar (nadie dijo si vino o no) */}
       <TurnosSinMarcar hoy={hoy} />

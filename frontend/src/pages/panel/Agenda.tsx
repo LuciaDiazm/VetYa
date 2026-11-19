@@ -10,6 +10,8 @@ import { useHoraActual } from '../../lib/horaActual'
 import { useSitio } from '../../lib/sitio'
 import { ESTADOS_TURNO, huecosLibres, type Hueco } from '../../lib/turnos'
 import type { Turno } from '../../types'
+import { useAuth } from '../../context/AuthContext'
+import { puede } from '../../lib/permisos'
 
 const DIA_SEMANA = new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
 const NUMERO_DIA = new Intl.DateTimeFormat('es-AR', { day: 'numeric', timeZone: 'UTC' })
@@ -33,6 +35,8 @@ function plural(cantidad: number, uno: string, varios: string) {
 const claveVet = (t: Turno) => (t.veterinario ? String(t.veterinario.id) : 'sin')
 
 export function Agenda() {
+  const { usuario } = useAuth()
+  const daTurnos = puede(usuario, 'turnos.dar')
   const [parametros, setParametros] = useSearchParams()
   const hoy = hoyArgentina()
   const dia = parametros.get('dia') ?? hoy
@@ -135,9 +139,11 @@ export function Agenda() {
           etiqueta="Cómo se usa la agenda"
           texto="Elegí un día de la semana para ver sus turnos. Los ratos libres tienen el botón para dar un turno a esa hora, y la línea amarilla marca la hora actual."
         />
-        <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton informe-imprimir">
-          <CalendarPlus size={20} aria-hidden="true" /> Dar turno
-        </Link>
+        {daTurnos && (
+          <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton informe-imprimir">
+            <CalendarPlus size={20} aria-hidden="true" /> Dar turno
+          </Link>
+        )}
       </div>
 
       <div className="informe-caja agenda-caja">
@@ -239,7 +245,7 @@ export function Agenda() {
         ) : renglones.length === 0 ? (
           <div className="agenda-vacio">
             <p>{dia < hoy ? 'Ese día no hubo turnos.' : 'No hay turnos para este día.'}</p>
-            {dia >= hoy && !cerradoHoy && (
+            {daTurnos && dia >= hoy && !cerradoHoy && (
               <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton-fila">
                 <CalendarPlus size={18} aria-hidden="true" /> Dar un turno
               </Link>
@@ -270,13 +276,15 @@ export function Agenda() {
                     <span className="fila-libre-texto">
                       <Clock size={16} aria-hidden="true" /> Libre hasta las <strong>{r.hueco.fin}</strong>
                     </span>
-                    <Link
-                      to={`/panel/agenda/nuevo?fecha=${dia}&hora=${r.hueco.inicio}`}
-                      className="boton-fila"
-                      aria-label={`Dar turno a las ${r.hueco.inicio}`}
-                    >
-                      <Plus size={16} aria-hidden="true" /> Dar turno
-                    </Link>
+                    {daTurnos && (
+                      <Link
+                        to={`/panel/agenda/nuevo?fecha=${dia}&hora=${r.hueco.inicio}`}
+                        className="boton-fila"
+                        aria-label={`Dar turno a las ${r.hueco.inicio}`}
+                      >
+                        <Plus size={16} aria-hidden="true" /> Dar turno
+                      </Link>
+                    )}
                   </li>
                 ) : (
                   <li key="ahora" className="fila-ahora">

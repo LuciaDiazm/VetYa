@@ -3,6 +3,8 @@ import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina, esFechaValida, sumarDias } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { registrarCambio } from "../lib/auditoria";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { CANTIDAD_COLUMNAS_PAGOS, escribirInformePagos } from "../lib/informe";
 import { prisma } from "../lib/prisma";
 
@@ -10,7 +12,8 @@ import { prisma } from "../lib/prisma";
 // Un turno atendido queda "Por cobrar" solo, con el precio del servicio ya puesto. Se cobra con un toque,
 // eligiendo el medio. Los pagos nunca se borran: si hubo un error se anulan y queda quién y por qué.
 export const pagosRouter = Router();
-pagosRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+// Todo el personal ve la caja; cobrar es de administración y recepción.
+pagosRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("pagos.ver"));
 
 const MEDIOS = ["EFECTIVO", "TRANSFERENCIA", "DEBITO", "CREDITO", "SIN_CARGO"] as const;
 const MAX_DIAS = 400;
@@ -146,7 +149,7 @@ const esquemaPago = z
   .refine((d) => d.medio === "SIN_CARGO" || d.monto > 0, { message: "Escribí el monto", path: ["monto"] })
   .refine((d) => d.turnoId || d.concepto, { message: "Escribí qué se cobró", path: ["concepto"] });
 
-pagosRouter.post("/", async (req, res) => {
+pagosRouter.post("/", requierePermiso("pagos.cobrar"), async (req, res) => {
   const datos = esquemaPago.safeParse(req.body);
   if (!datos.success) {
     res.status(400).json({ error: datos.error.issues[0].message });
@@ -207,7 +210,7 @@ pagosRouter.post("/", async (req, res) => {
   }
 });
 
-// Anular: el administrador, siempre; el veterinario, solo un pago suyo de hoy (para corregir un error al toque).
+// Anular: la administración, siempre; quien cobró, solo un pago suyo de hoy (para corregir un error al toque).
 const esquemaAnular = z.object({
   motivo: z.string().trim().min(3, "Escribí por qué se anula").max(190, "El motivo es muy largo"),
 });
@@ -230,13 +233,19 @@ pagosRouter.patch("/:id/anular", async (req, res) => {
   const esAdmin = req.usuario!.rol === "ADMIN";
   const esSuyoDeHoy = pago.registradoPorId === req.usuario!.id && diaArgentina(pago.fecha) === diaArgentina(new Date());
   if (!esAdmin && !esSuyoDeHoy) {
-    res.status(403).json({ error: "Solo la veterinaria o el veterinario a cargo puede anular este pago" });
+    res.status(403).json({ error: "Solo podés anular un cobro tuyo de hoy. Pedíselo a la administración" });
     return;
   }
   const anulado = await prisma.pago.update({
     where: { id: pago.id },
     data: { anulado: true, anuladoEn: new Date(), anuladoPorId: req.usuario!.id, motivoAnulacion: datos.data.motivo },
     include: conDatos,
+  });
+  await registrarCambio(req, {
+    accion: "pago.anular",
+    entidad: "pago",
+    entidadId: pago.id,
+    resumen: `Anuló el cobro N.º ${pago.id} ($ ${Number(pago.monto).toLocaleString("es-AR")}): ${datos.data.motivo}`,
   });
   res.json(aJson(anulado));
 });

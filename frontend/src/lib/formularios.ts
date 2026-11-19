@@ -13,6 +13,8 @@ export interface DatosMascota {
   fechaNacimiento: string // "AAAA-MM-DD" o vacío
   castrado: boolean
   observaciones: string
+  microchip: string
+  alergias: string
 }
 
 export const MASCOTA_VACIA: DatosMascota = {
@@ -25,6 +27,8 @@ export const MASCOTA_VACIA: DatosMascota = {
   fechaNacimiento: '',
   castrado: false,
   observaciones: '',
+  microchip: '',
+  alergias: '',
 }
 
 export function datosDeMascota(m: Mascota): DatosMascota {
@@ -38,6 +42,8 @@ export function datosDeMascota(m: Mascota): DatosMascota {
     fechaNacimiento: m.fechaNacimiento ? m.fechaNacimiento.slice(0, 10) : '',
     castrado: m.castrado,
     observaciones: m.observaciones ?? '',
+    microchip: m.microchip ?? '',
+    alergias: m.alergias ?? '',
   }
 }
 

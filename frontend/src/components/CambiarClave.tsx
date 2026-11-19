@@ -1,6 +1,6 @@
 import { KeyRound } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { apiPost, guardarToken } from '../lib/api'
+import { apiPost } from '../lib/api'
 import { CampoClave } from './CampoClave'
 
 // "Cambiar mi contraseña": para dueños (en Mi cuenta) y para el personal (en el panel).
@@ -19,8 +19,8 @@ export function CambiarClave({ cerrable = false }: { cerrable?: boolean }) {
     setError(null)
     setGuardando(true)
     try {
-      const { token } = await apiPost<{ token: string }>('/auth/cambiar-password', { actual, nueva })
-      guardarToken(token)
+      // El servidor renueva la cookie de esta sesión; las demás (otras compus) se cierran.
+      await apiPost('/auth/cambiar-password', { actual, nueva })
       setActual('')
       setNueva('')
       setListo(true)

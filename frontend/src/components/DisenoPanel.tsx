@@ -2,6 +2,7 @@ import { BarChart3, Bell, CalendarDays, FileText, HandCoins, House, KeyRound, Lo
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
+import { puede } from '../lib/permisos'
 import type { ResumenRecordatorios } from '../types'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from './Logo'
@@ -28,11 +29,14 @@ export function DisenoPanel() {
     { ruta: '/panel/clientes', nombre: 'Clientes', icono: PawPrint },
     { ruta: '/panel/pagos', nombre: 'Pagos', icono: HandCoins },
     { ruta: '/panel/recordatorios', nombre: 'Notificaciones', icono: Bell, globo: avisosPendientes },
-    { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
-    { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
-    ...(usuario?.rol === 'ADMIN'
-      ? [{ ruta: '/panel/configuracion', nombre: 'Ajustes', icono: Settings }]
+    // Lo de la administración (números del negocio y ajustes) solo lo ve la administración.
+    ...(puede(usuario, 'estadisticas')
+      ? [
+          { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
+          { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
+        ]
       : []),
+    ...(puede(usuario, 'ajustes') ? [{ ruta: '/panel/configuracion', nombre: 'Ajustes', icono: Settings }] : []),
   ]
 
   return (

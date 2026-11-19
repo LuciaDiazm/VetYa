@@ -6,6 +6,8 @@ import { Paginacion } from '../../components/Paginacion'
 import { apiGet } from '../../lib/api'
 import { formatearTelefono } from '../../lib/mascotas'
 import type { Cliente, EspecieMascota, ResumenRecordatorios } from '../../types'
+import { useAuth } from '../../context/AuthContext'
+import { puede } from '../../lib/permisos'
 
 export function IconoEspecie({ especie, size = 18 }: { especie: EspecieMascota; size?: number }) {
   if (especie === 'PERRO') return <Dog size={size} aria-hidden="true" />
@@ -23,6 +25,7 @@ interface PaginaClientes {
 // Buscador de clientes: por nombre, apellido, DNI, teléfono o nombre de la mascota.
 // Los resultados vienen de a 10 por página desde el servidor.
 export function Clientes() {
+  const { usuario } = useAuth()
   const [parametros, setParametros] = useSearchParams()
   const [texto, setTexto] = useState(parametros.get('q') ?? '')
   // Lo que se buscó y la página quedan en la dirección: se puede volver atrás o recargar igual.
@@ -79,9 +82,11 @@ export function Clientes() {
           <h1>Clientes y mascotas</h1>
           <p>Buscá por nombre, teléfono, DNI o nombre de la mascota.</p>
         </div>
-        <Link to="/panel/clientes/nuevo" className="boton boton-grande boton-secundario">
-          <Plus size={22} aria-hidden="true" /> Nuevo cliente
-        </Link>
+        {puede(usuario, 'clientes.editar') && (
+          <Link to="/panel/clientes/nuevo" className="boton boton-grande boton-secundario">
+            <Plus size={22} aria-hidden="true" /> Nuevo cliente
+          </Link>
+        )}
       </div>
 
       <label className="buscador">
@@ -117,9 +122,11 @@ export function Clientes() {
           <p className="vacio">
             {texto.trim() ? `No encontramos a nadie con “${texto.trim()}”.` : 'Todavía no hay clientes cargados.'}
           </p>
-          <Link to="/panel/clientes/nuevo" className="boton">
-            <Plus size={20} aria-hidden="true" /> Cargar cliente nuevo
-          </Link>
+          {puede(usuario, 'clientes.editar') && (
+            <Link to="/panel/clientes/nuevo" className="boton">
+              <Plus size={20} aria-hidden="true" /> Cargar cliente nuevo
+            </Link>
+          )}
         </div>
       ) : (
         <>

@@ -2,11 +2,26 @@ import { Router } from "express";
 import { z } from "zod";
 import { diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { registrarCambio } from "../lib/auditoria";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
+import { guardarArchivo, subirAdjunto } from "../lib/subidas";
 
 // Historia clínica: consultas y aplicaciones sanitarias (vacunas y desparasitaciones).
+// Cargarla es de administración y veterinarios; recepción no la toca.
 export const consultasRouter = Router();
-consultasRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+consultasRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("clinica.escribir"));
+
+const esDeHoy = (fecha: Date) => diaArgentina(fecha) === diaArgentina(new Date());
+
+const NOMBRE_CAMPO: Record<string, string> = {
+  motivo: "motivo",
+  pesoKg: "peso",
+  temperatura: "temperatura",
+  diagnostico: "diagnóstico",
+  tratamiento: "tratamiento",
+  observaciones: "observaciones",
+};
 
 const textoOpcional = z
   .string()
@@ -97,7 +112,12 @@ consultasRouter.post("/", async (req, res) => {
         turnoId: turnoId ?? null,
         fecha: ahora,
         aplicaciones: {
-          create: aplicaciones.map((a) => ({ ...a, mascotaId, fechaAplicacion: hoySinHora })),
+          create: aplicaciones.map((a) => ({
+            ...a,
+            mascotaId,
+            fechaAplicacion: hoySinHora,
+            registradoPorId: req.usuario!.id,
+          })),
         },
       },
       include: { aplicaciones: true },
@@ -129,7 +149,42 @@ consultasRouter.put("/:id", async (req, res) => {
     res.status(404).json({ error: "Consulta no encontrada" });
     return;
   }
-  const actualizada = await prisma.consulta.update({ where: { id }, data: resultado.data });
+  // Una consulta es un registro clínico: la veterinaria o el veterinario corrige la suya el mismo día;
+  // después, solo la administración. Cada corrección queda anotada con lo que había antes.
+  const usuario = req.usuario!;
+  if (usuario.rol !== "ADMIN" && !(consulta.veterinarioId === usuario.id && esDeHoy(consulta.fecha))) {
+    res.status(403).json({ error: "Solo podés corregir tus consultas del día. Pedíselo a la administración" });
+    return;
+  }
+  const actualizada = await prisma.$transaction(async (tx) => {
+    const nueva = await tx.consulta.update({
+      where: { id },
+      data: { ...resultado.data, editadaEn: new Date(), editadaPorId: usuario.id },
+    });
+    const campos = ["motivo", "pesoKg", "temperatura", "diagnostico", "tratamiento", "observaciones"] as const;
+    const antes: Record<string, unknown> = {};
+    const despues: Record<string, unknown> = {};
+    for (const c of campos) {
+      if (String(consulta[c] ?? "") !== String(nueva[c] ?? "")) {
+        antes[c] = consulta[c];
+        despues[c] = nueva[c];
+      }
+    }
+    const dia = consulta.fecha.toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+    await registrarCambio(
+      req,
+      {
+        accion: "consulta.corregir",
+        entidad: "consulta",
+        entidadId: id,
+        resumen: `Corrigió la consulta del ${dia} (${Object.keys(despues).map((c) => NOMBRE_CAMPO[c]).join(", ") || "sin cambios"})`,
+        antes,
+        despues,
+      },
+      tx,
+    );
+    return nueva;
+  });
   res.json(actualizada);
 });
 
@@ -165,19 +220,139 @@ consultasRouter.post("/aplicaciones", async (req, res) => {
     res.status(400).json({ error: "La próxima dosis tiene que ser después de la aplicación" });
     return;
   }
-  const aplicacion = await prisma.aplicacionSanitaria.create({ data: { ...datos, mascotaId } });
+  const aplicacion = await prisma.aplicacionSanitaria.create({
+    data: { ...datos, mascotaId, registradoPorId: req.usuario!.id },
+  });
   res.status(201).json(aplicacion);
 });
 
-consultasRouter.delete("/aplicaciones/:id", async (req, res) => {
+// Una vacuna mal cargada no se borra: se anula con un motivo y queda tachada en la ficha.
+// Deja de contar para los avisos y el carnet. La administración anula cualquiera;
+// quien la cargó, la suya del mismo día.
+const esquemaAnular = z.object({
+  motivo: z.string().trim().min(3, "Escribí por qué se anula").max(300),
+});
+
+consultasRouter.patch("/aplicaciones/:id/anular", async (req, res) => {
+  const resultado = esquemaAnular.safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: resultado.error.issues[0].message });
+    return;
+  }
   const id = Number(req.params.id);
+  const usuario = req.usuario!;
   const aplicacion = await prisma.aplicacionSanitaria.findFirst({
-    where: { id, mascota: { cliente: { clinicaId: req.usuario!.clinicaId } } },
+    where: { id, mascota: { cliente: { clinicaId: usuario.clinicaId } } },
+    include: { mascota: { select: { nombre: true } } },
   });
   if (!aplicacion) {
     res.status(404).json({ error: "Registro no encontrado" });
     return;
   }
-  await prisma.aplicacionSanitaria.delete({ where: { id } });
+  if (aplicacion.anulada) {
+    res.status(409).json({ error: "Ya estaba anulada" });
+    return;
+  }
+  const suyaDeHoy = aplicacion.registradoPorId === usuario.id && esDeHoy(aplicacion.creadoEn);
+  if (usuario.rol !== "ADMIN" && !suyaDeHoy) {
+    res.status(403).json({ error: "Solo podés anular lo que cargaste hoy. Pedíselo a la administración" });
+    return;
+  }
+  const anulada = await prisma.$transaction(async (tx) => {
+    const r = await tx.aplicacionSanitaria.update({
+      where: { id },
+      data: { anulada: true, anuladaEn: new Date(), anuladaPorId: usuario.id, motivoAnulacion: resultado.data.motivo },
+    });
+    const que = aplicacion.tipo === "VACUNA" ? "la vacuna" : "la desparasitación";
+    await registrarCambio(
+      req,
+      {
+        accion: "vacuna.anular",
+        entidad: "aplicacion",
+        entidadId: id,
+        resumen: `Anuló ${que} ${aplicacion.producto} de ${aplicacion.mascota.nombre}: ${resultado.data.motivo}`,
+      },
+      tx,
+    );
+    return r;
+  });
+  res.json(anulada);
+});
+
+// ---------- Archivos adjuntos (análisis, ecografías, radiografías, fotos) ----------
+
+const esquemaAdjunto = z.object({
+  mascotaId: z.coerce.number().int(),
+  consultaId: z.coerce.number().int().optional(),
+  descripcion: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+
+consultasRouter.post("/adjuntos", subirAdjunto.single("archivo"), async (req, res) => {
+  const resultado = esquemaAdjunto.safeParse(req.body ?? {});
+  if (!resultado.success) {
+    res.status(400).json({ error: resultado.error.issues[0].message });
+    return;
+  }
+  if (!req.file) {
+    res.status(400).json({ error: "Elegí un archivo (foto o PDF)" });
+    return;
+  }
+  const { mascotaId, consultaId, descripcion } = resultado.data;
+  const clinicaId = req.usuario!.clinicaId;
+  const mascota = await prisma.mascota.findFirst({ where: { id: mascotaId, cliente: { clinicaId } } });
+  if (!mascota) {
+    res.status(404).json({ error: "Mascota no encontrada" });
+    return;
+  }
+  if (consultaId && !(await prisma.consulta.findFirst({ where: { id: consultaId, mascotaId } }))) {
+    res.status(400).json({ error: "La consulta no corresponde a esta mascota" });
+    return;
+  }
+  const archivo = await guardarArchivo(req, req.file);
+  if (!archivo) {
+    res.status(400).json({ error: "Solo se pueden adjuntar fotos (JPG, PNG, WEBP) o PDF" });
+    return;
+  }
+  const adjunto = await prisma.adjunto.create({
+    data: { mascotaId, consultaId: consultaId ?? null, archivoId: archivo.id, descripcion, subidoPorId: req.usuario!.id },
+    include: {
+      archivo: { select: { nombre: true, tipo: true, tamanio: true } },
+      subidoPor: { select: { id: true, nombre: true, apellido: true } },
+    },
+  });
+  res.status(201).json(adjunto);
+});
+
+// Quitar un adjunto lo saca de la ficha, pero queda guardado y anotado (no se pierde nada clínico).
+consultasRouter.patch("/adjuntos/:id/quitar", async (req, res) => {
+  const id = Number(req.params.id);
+  const usuario = req.usuario!;
+  const adjunto = await prisma.adjunto.findFirst({
+    where: { id, quitado: false, mascota: { cliente: { clinicaId: usuario.clinicaId } } },
+    include: { archivo: { select: { nombre: true } }, mascota: { select: { nombre: true } } },
+  });
+  if (!adjunto) {
+    res.status(404).json({ error: "Archivo no encontrado" });
+    return;
+  }
+  if (usuario.rol !== "ADMIN" && !(adjunto.subidoPorId === usuario.id && esDeHoy(adjunto.creadoEn))) {
+    res.status(403).json({ error: "Solo podés quitar lo que subiste hoy. Pedíselo a la administración" });
+    return;
+  }
+  await prisma.adjunto.update({
+    where: { id },
+    data: { quitado: true, quitadoEn: new Date(), quitadoPorId: usuario.id },
+  });
+  await registrarCambio(req, {
+    accion: "adjunto.quitar",
+    entidad: "adjunto",
+    entidadId: id,
+    resumen: `Quitó el archivo ${adjunto.archivo.nombre} de la ficha de ${adjunto.mascota.nombre}`,
+  });
   res.status(204).end();
 });

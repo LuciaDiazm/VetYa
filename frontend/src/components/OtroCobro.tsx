@@ -1,6 +1,8 @@
 import { Plus } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { apiPost } from '../lib/api'
+import { puede } from '../lib/permisos'
 import { leerMonto, MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../lib/pagos'
 import type { MedioPago, Pago } from '../types'
 import { BotonesComprobante } from './BotonesComprobante'
@@ -8,6 +10,7 @@ import { BotonesComprobante } from './BotonesComprobante'
 // Un cobro que no viene de un turno: alimento, un medicamento, un accesorio…
 // Desde la ficha del cliente queda a su nombre; desde Pagos, como venta en el mostrador.
 export function OtroCobro({ clienteId, alGuardar }: { clienteId?: number; alGuardar: () => void }) {
+  const { usuario } = useAuth()
   const [abierto, setAbierto] = useState(false)
   const [concepto, setConcepto] = useState('')
   const [monto, setMonto] = useState('')
@@ -39,6 +42,8 @@ export function OtroCobro({ clienteId, alGuardar }: { clienteId?: number; alGuar
       setGuardando(false)
     }
   }
+
+  if (!puede(usuario, 'pagos.cobrar')) return null
 
   if (!abierto) {
     return (

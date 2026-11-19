@@ -29,6 +29,7 @@ import { NuevoTurno } from './pages/panel/NuevoTurno'
 import { NuevaConsulta } from './pages/panel/NuevaConsulta'
 import { Recordatorios } from './pages/panel/Recordatorios'
 import { SacarTurno } from './pages/SacarTurno'
+import { PERSONAL } from './lib/permisos'
 
 // Páginas públicas y de dueños: llevan la barra de arriba.
 function DisenoPublico() {
@@ -71,22 +72,22 @@ function App() {
           <Route
             path="/panel"
             element={
-              <RutaProtegida roles={['VETERINARIO', 'ADMIN']}>
+              <RutaProtegida roles={PERSONAL}>
                 <DisenoPanel />
               </RutaProtegida>
             }
           >
             <Route index element={<Panel />} />
             <Route path="agenda" element={<Agenda />} />
-            <Route path="agenda/nuevo" element={<NuevoTurno />} />
+            <Route path="agenda/nuevo" element={<RutaProtegida roles={['ADMIN', 'RECEPCION']}><NuevoTurno /></RutaProtegida>} />
             <Route path="clientes" element={<Clientes />} />
-            <Route path="clientes/nuevo" element={<NuevoCliente />} />
+            <Route path="clientes/nuevo" element={<RutaProtegida roles={['ADMIN', 'RECEPCION']}><NuevoCliente /></RutaProtegida>} />
             <Route path="clientes/:id" element={<ClienteDetalle />} />
             <Route path="mascotas/:id" element={<MascotaDetalle />} />
-            <Route path="mascotas/:id/consulta" element={<NuevaConsulta />} />
+            <Route path="mascotas/:id/consulta" element={<RutaProtegida roles={['ADMIN', 'VETERINARIO']}><NuevaConsulta /></RutaProtegida>} />
             <Route path="recordatorios" element={<Recordatorios />} />
-            <Route path="estadisticas" element={<Estadisticas />} />
-            <Route path="informe" element={<InformeTurnos />} />
+            <Route path="estadisticas" element={<RutaProtegida roles={['ADMIN']}><Estadisticas /></RutaProtegida>} />
+            <Route path="informe" element={<RutaProtegida roles={['ADMIN']}><InformeTurnos /></RutaProtegida>} />
             <Route path="contrasena" element={<MiClave />} />
             <Route path="pagos" element={<Pagos />} />
             <Route path="pagos/:id/comprobante" element={<ComprobantePago />} />

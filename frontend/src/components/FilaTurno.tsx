@@ -1,11 +1,14 @@
-import { Ban, Check, ChevronDown, MessageCircle, StickyNote, Stethoscope, Undo2, UserX } from 'lucide-react'
+import { Armchair, Ban, Check, ChevronDown, DoorOpen, MessageCircle, StickyNote, Stethoscope, Undo2, UserX } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { apiPatch } from '../lib/api'
+import { puede } from '../lib/permisos'
 import { horaDe } from '../lib/fechas'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 import { mensajeConfirmacion, ORIGENES } from '../lib/turnos'
 import type { EstadoTurno, Turno } from '../types'
+import { MoverTurno } from './MoverTurno'
 
 interface Props {
   turno: Turno
@@ -20,6 +23,11 @@ interface Props {
 // y las acciones. Las dos más usadas van a la vista; las demás, en el menú "Más".
 export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
   const { datos } = useSitio()
+  const { usuario } = useAuth()
+  // Atender (cargar la consulta) es de veterinarios y administración; dar y mover turnos, de recepción y administración.
+  const atiende = puede(usuario, 'clinica.escribir')
+  const mueve = puede(usuario, 'turnos.dar')
+  const [moviendo, setMoviendo] = useState(false)
   const [cambiando, setCambiando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { cliente } = turno.mascota
@@ -39,6 +47,23 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
       setCambiando(false)
     }
   }
+
+  async function marcarLlegada(llego: boolean) {
+    setCambiando(true)
+    setError(null)
+    try {
+      alCambiar(await apiPatch<Turno>(`/turnos/${turno.id}/llego`, { llego }))
+    } catch {
+      setError('No se pudo guardar el cambio. Probá de nuevo.')
+    } finally {
+      setCambiando(false)
+    }
+  }
+
+  const opcionMover = mueve ? [{ texto: 'Cambiar día u hora', alElegir: () => setMoviendo(true) }] : []
+  const opcionLlegada = turno.llegoEn
+    ? { texto: 'Todavía no llegó', alElegir: () => marcarLlegada(false) }
+    : { texto: 'Llegó (sala de espera)', alElegir: () => marcarLlegada(true) }
 
   const mensajeDueno = `Hola ${cliente.nombre}, te escribimos de ${nombreClinica} por el turno de ${turno.mascota.nombre}.`
   const avisoAusente = `Hola ${cliente.nombre}, hoy te esperábamos con ${turno.mascota.nombre} a las ${horaDe(turno.fechaHoraInicio)} en ${nombreClinica}. ¿Querés que te demos otro turno?`
@@ -99,7 +124,13 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
         ) : (
           <>
             <strong>{turno.estado === 'PENDIENTE' ? 'Sin confirmar' : 'Confirmado'}</strong>
-            {paso && <span className="fila-paso">Pasó la hora</span>}
+            {turno.llegoEn ? (
+              <span className="fila-llego">
+                <Armchair size={16} aria-hidden="true" /> En sala {horaDe(turno.llegoEn)}
+              </span>
+            ) : (
+              paso && <span className="fila-paso">Pasó la hora</span>
+            )}
           </>
         )}
       </div>
@@ -119,6 +150,7 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
             <MenuMas
               opciones={[
                 { texto: 'Ya le confirmé por teléfono', alElegir: () => cambiar('CONFIRMADO') },
+                ...opcionMover,
                 { texto: 'Cancelar turno', peligro: true, alElegir: () => cambiar('CANCELADO') },
               ]}
               deshabilitado={cambiando}
@@ -126,17 +158,46 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
           </>
         )}
 
-        {turno.estado === 'CONFIRMADO' && (
+        {turno.estado === 'CONFIRMADO' && atiende && (
           <>
             <Link to={rutaConsulta} className="boton-fila">
               <Stethoscope size={18} aria-hidden="true" /> Atender
             </Link>
-            <button type="button" className="boton-fila" disabled={cambiando} onClick={() => cambiar('AUSENTE')}>
-              <UserX size={18} aria-hidden="true" /> No vino
-            </button>
+            {!turno.llegoEn && (
+              <button type="button" className="boton-fila" disabled={cambiando} onClick={() => cambiar('AUSENTE')}>
+                <UserX size={18} aria-hidden="true" /> No vino
+              </button>
+            )}
             <MenuMas
               opciones={[
+                opcionLlegada,
+                ...opcionMover,
                 { texto: 'Atendido sin consulta', alElegir: () => cambiar('ATENDIDO') },
+                { texto: 'Cancelar turno', peligro: true, alElegir: () => cambiar('CANCELADO') },
+              ]}
+              deshabilitado={cambiando}
+            />
+          </>
+        )}
+
+        {/* Recepción: la acción del turno confirmado es anotar que llegó (la consulta la carga quien atiende). */}
+        {turno.estado === 'CONFIRMADO' && !atiende && (
+          <>
+            {!turno.llegoEn && (
+              <>
+                <button type="button" className="boton-fila" disabled={cambiando} onClick={() => marcarLlegada(true)}>
+                  <DoorOpen size={18} aria-hidden="true" /> Llegó
+                </button>
+                <button type="button" className="boton-fila" disabled={cambiando} onClick={() => cambiar('AUSENTE')}>
+                  <UserX size={18} aria-hidden="true" /> No vino
+                </button>
+              </>
+            )}
+            <MenuMas
+              opciones={[
+                ...(turno.llegoEn ? [opcionLlegada] : []),
+                ...opcionMover,
+                { texto: 'Atendido', alElegir: () => cambiar('ATENDIDO') },
                 { texto: 'Cancelar turno', peligro: true, alElegir: () => cambiar('CANCELADO') },
               ]}
               deshabilitado={cambiando}
@@ -147,13 +208,15 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
         {turno.estado === 'ATENDIDO' &&
           (turno.consulta ? (
             <Link to={`/panel/mascotas/${turno.mascota.id}`} className="boton-fila">
-              Ver historia clínica
+              {atiende ? 'Ver historia clínica' : 'Ver ficha'}
             </Link>
           ) : (
             <>
-              <Link to={rutaConsulta} className="boton-fila">
-                Cargar consulta
-              </Link>
+              {atiende && (
+                <Link to={rutaConsulta} className="boton-fila">
+                  Cargar consulta
+                </Link>
+              )}
               <MenuMas opciones={[{ texto: 'Deshacer', alElegir: () => cambiar('CONFIRMADO') }]} deshabilitado={cambiando} />
             </>
           ))}
@@ -173,6 +236,17 @@ export function FilaTurno({ turno, alCambiar, paso, sigue }: Props) {
           </button>
         )}
       </div>
+
+      {moviendo && (
+        <MoverTurno
+          turno={turno}
+          clinica={nombreClinica}
+          alTerminar={(movido) => {
+            setMoviendo(false)
+            if (movido) alCambiar(movido)
+          }}
+        />
+      )}
 
       {error && (
         <p className="mensaje-error fila-error" role="alert">

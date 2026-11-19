@@ -3,7 +3,10 @@ import { Router } from "express";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { registrarCambio } from "../lib/auditoria";
+import { PERSONAL, puede, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
+import { guardarArchivo, subirFoto, urlArchivo } from "../lib/subidas";
 import { tokenDeCarnet } from "../lib/carnet";
 import { suspensionVigente } from "../lib/sanciones";
 import { normalizarTelefono } from "../lib/telefono";
@@ -12,8 +15,10 @@ import { normalizarTelefono } from "../lib/telefono";
 export const clientesRouter = Router();
 export const mascotasRouter = Router();
 
-clientesRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
-mascotasRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+// Todo el personal ve clientes y mascotas; crearlos y cambiarlos es de administración y recepción.
+clientesRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("clientes.ver"));
+mascotasRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("clientes.ver"));
+const editar = requierePermiso("clientes.editar");
 
 // ---------- Validaciones ----------
 
@@ -56,6 +61,13 @@ const esquemaMascota = z.object({
     ),
   castrado: z.boolean().default(false),
   observaciones: textoOpcional,
+  microchip: z
+    .string()
+    .trim()
+    .max(30, "El microchip tiene hasta 30 caracteres")
+    .optional()
+    .transform((v) => (v ? v.replace(/\s+/g, "") : null)),
+  alergias: textoOpcional,
 })
   .refine((m) => m.especie !== "OTRO" || m.otraEspecie, {
     message: "Escribí qué animal es (por ejemplo: conejo)",
@@ -115,7 +127,7 @@ clientesRouter.get("/", async (req, res) => {
 
 const CLIENTES_POR_PAGINA = 10;
 
-clientesRouter.post("/", async (req, res) => {
+clientesRouter.post("/", editar, async (req, res) => {
   const resultado = esquemaAltaRapida.safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: primerError(resultado.error) });
@@ -148,7 +160,7 @@ clientesRouter.post("/", async (req, res) => {
 });
 
 // Clientes que el sistema suspendió solo (canceló muchos turnos web seguidos) y el administrador todavía no revisó.
-clientesRouter.get("/suspensiones", requiereRol("ADMIN"), async (req, res) => {
+clientesRouter.get("/suspensiones", requierePermiso("clientes.sanciones"), async (req, res) => {
   const clientes = await prisma.cliente.findMany({
     where: { clinicaId: req.usuario!.clinicaId, suspensionRevisada: false, suspendidoHasta: { gt: new Date() } },
     select: { id: true, nombre: true, apellido: true, telefono: true, suspendidoHasta: true, suspensionMotivo: true },
@@ -199,7 +211,7 @@ clientesRouter.get("/:id", async (req, res) => {
 });
 
 // Solo el administrador: cuántos turnos web puede tener a la vez este cliente (null = el de la clínica).
-clientesRouter.patch("/:id/limite-turnos", requiereRol("ADMIN"), async (req, res) => {
+clientesRouter.patch("/:id/limite-turnos", requierePermiso("clientes.sanciones"), async (req, res) => {
   const resultado = z
     .object({
       maxTurnosOnline: z
@@ -224,7 +236,7 @@ clientesRouter.patch("/:id/limite-turnos", requiereRol("ADMIN"), async (req, res
 });
 
 // Solo el administrador decide: mantener la suspensión automática, levantarla o suspender a mano.
-clientesRouter.patch("/:id/suspension", requiereRol("ADMIN"), async (req, res) => {
+clientesRouter.patch("/:id/suspension", requierePermiso("clientes.sanciones"), async (req, res) => {
   const resultado = z.object({ accion: z.enum(["mantener", "levantar", "suspender"]) }).safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: "Acción inválida" });
@@ -258,7 +270,7 @@ clientesRouter.patch("/:id/suspension", requiereRol("ADMIN"), async (req, res) =
   res.json({ suspendidoHasta: suspensionVigente(actualizado), suspensionMotivo: actualizado.suspensionMotivo });
 });
 
-clientesRouter.put("/:id", async (req, res) => {
+clientesRouter.put("/:id", editar, async (req, res) => {
   const resultado = esquemaCliente.safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: primerError(resultado.error) });
@@ -281,7 +293,7 @@ clientesRouter.put("/:id", async (req, res) => {
 });
 
 // Contraseña nueva para la cuenta web del dueño, si se la olvidó (lo pide llamando o por WhatsApp).
-clientesRouter.patch("/:id/password", async (req, res) => {
+clientesRouter.patch("/:id/password", editar, async (req, res) => {
   const resultado = z
     .object({ password: z.string().min(8, "La contraseña tiene que tener al menos 8 caracteres") })
     .safeParse(req.body);
@@ -309,7 +321,7 @@ clientesRouter.patch("/:id/password", async (req, res) => {
 // que la clínica no tenía cargado: el sistema no las une solo (por seguridad) y le crea una ficha vacía.
 // La clínica, que lo conoce, escribe el email de la cuenta y las une. Lo que tuviera la ficha nueva
 // (mascotas o avisos) pasa a esta, y la ficha nueva se borra.
-clientesRouter.patch("/:id/unir-cuenta", async (req, res) => {
+clientesRouter.patch("/:id/unir-cuenta", editar, async (req, res) => {
   const resultado = z
     .object({ email: z.string().trim().toLowerCase().pipe(z.email("Escribí un email válido")) })
     .safeParse(req.body);
@@ -351,7 +363,7 @@ clientesRouter.patch("/:id/unir-cuenta", async (req, res) => {
   res.json({ ok: true });
 });
 
-clientesRouter.post("/:id/mascotas", async (req, res) => {
+clientesRouter.post("/:id/mascotas", editar, async (req, res) => {
   const resultado = esquemaMascota.safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: primerError(resultado.error) });
@@ -381,12 +393,27 @@ mascotasRouter.get("/:id", async (req, res) => {
       consultas: {
         orderBy: { fecha: "desc" },
         include: {
-          veterinario: { select: { nombre: true, apellido: true } },
-          aplicaciones: { select: { id: true, tipo: true, producto: true } },
+          veterinario: { select: { id: true, nombre: true, apellido: true } },
+          editadaPor: { select: { nombre: true, apellido: true } },
+          aplicaciones: { select: { id: true, tipo: true, producto: true, anulada: true } },
           turno: { select: { servicio: { select: { nombre: true } } } },
         },
       },
-      aplicaciones: { orderBy: { fechaAplicacion: "desc" } },
+      aplicaciones: {
+        orderBy: { fechaAplicacion: "desc" },
+        include: {
+          registradoPor: { select: { id: true, nombre: true, apellido: true } },
+          anuladaPor: { select: { nombre: true, apellido: true } },
+        },
+      },
+      adjuntos: {
+        where: { quitado: false },
+        orderBy: { creadoEn: "desc" },
+        include: {
+          archivo: { select: { nombre: true, tipo: true, tamanio: true } },
+          subidoPor: { select: { id: true, nombre: true, apellido: true } },
+        },
+      },
       turnos: {
         // Desde el comienzo de hoy: un turno de las 10:00 se puede atender (y vincular a la consulta) a las 10:05.
         where: { fechaHoraInicio: { gte: aFechaUTC(diaArgentina(new Date()), "00:00") }, estado: { in: ["PENDIENTE", "CONFIRMADO"] } },
@@ -400,10 +427,64 @@ mascotasRouter.get("/:id", async (req, res) => {
     return;
   }
   const { tokenCarnet: _token, ...ficha } = mascota;
-  res.json(ficha);
+  const fotoUrl = ficha.fotoId ? urlArchivo(ficha.fotoId) : null;
+  // Recepción ve las visitas (fecha, motivo y quién atendió) pero no lo clínico.
+  if (!puede(req.usuario!.rol, "clinica.ver")) {
+    res.json({
+      ...ficha,
+      fotoUrl,
+      adjuntos: [],
+      consultas: ficha.consultas.map((c) => ({
+        ...c,
+        diagnostico: null,
+        tratamiento: null,
+        observaciones: null,
+        temperatura: null,
+        reservada: true,
+      })),
+    });
+    return;
+  }
+  res.json({ ...ficha, fotoUrl });
 });
 
-mascotasRouter.put("/:id", async (req, res) => {
+// Foto de la mascota (se guarda en la base). Reemplaza la anterior.
+mascotasRouter.post("/:id/foto", editar, subirFoto.single("foto"), async (req, res) => {
+  const id = Number(req.params.id);
+  const mascota = await mascotaDeLaClinica(id, req.usuario!.clinicaId);
+  if (!mascota) {
+    res.status(404).json({ error: "Mascota no encontrada" });
+    return;
+  }
+  if (!req.file) {
+    res.status(400).json({ error: "Elegí una foto (JPG, PNG o WEBP)" });
+    return;
+  }
+  const archivo = await guardarArchivo(req, req.file, { soloImagen: true });
+  if (!archivo) {
+    res.status(400).json({ error: "El archivo no es una foto válida" });
+    return;
+  }
+  await prisma.mascota.update({ where: { id }, data: { fotoId: archivo.id } });
+  if (mascota.fotoId) await prisma.archivo.delete({ where: { id: mascota.fotoId } }).catch(() => {});
+  res.json({ fotoUrl: urlArchivo(archivo.id) });
+});
+
+mascotasRouter.delete("/:id/foto", editar, async (req, res) => {
+  const id = Number(req.params.id);
+  const mascota = await mascotaDeLaClinica(id, req.usuario!.clinicaId);
+  if (!mascota) {
+    res.status(404).json({ error: "Mascota no encontrada" });
+    return;
+  }
+  if (mascota.fotoId) {
+    await prisma.mascota.update({ where: { id }, data: { fotoId: null } });
+    await prisma.archivo.delete({ where: { id: mascota.fotoId } }).catch(() => {});
+  }
+  res.json({ fotoUrl: null });
+});
+
+mascotasRouter.put("/:id", editar, async (req, res) => {
   const resultado = esquemaMascota.safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: primerError(resultado.error) });
@@ -429,7 +510,7 @@ mascotasRouter.get("/:id/carnet", async (req, res) => {
 });
 
 // No se borran: se desactivan (falleció o dejó de venir) para conservar la historia clínica.
-mascotasRouter.patch("/:id/activo", async (req, res) => {
+mascotasRouter.patch("/:id/activo", editar, async (req, res) => {
   const resultado = z.object({ activo: z.boolean() }).safeParse(req.body);
   if (!resultado.success) {
     res.status(400).json({ error: "Falta indicar si la mascota queda activa" });
@@ -441,5 +522,11 @@ mascotasRouter.patch("/:id/activo", async (req, res) => {
     return;
   }
   const mascota = await prisma.mascota.update({ where: { id }, data: { activo: resultado.data.activo } });
+  await registrarCambio(req, {
+    accion: resultado.data.activo ? "mascota.reactivar" : "mascota.archivar",
+    entidad: "mascota",
+    entidadId: id,
+    resumen: `${resultado.data.activo ? "Volvió a activar" : "Archivó"} la ficha de ${mascota.nombre}`,
+  });
   res.json(mascota);
 });

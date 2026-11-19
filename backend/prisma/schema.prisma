@@ -12,10 +12,13 @@ datasource db {
 
 // ---------- Enums ----------
 
+// DUENIO: dueño de mascota (Mi cuenta). VETERINARIO: atiende (lo clínico). RECEPCION: mostrador
+// (clientes, turnos, cobros y avisos, sin lo clínico). ADMIN: administración de la clínica (todo).
 enum Rol {
   DUENIO
   VETERINARIO
   ADMIN
+  RECEPCION
 }
 
 enum Especie {
@@ -80,24 +83,24 @@ enum TipoRecordatorio {
 // ---------- Clínica y configuración ----------
 
 model Clinica {
-  id                  Int     @id @default(autoincrement()) @map("id_clinica")
+  id                  Int       @id @default(autoincrement()) @map("id_clinica")
   nombre              String
   direccion           String
   telefono            String
   whatsapp            String
   email               String?
   instagram           String?
-  latitud             Decimal @db.Decimal(9, 6)
-  longitud            Decimal @db.Decimal(9, 6)
-  horasCancelacion    Int     @default(24) @map("horas_cancelacion")
-  telefonoUrgencias   String? @map("telefono_urgencias")
-  horarioUrgencias    String? @map("horario_urgencias") // Ej.: "Todos los días de 8 a 22 h"
+  latitud             Decimal   @db.Decimal(9, 6)
+  longitud            Decimal   @db.Decimal(9, 6)
+  horasCancelacion    Int       @default(24) @map("horas_cancelacion")
+  telefonoUrgencias   String?   @map("telefono_urgencias")
+  horarioUrgencias    String?   @map("horario_urgencias") // Ej.: "Todos los días de 8 a 22 h"
   // Regla contra el abuso de turnos web: si un dueño cancela limiteCancelaciones turnos en diasCancelaciones días,
   // queda diasSuspension días sin poder sacar turnos por la web (la clínica decide si lo mantiene).
-  limiteCancelaciones Int     @default(3) @map("limite_cancelaciones")
-  diasCancelaciones   Int     @default(7) @map("dias_cancelaciones")
-  diasSuspension      Int     @default(30) @map("dias_suspension")
-  maxTurnosOnline     Int     @default(3) @map("max_turnos_online") // turnos futuros a la vez por la web
+  limiteCancelaciones Int       @default(3) @map("limite_cancelaciones")
+  diasCancelaciones   Int       @default(7) @map("dias_cancelaciones")
+  diasSuspension      Int       @default(30) @map("dias_suspension")
+  maxTurnosOnline     Int       @default(3) @map("max_turnos_online") // turnos futuros a la vez por la web
   // Desde cuándo se registran los pagos: los turnos atendidos antes no aparecen "Por cobrar".
   pagosDesde          DateTime? @map("pagos_desde")
 
@@ -113,21 +116,23 @@ model Clinica {
   formasPago       FormaPago[]
   planesSanitarios PlanSanitario[]
   pagos            Pago[]
+  archivos         Archivo[]
+  auditoria        Auditoria[]
 
   @@map("clinica")
 }
 
 model Usuario {
-  id           Int      @id @default(autoincrement()) @map("id_usuario")
-  clinicaId    Int      @map("id_clinica")
-  nombre       String
-  apellido     String
-  email        String   @unique
-  telefono     String?
-  passwordHash String   @map("password_hash")
-  rol          Rol
-  activo       Boolean  @default(true)
-  creadoEn     DateTime @default(now()) @map("creado_en")
+  id            Int       @id @default(autoincrement()) @map("id_usuario")
+  clinicaId     Int       @map("id_clinica")
+  nombre        String
+  apellido      String
+  email         String    @unique
+  telefono      String?
+  passwordHash  String    @map("password_hash")
+  rol           Rol
+  activo        Boolean   @default(true)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
   // Las sesiones iniciadas antes de esta fecha ya no valen (se completa al cambiar la contraseña).
   sesionesDesde DateTime? @map("sesiones_desde")
 
@@ -138,13 +143,20 @@ model Usuario {
   presentacion String? @db.Text
   fotoUrl      String? @map("foto_url")
 
-  clinica               Clinica        @relation(fields: [clinicaId], references: [id])
+  clinica               Clinica               @relation(fields: [clinicaId], references: [id])
   cliente               Cliente?
-  turnosAtendidos       Turno[]        @relation("TurnoVeterinario")
+  turnosAtendidos       Turno[]               @relation("TurnoVeterinario")
   consultas             Consulta[]
   recordatoriosEnviados Recordatorio[]
-  pagosRegistrados      Pago[]         @relation("PagoRegistradoPor")
-  pagosAnulados         Pago[]         @relation("PagoAnuladoPor")
+  pagosRegistrados      Pago[]                @relation("PagoRegistradoPor")
+  pagosAnulados         Pago[]                @relation("PagoAnuladoPor")
+  consultasEditadas     Consulta[]            @relation("ConsultaEditadaPor")
+  aplicacionesCargadas  AplicacionSanitaria[] @relation("AplicacionRegistradaPor")
+  aplicacionesAnuladas  AplicacionSanitaria[] @relation("AplicacionAnuladaPor")
+  archivosSubidos       Archivo[]
+  adjuntosSubidos       Adjunto[]             @relation("AdjuntoSubidoPor")
+  adjuntosQuitados      Adjunto[]             @relation("AdjuntoQuitadoPor")
+  cambiosHechos         Auditoria[]
 
   @@map("usuario")
 }
@@ -191,15 +203,21 @@ model Mascota {
   color           String?
   castrado        Boolean   @default(false)
   observaciones   String?   @db.Text
+  microchip       String?
+  alergias        String?   @db.Text // alergias y condiciones importantes: se muestran en rojo al atender
+  fotoId          Int?      @unique @map("id_foto")
   activo          Boolean   @default(true)
   // Enlace privado para ver el carnet de vacunación sin cuenta (se crea la primera vez que se pide).
   tokenCarnet     String?   @unique @map("token_carnet")
 
   cliente      Cliente               @relation(fields: [clienteId], references: [id])
+  foto         Archivo?              @relation("FotoMascota", fields: [fotoId], references: [id], onDelete: SetNull)
   turnos       Turno[]
   consultas    Consulta[]
   aplicaciones AplicacionSanitaria[]
+  adjuntos     Adjunto[]
 
+  @@index([microchip])
   @@map("mascota")
 }
 
@@ -262,6 +280,7 @@ model Turno {
   recordatorioEnviadoEn DateTime?     @map("recordatorio_enviado_en")
   canceladoEn           DateTime?     @map("cancelado_en")
   canceladoPor          CanceladoPor? @map("cancelado_por")
+  llegoEn               DateTime?     @map("llego_en") // Recepción marca "Llegó": queda en la sala de espera
   creadoEn              DateTime      @default(now()) @map("creado_en")
 
   clinica       Clinica             @relation(fields: [clinicaId], references: [id])
@@ -307,22 +326,26 @@ model Pago {
 }
 
 model Consulta {
-  id            Int      @id @default(autoincrement()) @map("id_consulta")
-  mascotaId     Int      @map("id_mascota")
-  veterinarioId Int      @map("id_veterinario")
-  turnoId       Int?     @unique @map("id_turno")
-  fecha         DateTime @default(now())
+  id            Int       @id @default(autoincrement()) @map("id_consulta")
+  mascotaId     Int       @map("id_mascota")
+  veterinarioId Int       @map("id_veterinario")
+  turnoId       Int?      @unique @map("id_turno")
+  fecha         DateTime  @default(now())
   motivo        String
-  pesoKg        Decimal? @map("peso_kg") @db.Decimal(5, 2)
-  temperatura   Decimal? @db.Decimal(4, 1)
-  diagnostico   String?  @db.Text
-  tratamiento   String?  @db.Text
-  observaciones String?  @db.Text
+  pesoKg        Decimal?  @map("peso_kg") @db.Decimal(5, 2)
+  temperatura   Decimal?  @db.Decimal(4, 1)
+  diagnostico   String?   @db.Text
+  tratamiento   String?   @db.Text
+  observaciones String?   @db.Text
+  editadaEn     DateTime? @map("editada_en") // la versión anterior queda en auditoria
+  editadaPorId  Int?      @map("id_editada_por")
 
   mascota      Mascota               @relation(fields: [mascotaId], references: [id])
   veterinario  Usuario               @relation(fields: [veterinarioId], references: [id])
+  editadaPor   Usuario?              @relation("ConsultaEditadaPor", fields: [editadaPorId], references: [id])
   turno        Turno?                @relation(fields: [turnoId], references: [id])
   aplicaciones AplicacionSanitaria[]
+  adjuntos     Adjunto[]
 
   @@map("consulta")
 }
@@ -336,9 +359,18 @@ model AplicacionSanitaria {
   lote              String?
   fechaAplicacion   DateTime       @map("fecha_aplicacion") @db.Date
   fechaProximaDosis DateTime?      @map("fecha_proxima_dosis") @db.Date
+  registradoPorId   Int?           @map("id_registrado_por")
+  creadoEn          DateTime       @default(now()) @map("creado_en")
+  // No se borran: si se cargó mal, se anula con el motivo (deja de avisar y de salir en el carnet).
+  anulada           Boolean        @default(false)
+  anuladaEn         DateTime?      @map("anulada_en")
+  anuladaPorId      Int?           @map("id_anulada_por")
+  motivoAnulacion   String?        @map("motivo_anulacion")
 
   mascota       Mascota        @relation(fields: [mascotaId], references: [id])
   consulta      Consulta?      @relation(fields: [consultaId], references: [id])
+  registradoPor Usuario?       @relation("AplicacionRegistradaPor", fields: [registradoPorId], references: [id])
+  anuladaPor    Usuario?       @relation("AplicacionAnuladaPor", fields: [anuladaPorId], references: [id])
   recordatorios Recordatorio[]
 
   @@index([fechaProximaDosis])
@@ -473,4 +505,72 @@ model CuestionarioPrevio {
   turno Turno @relation(fields: [turnoId], references: [id], onDelete: Cascade)
 
   @@map("cuestionario_previo")
+}
+
+// Archivos que sube la clínica (fotos de mascotas y del equipo, análisis, ecografías…).
+// Se guardan dentro de la base: así no se pierden si el servidor se reinicia (Render borra los archivos sueltos)
+// y entran en las copias de seguridad de la base.
+model Archivo {
+  id          Int      @id @default(autoincrement()) @map("id_archivo")
+  clinicaId   Int      @map("id_clinica")
+  nombre      String // nombre original, para descargarlo con el mismo nombre
+  tipo        String // image/jpeg, application/pdf…
+  tamanio     Int
+  datos       Bytes    @db.MediumBlob // hasta 16 MB (la app permite 8 MB)
+  publico     Boolean  @default(false) // true = foto del equipo para la web
+  subidoPorId Int?     @map("id_subido_por")
+  creadoEn    DateTime @default(now()) @map("creado_en")
+
+  clinica   Clinica  @relation(fields: [clinicaId], references: [id])
+  subidoPor Usuario? @relation(fields: [subidoPorId], references: [id])
+  fotoDe    Mascota? @relation("FotoMascota")
+  adjunto   Adjunto?
+
+  @@map("archivo")
+}
+
+// Archivo adjunto a la historia clínica (un análisis, una ecografía, una radiografía).
+// No se borra: si se subió por error, se quita (deja de verse) y queda quién y cuándo.
+model Adjunto {
+  id           Int       @id @default(autoincrement()) @map("id_adjunto")
+  mascotaId    Int       @map("id_mascota")
+  consultaId   Int?      @map("id_consulta")
+  archivoId    Int       @unique @map("id_archivo")
+  descripcion  String?
+  subidoPorId  Int       @map("id_subido_por")
+  creadoEn     DateTime  @default(now()) @map("creado_en")
+  quitado      Boolean   @default(false)
+  quitadoEn    DateTime? @map("quitado_en")
+  quitadoPorId Int?      @map("id_quitado_por")
+
+  mascota    Mascota   @relation(fields: [mascotaId], references: [id])
+  consulta   Consulta? @relation(fields: [consultaId], references: [id])
+  archivo    Archivo   @relation(fields: [archivoId], references: [id])
+  subidoPor  Usuario   @relation("AdjuntoSubidoPor", fields: [subidoPorId], references: [id])
+  quitadoPor Usuario?  @relation("AdjuntoQuitadoPor", fields: [quitadoPorId], references: [id])
+
+  @@index([mascotaId])
+  @@map("adjunto")
+}
+
+// Registro de cambios: quién cambió qué y cuándo (consultas corregidas, vacunas anuladas, turnos movidos,
+// pagos, personal). Solo se agregan filas: nunca se editan ni se borran.
+model Auditoria {
+  id        Int      @id @default(autoincrement()) @map("id_auditoria")
+  clinicaId Int      @map("id_clinica")
+  usuarioId Int?     @map("id_usuario")
+  fecha     DateTime @default(now())
+  accion    String // ej.: consulta.corregir, vacuna.anular, turno.mover
+  entidad   String // consulta, aplicacion, turno, pago, usuario, mascota, adjunto
+  entidadId Int      @map("id_entidad")
+  resumen   String   @db.Text // en palabras: "Corrigió la consulta de Firulais"
+  antes     Json?
+  despues   Json?
+
+  clinica Clinica  @relation(fields: [clinicaId], references: [id])
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([clinicaId, fecha])
+  @@index([entidad, entidadId])
+  @@map("auditoria")
 }

@@ -5,11 +5,14 @@ import {
   diaArgentina,
   esFechaValida,
   grillaHorarios,
+  horaArgentina,
   horariosLibres,
   sumarDias,
   validarHorario,
 } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { registrarCambio } from "../lib/auditoria";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
 import { bloquearAgenda, opcionesReserva, suspensionVigente, turnosWebActivos } from "../lib/sanciones";
 
@@ -205,7 +208,8 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
 // =====================================================================
 
 export const turnosRouter = Router();
-turnosRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+// Todo el personal ve la agenda; dar y mover turnos es de administración y recepción.
+turnosRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("turnos.ver"));
 
 const incluirDetalle = {
   mascota: { include: { cliente: { select: { id: true, nombre: true, apellido: true, telefono: true } } } },
@@ -247,7 +251,9 @@ turnosRouter.get("/dias-cerrados", async (req, res) => {
 turnosRouter.get("/disponibilidad", async (req, res) => {
   const servicioId = Number(req.query.servicioId);
   const dia = esFechaValida(req.query.fecha) ? req.query.fecha : hoy();
-  const libres = await horariosLibres(req.usuario!.clinicaId, servicioId, dia, 1);
+  // Al mover un turno, su propio horario cuenta como libre.
+  const ignorarTurnoId = Number(req.query.ignorar) || undefined;
+  const libres = await horariosLibres(req.usuario!.clinicaId, servicioId, dia, 1, { ignorarTurnoId });
   res.json(libres[dia] ?? []);
 });
 
@@ -262,7 +268,7 @@ const esquemaTurnoPersonal = z.object({
   sobreturno: z.boolean().optional(),
 });
 
-turnosRouter.post("/", async (req, res) => {
+turnosRouter.post("/", requierePermiso("turnos.dar"), async (req, res) => {
   const resultado = esquemaTurnoPersonal.safeParse(req.body);
   if (!resultado.success) return responderError(res, resultado.error);
   const datos = resultado.data;
@@ -315,7 +321,7 @@ turnosRouter.post("/", async (req, res) => {
 });
 
 // Cambiar el estado con un toque: confirmado, atendido, ausente o cancelado.
-turnosRouter.patch("/:id/estado", async (req, res) => {
+turnosRouter.patch("/:id/estado", requierePermiso("turnos.estado"), async (req, res) => {
   const resultado = z
     .object({ estado: z.enum(["PENDIENTE", "CONFIRMADO", "ATENDIDO", "AUSENTE", "CANCELADO"]) })
     .safeParse(req.body);
@@ -346,5 +352,114 @@ turnosRouter.patch("/:id/estado", async (req, res) => {
     },
     include: incluirDetalle,
   });
+  if (resultado.data.estado === "CANCELADO" && turno.estado !== "CANCELADO") {
+    await registrarCambio(req, {
+      accion: "turno.cancelar",
+      entidad: "turno",
+      entidadId: id,
+      resumen: `Canceló el turno de ${actualizado.mascota.nombre} del ${diaYHora(turno.fechaHoraInicio)}`,
+    });
+  }
   res.json(actualizado);
+});
+
+function diaYHora(fecha: Date) {
+  const [a, m, d] = diaArgentina(fecha).split("-");
+  return `${d}/${m}/${a} a las ${horaArgentina(fecha)}`;
+}
+
+// "Llegó": recepción marca que el cliente ya está en la sala de espera (se puede deshacer).
+turnosRouter.patch("/:id/llego", requierePermiso("turnos.estado"), async (req, res) => {
+  const resultado = z.object({ llego: z.boolean() }).safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: "Dato inválido" });
+    return;
+  }
+  const id = Number(req.params.id);
+  const turno = await prisma.turno.findFirst({ where: { id, clinicaId: req.usuario!.clinicaId } });
+  if (!turno) {
+    res.status(404).json({ error: "Turno no encontrado" });
+    return;
+  }
+  if (turno.estado === "CANCELADO") {
+    res.status(409).json({ error: "Ese turno está cancelado" });
+    return;
+  }
+  const actualizado = await prisma.turno.update({
+    where: { id },
+    data: {
+      llegoEn: resultado.data.llego ? (turno.llegoEn ?? new Date()) : null,
+      // Si estaba marcado como ausente por error, al llegar vuelve a confirmado.
+      ...(resultado.data.llego && turno.estado === "AUSENTE" ? { estado: "CONFIRMADO" as const } : {}),
+    },
+    include: incluirDetalle,
+  });
+  res.json(actualizado);
+});
+
+// Cambiar el día o la hora sin cancelar el turno (el historial y el origen se conservan).
+const esquemaMover = z.object({ fecha, hora, sobreturno: z.boolean().optional() });
+
+turnosRouter.patch("/:id/mover", requierePermiso("turnos.dar"), async (req, res) => {
+  const resultado = esquemaMover.safeParse(req.body);
+  if (!resultado.success) return responderError(res, resultado.error);
+  const datos = resultado.data;
+  const id = Number(req.params.id);
+  const clinicaId = req.usuario!.clinicaId;
+  const turno = await prisma.turno.findFirst({ where: { id, clinicaId }, include: { servicio: true } });
+  if (!turno) {
+    res.status(404).json({ error: "Turno no encontrado" });
+    return;
+  }
+  if (!["PENDIENTE", "CONFIRMADO"].includes(turno.estado)) {
+    res.status(409).json({ error: "Solo se pueden mover turnos que todavía no pasaron" });
+    return;
+  }
+  const inicio = aFechaUTC(datos.fecha, datos.hora);
+  if (inicio < new Date()) {
+    res.status(400).json({ error: "Elegí un día y una hora que no hayan pasado" });
+    return;
+  }
+  let movido;
+  try {
+    movido = await prisma.$transaction(async (tx) => {
+      await bloquearAgenda(tx, clinicaId);
+      const problema = await validarHorario(clinicaId, turno.servicioId, datos.fecha, datos.hora, {
+        sobreturno: datos.sobreturno,
+        ignorarTurnoId: id,
+      });
+      if (problema) throw new ProblemaReserva(problema);
+      const nuevo = await tx.turno.update({
+        where: { id },
+        data: {
+          fechaHoraInicio: inicio,
+          fechaHoraFin: new Date(inicio.getTime() + turno.servicio.duracionMin * 60 * 1000),
+          // Si ya se le había mandado el recordatorio, se le vuelve a mandar con la fecha nueva.
+          recordatorioEnviadoEn: null,
+          llegoEn: null,
+        },
+        include: incluirDetalle,
+      });
+      await registrarCambio(
+        req,
+        {
+          accion: "turno.mover",
+          entidad: "turno",
+          entidadId: id,
+          resumen: `Movió el turno de ${nuevo.mascota.nombre}: del ${diaYHora(turno.fechaHoraInicio)} al ${diaYHora(inicio)}`,
+          antes: { fechaHoraInicio: turno.fechaHoraInicio },
+          despues: { fechaHoraInicio: inicio },
+        },
+        tx,
+      );
+      return nuevo;
+    }, opcionesReserva);
+  } catch (error) {
+    if (error instanceof ProblemaReserva) {
+      res.status(error.estado).json({ error: error.message });
+      return;
+    }
+    throw error;
+  }
+  res.json(movido);
 });

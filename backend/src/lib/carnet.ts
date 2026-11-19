@@ -44,7 +44,7 @@ export async function datosDelCarnet(token: string) {
     where: { tokenCarnet: token },
     include: {
       cliente: { include: { clinica: true } },
-      aplicaciones: { orderBy: { fechaAplicacion: "asc" } },
+      aplicaciones: { where: { anulada: false }, orderBy: { fechaAplicacion: "asc" } },
     },
   });
 }

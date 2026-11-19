@@ -2,12 +2,14 @@ import { Router } from "express";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina, esFechaValida, sumarDias } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
 import { CANTIDAD_COLUMNAS, escribirInforme } from "../lib/informe";
 
 // Estadísticas de la clínica para un período (fechas en hora argentina, ambas inclusive).
 export const estadisticasRouter = Router();
-estadisticasRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+// Las estadísticas (y el informe de turnos) son de la administración.
+estadisticasRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("estadisticas"));
 
 const MAX_DIAS = 400;
 const DIAS_PARA_VOLVER = 30; // un aviso "recupera" al cliente si saca turno dentro de este plazo

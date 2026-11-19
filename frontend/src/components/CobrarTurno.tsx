@@ -1,7 +1,9 @@
 import { Check, Undo2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { apiPatch, apiPost } from '../lib/api'
+import { puede } from '../lib/permisos'
 import { BotonesComprobante } from './BotonesComprobante'
 import { diaCorto, diaDe, esHoy, horaDe } from '../lib/fechas'
 import { leerMonto, MEDIOS_PAGO, MEDIOS_PARA_COBRAR, montoParaEditar, pesos } from '../lib/pagos'
@@ -18,6 +20,7 @@ export function CobrarTurno({
   alCambiar?: (cobrado: boolean) => void
   conCliente?: boolean // en la ficha del cliente no hace falta repetir su nombre
 }) {
+  const { usuario } = useAuth()
   const [monto, setMonto] = useState(() => montoParaEditar(turno.servicio.precioReferencia))
   const [medio, setMedio] = useState<MedioPago>('EFECTIVO')
   const [pago, setPago] = useState<Pago | null>(null)
@@ -80,6 +83,17 @@ export function CobrarTurno({
       </span>
     </div>
   )
+
+  // Quien atiende ve lo que falta cobrar, pero el cobro lo hacen recepción o la administración.
+  if (!puede(usuario, 'pagos.cobrar')) {
+    const precio = turno.servicio.precioReferencia
+    return (
+      <li className="cobro">
+        {quien}
+        <p className="cobro-solo-ver">Por cobrar{precio !== null && <> · {pesos(precio)}</>}</p>
+      </li>
+    )
+  }
 
   if (pago) {
     return (

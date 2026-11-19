@@ -1,6 +1,7 @@
 import { Ban, CalendarCheck, CalendarX, CircleCheck, Pencil, UserX } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { puede } from '../lib/permisos'
 import { apiPatch } from '../lib/api'
 import { fechaCortaDe } from '../lib/fechas'
 import type { ClienteDetalle } from '../types'
@@ -16,7 +17,8 @@ export function TurnosDelCliente({ cliente, alCambiar }: Props) {
   const [error, setError] = useState<string | null>(null)
   const { atendidos, ausentes, canceladosPorElDueno } = cliente.resumenTurnos
   const { usuario } = useAuth()
-  const esAdmin = usuario?.rol === 'ADMIN'
+  // Suspender, levantar o cambiar el límite de turnos web: solo la administración.
+  const esAdmin = puede(usuario, 'clientes.sanciones')
   const [editandoLimite, setEditandoLimite] = useState(false)
   const [limite, setLimite] = useState('')
   const limiteActual = cliente.maxTurnosOnline ?? cliente.maxTurnosOnlineClinica

@@ -41,7 +41,7 @@ export interface Cirugia extends Servicio {
   avisar: string[]
 }
 
-export type Rol = 'DUENIO' | 'VETERINARIO' | 'ADMIN'
+export type Rol = 'DUENIO' | 'VETERINARIO' | 'ADMIN' | 'RECEPCION'
 
 export interface Usuario {
   id: number
@@ -53,7 +53,6 @@ export interface Usuario {
 }
 
 export interface RespuestaSesion {
-  token: string
   usuario: Usuario
 }
 
@@ -140,6 +139,9 @@ export interface Mascota {
   color: string | null
   castrado: boolean
   observaciones: string | null
+  microchip?: string | null
+  alergias?: string | null
+  fotoUrl?: string | null
   activo: boolean
 }
 
@@ -183,9 +185,40 @@ export interface ConsultaResumen {
   diagnostico: string | null
   tratamiento: string | null
   observaciones: string | null
-  veterinario: { nombre: string; apellido: string }
-  aplicaciones: { id: number; tipo: 'VACUNA' | 'DESPARASITACION'; producto: string }[]
+  veterinario: { id?: number; nombre: string; apellido: string }
+  aplicaciones: { id: number; tipo: 'VACUNA' | 'DESPARASITACION'; producto: string; anulada?: boolean }[]
   turno: { servicio: { nombre: string } } | null
+  editadaEn?: string | null
+  editadaPor?: { nombre: string; apellido: string } | null
+  // Recepción ve la visita (fecha, motivo, quién atendió) pero no el detalle clínico.
+  reservada?: boolean
+}
+
+export interface Persona {
+  nombre: string
+  apellido: string
+}
+
+export interface Adjunto {
+  id: number
+  consultaId: number | null
+  descripcion: string | null
+  creadoEn: string
+  archivoId: number
+  archivo: { nombre: string; tipo: string; tamanio: number }
+  subidoPor: Persona & { id: number }
+}
+
+export interface Cambio {
+  id: number
+  fecha: string
+  accion: string
+  entidad: string
+  entidadId: number
+  resumen: string
+  antes: Record<string, unknown> | null
+  despues: Record<string, unknown> | null
+  usuario: { id: number; nombre: string; apellido: string; rol: Rol } | null
 }
 
 export interface AplicacionSanitaria {
@@ -194,6 +227,12 @@ export interface AplicacionSanitaria {
   producto: string
   fechaAplicacion: string
   fechaProximaDosis: string | null
+  creadoEn?: string
+  anulada?: boolean
+  anuladaEn?: string | null
+  motivoAnulacion?: string | null
+  registradoPor?: (Persona & { id: number }) | null
+  anuladaPor?: Persona | null
 }
 
 export interface TurnoResumen {
@@ -209,6 +248,7 @@ export interface FichaMascota extends Mascota {
   consultas: ConsultaResumen[]
   aplicaciones: AplicacionSanitaria[]
   turnos: TurnoResumen[]
+  adjuntos: Adjunto[]
 }
 
 // ---------- Turnos ----------
@@ -224,6 +264,7 @@ export interface Turno {
   origen: OrigenTurno
   observaciones: string | null
   canceladoPor?: 'DUENIO' | 'CLINICA' | null
+  llegoEn?: string | null // recepción marcó "Llegó": está en la sala de espera
   mascota: Mascota & { cliente: { id: number; nombre: string; apellido: string; telefono: string } }
   servicio: { id: number; nombre: string; duracionMin: number; categoria: CategoriaServicio }
   veterinario: { id: number; nombre: string; apellido: string } | null
@@ -294,7 +335,7 @@ export interface ServicioConfig extends Servicio {
 }
 
 export interface Personal extends Omit<Usuario, 'rol'> {
-  rol: 'VETERINARIO' | 'ADMIN'
+  rol: 'ADMIN' | 'VETERINARIO' | 'RECEPCION'
   activo: boolean
   visibleEnWeb: boolean
   matricula: string | null

@@ -3,6 +3,7 @@ import { DatosClinica } from './DatosClinica'
 import { DiasCerrados } from './DiasCerrados'
 import { Horarios } from './Horarios'
 import { PersonalClinica } from './PersonalClinica'
+import { RegistroCambios } from './RegistroCambios'
 import { Servicios } from './Servicios'
 
 const SECCIONES = [
@@ -11,6 +12,7 @@ const SECCIONES = [
   { clave: 'cerrado', nombre: 'Días cerrados', componente: DiasCerrados },
   { clave: 'servicios', nombre: 'Servicios', componente: Servicios },
   { clave: 'personal', nombre: 'Personal', componente: PersonalClinica },
+  { clave: 'cambios', nombre: 'Registro de cambios', componente: RegistroCambios },
 ] as const
 
 // Configuración de la clínica (solo administración). La sección elegida queda en la dirección,

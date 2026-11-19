@@ -2,23 +2,19 @@ import { descargarArchivo } from './descargas'
 
 // Funciones para comunicarse con el backend.
 
-const CLAVE_TOKEN = 'vetya_token'
+// La sesión viaja en una cookie que guarda el navegador y que ningún script puede leer (más segura que
+// guardarla en la página). Acá solo se anota si hay alguien adentro, para saber qué hacer si se corta.
+let conSesion = false
 
-export function guardarToken(token: string | null) {
-  try {
-    if (token) localStorage.setItem(CLAVE_TOKEN, token)
-    else localStorage.removeItem(CLAVE_TOKEN)
-  } catch {
-    // Si el navegador bloquea el almacenamiento, la sesión dura hasta recargar la página.
-  }
+export function marcarSesion(activa: boolean) {
+  conSesion = activa
 }
 
-export function leerToken(): string | null {
-  try {
-    return localStorage.getItem(CLAVE_TOKEN)
-  } catch {
-    return null
-  }
+// Antes del 22/11 la sesión se guardaba en el navegador: se borra lo que haya quedado.
+try {
+  localStorage.removeItem('vetya_token')
+} catch {
+  // sin almacenamiento, no hay nada que borrar
 }
 
 // Error con el mensaje que devuelve el backend, para mostrarlo en pantalla.
@@ -33,21 +29,16 @@ export class ErrorApi extends Error {
 }
 
 async function apiFetch<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
-  const token = leerToken()
   const respuesta = await fetch(`/api${ruta}`, {
     ...opciones,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...opciones.headers,
-    },
+    headers: { 'Content-Type': 'application/json', ...opciones.headers },
   })
   const cuerpo = respuesta.status === 204 ? null : await respuesta.json().catch(() => null)
   if (!respuesta.ok) {
     // La sesión ya no vale (se cambió la contraseña, se desactivó la cuenta o venció): se cierra
     // y se pide entrar de nuevo, en lugar de mostrar errores raros en cada pantalla.
-    if (respuesta.status === 401 && token && !ruta.startsWith('/auth/login')) {
-      guardarToken(null)
+    if (respuesta.status === 401 && conSesion && !ruta.startsWith('/auth/')) {
+      conSesion = false
       window.location.assign('/ingresar')
     }
     throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`, cuerpo)
@@ -77,11 +68,10 @@ export function apiDelete<T>(ruta: string): Promise<T> {
 
 // Pide un archivo armado por el servidor (por ejemplo, un PDF) y lo baja con el nombre dado.
 export async function apiDescargar(ruta: string, datos: unknown, nombre: string) {
-  const token = leerToken()
   const respuesta = await fetch(`/api${ruta}`, {
     method: 'POST',
     body: JSON.stringify(datos),
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: { 'Content-Type': 'application/json' },
   })
   if (!respuesta.ok) {
     const cuerpo = await respuesta.json().catch(() => null)
@@ -92,12 +82,7 @@ export async function apiDescargar(ruta: string, datos: unknown, nombre: string)
 
 // Envía archivos (por ejemplo, fotos). No se fija el Content-Type: el navegador lo arma con el FormData.
 export async function apiSubir<T>(ruta: string, formulario: FormData): Promise<T> {
-  const token = leerToken()
-  const respuesta = await fetch(`/api${ruta}`, {
-    method: 'POST',
-    body: formulario,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
+  const respuesta = await fetch(`/api${ruta}`, { method: 'POST', body: formulario })
   const cuerpo = await respuesta.json().catch(() => null)
   if (!respuesta.ok) throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`)
   return cuerpo as T

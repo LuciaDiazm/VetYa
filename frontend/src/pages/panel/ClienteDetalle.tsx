@@ -13,10 +13,16 @@ import { PagosDelCliente } from '../../components/PagosDelCliente'
 import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
 import { IconoEspecie } from './Clientes'
 import { Cargando } from '../../components/Cargando'
+import { useAuth } from '../../context/AuthContext'
+import { puede } from '../../lib/permisos'
 
 // Ficha del dueño: sus datos y botones de contacto al costado; sus mascotas y turnos al lado.
 export function ClienteDetalle() {
   const { id } = useParams()
+  const { usuario } = useAuth()
+  // Recepción y administración cargan y corrigen datos; la veterinaria o el veterinario los consulta.
+  const edita = puede(usuario, 'clientes.editar')
+  const daTurnos = puede(usuario, 'turnos.dar')
   const navegar = useNavigate()
   const [cliente, setCliente] = useState<DatosClienteDetalle | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -168,22 +174,24 @@ export function ClienteDetalle() {
                 <a href={`tel:+${cliente.telefono}`} className="boton boton-contorno">
                   <Phone size={20} aria-hidden="true" /> Llamar
                 </a>
-                <button
-                  type="button"
-                  className="boton boton-contorno"
-                  onClick={() => {
-                    setDatos(datosDeCliente(cliente))
-                    setEditando(true)
-                  }}
-                >
-                  <Pencil size={18} aria-hidden="true" /> Editar datos
-                </button>
+                {edita && (
+                  <button
+                    type="button"
+                    className="boton boton-contorno"
+                    onClick={() => {
+                      setDatos(datosDeCliente(cliente))
+                      setEditando(true)
+                    }}
+                  >
+                    <Pencil size={18} aria-hidden="true" /> Editar datos
+                  </button>
+                )}
               </div>
             </>
           )}
 
           {/* Sin cuenta: si se registró en la web con otro email, la clínica la une acá */}
-          {!cliente.usuario && (
+          {edita && !cliente.usuario && (
             <section className="ficha-cliente-clave" aria-labelledby="titulo-unir-cuenta">
               <h2 id="titulo-unir-cuenta">Cuenta en la web</h2>
               <p>
@@ -213,7 +221,7 @@ export function ClienteDetalle() {
             </section>
           )}
 
-          {cliente.usuario && (
+          {edita && cliente.usuario && (
             <section className="ficha-cliente-clave" aria-labelledby="titulo-cuenta-web">
               <h2 id="titulo-cuenta-web">Cuenta en la web</h2>
               <p>
@@ -276,7 +284,7 @@ export function ClienteDetalle() {
           <section className="tarjeta bloque-ficha">
             <div className="bloque-ficha-titulo">
               <h2>Mascotas</h2>
-              {!agregando && (
+              {edita && !agregando && (
                 <button type="button" className="boton boton-secundario" onClick={() => setAgregando(true)}>
                   <Plus size={20} aria-hidden="true" /> Agregar mascota
                 </button>
@@ -318,10 +326,12 @@ export function ClienteDetalle() {
                       </span>
                       <span className="mascota-fila-ver">Ver ficha</span>
                     </Link>
-                    <Link to={`/panel/agenda/nuevo?mascota=${m.id}`} className="boton boton-contorno">
-                      <CalendarPlus size={20} aria-hidden="true" /> Dar turno
-                      <span className="solo-lectores"> a {m.nombre}</span>
-                    </Link>
+                    {daTurnos && (
+                      <Link to={`/panel/agenda/nuevo?mascota=${m.id}`} className="boton boton-contorno">
+                        <CalendarPlus size={20} aria-hidden="true" /> Dar turno
+                        <span className="solo-lectores"> a {m.nombre}</span>
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

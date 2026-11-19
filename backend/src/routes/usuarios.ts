@@ -1,15 +1,17 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
-import { requiereRol, requiereSesion } from "../lib/auth";
+import { requiereSesion } from "../lib/auth";
+import { registrarCambio } from "../lib/auditoria";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
-import { borrarArchivoSubido, subirFotoEquipo, urlFotoEquipo } from "../lib/subidas";
+import { guardarArchivo, idDeUrl, subirFoto, urlArchivo } from "../lib/subidas";
 import { normalizarTelefono } from "../lib/telefono";
 
 // Gestión del personal de la clínica. Solo para administradores.
 export const usuariosRouter = Router();
 
-usuariosRouter.use(requiereSesion, requiereRol("ADMIN"));
+usuariosRouter.use(requiereSesion, requierePermiso("personal"));
 
 const camposPublicos = {
   id: true,
@@ -27,19 +29,22 @@ const camposPublicos = {
   fotoUrl: true,
 } as const;
 
+const NOMBRE_ROL = { ADMIN: "Administración", VETERINARIO: "Veterinaria/o", RECEPCION: "Recepción", DUENIO: "Dueño" } as const;
+const nombreDe = (u: { nombre: string; apellido: string }) => `${u.nombre} ${u.apellido}`;
+
 const esquemaPersonal = z.object({
   nombre: z.string().trim().min(1, "Ingresá el nombre"),
   apellido: z.string().trim().min(1, "Ingresá el apellido"),
   email: z.email("Email inválido").trim().toLowerCase(),
   telefono: z.string().trim().optional(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  rol: z.enum(["VETERINARIO", "ADMIN"]),
+  rol: z.enum(["ADMIN", "VETERINARIO", "RECEPCION"]),
 });
 
-// Lista del personal (veterinarios y administradores).
+// Lista del personal (administración, veterinarios y recepción).
 usuariosRouter.get("/", async (req, res) => {
   const usuarios = await prisma.usuario.findMany({
-    where: { clinicaId: req.usuario!.clinicaId, rol: { in: ["VETERINARIO", "ADMIN"] } },
+    where: { clinicaId: req.usuario!.clinicaId, rol: { in: PERSONAL } },
     select: camposPublicos,
     orderBy: { apellido: "asc" },
   });
@@ -71,6 +76,12 @@ usuariosRouter.post("/", async (req, res) => {
     },
     select: camposPublicos,
   });
+  await registrarCambio(req, {
+    accion: "personal.crear",
+    entidad: "usuario",
+    entidadId: usuario.id,
+    resumen: `Creó la cuenta de ${nombreDe(usuario)} (${NOMBRE_ROL[usuario.rol]})`,
+  });
   res.status(201).json(usuario);
 });
 
@@ -90,7 +101,7 @@ usuariosRouter.patch("/:id/activo", async (req, res) => {
   }
 
   const usuario = await prisma.usuario.findFirst({
-    where: { id, clinicaId: req.usuario!.clinicaId, rol: { in: ["VETERINARIO", "ADMIN"] } },
+    where: { id, clinicaId: req.usuario!.clinicaId, rol: { in: PERSONAL } },
   });
   if (!usuario) {
     res.status(404).json({ error: "Usuario no encontrado" });
@@ -102,11 +113,17 @@ usuariosRouter.patch("/:id/activo", async (req, res) => {
     data: { activo },
     select: camposPublicos,
   });
+  await registrarCambio(req, {
+    accion: activo ? "personal.activar" : "personal.desactivar",
+    entidad: "usuario",
+    entidadId: id,
+    resumen: `${activo ? "Activó" : "Desactivó"} la cuenta de ${nombreDe(actualizado)}`,
+  });
   res.json(actualizado);
 });
 
 function delPersonal(id: number, clinicaId: number) {
-  return prisma.usuario.findFirst({ where: { id, clinicaId, rol: { in: ["VETERINARIO", "ADMIN"] } } });
+  return prisma.usuario.findFirst({ where: { id, clinicaId, rol: { in: PERSONAL } } });
 }
 
 const opcional = (max: number) =>
@@ -122,7 +139,7 @@ const esquemaEdicion = z.object({
   apellido: z.string().trim().min(1, "Ingresá el apellido"),
   email: z.email("Email inválido").trim().toLowerCase(),
   telefono: opcional(40),
-  rol: z.enum(["VETERINARIO", "ADMIN"]),
+  rol: z.enum(["ADMIN", "VETERINARIO", "RECEPCION"]),
   // Perfil para la sección "Nuestro equipo" de la web
   visibleEnWeb: z.boolean(),
   matricula: opcional(60),
@@ -138,7 +155,8 @@ usuariosRouter.put("/:id", async (req, res) => {
     return;
   }
   const datos = resultado.data;
-  if (!(await delPersonal(id, req.usuario!.clinicaId))) {
+  const anterior = await delPersonal(id, req.usuario!.clinicaId);
+  if (!anterior) {
     res.status(404).json({ error: "Usuario no encontrado" });
     return;
   }
@@ -156,6 +174,16 @@ usuariosRouter.put("/:id", async (req, res) => {
     data: { ...datos, telefono: datos.telefono ? normalizarTelefono(datos.telefono) : null },
     select: camposPublicos,
   });
+  if (anterior.rol !== usuario.rol) {
+    await registrarCambio(req, {
+      accion: "personal.rol",
+      entidad: "usuario",
+      entidadId: id,
+      resumen: `Cambió el perfil de ${nombreDe(usuario)}: de ${NOMBRE_ROL[anterior.rol]} a ${NOMBRE_ROL[usuario.rol]}`,
+      antes: { rol: anterior.rol },
+      despues: { rol: usuario.rol },
+    });
+  }
   res.json(usuario);
 });
 
@@ -169,7 +197,8 @@ usuariosRouter.patch("/:id/password", async (req, res) => {
     res.status(400).json({ error: resultado.error.issues[0].message });
     return;
   }
-  if (!(await delPersonal(id, req.usuario!.clinicaId))) {
+  const persona = await delPersonal(id, req.usuario!.clinicaId);
+  if (!persona) {
     res.status(404).json({ error: "Usuario no encontrado" });
     return;
   }
@@ -178,29 +207,38 @@ usuariosRouter.patch("/:id/password", async (req, res) => {
     where: { id },
     data: { passwordHash: await bcrypt.hash(resultado.data.password, 10), sesionesDesde: new Date() },
   });
+  await registrarCambio(req, {
+    accion: "personal.contrasena",
+    entidad: "usuario",
+    entidadId: id,
+    resumen: `Le dio una contraseña nueva a ${nombreDe(persona)}`,
+  });
   res.json({ ok: true });
 });
 
-// Foto para la web. Reemplaza la anterior.
-usuariosRouter.post("/:id/foto", subirFotoEquipo.single("foto"), async (req, res) => {
+// Foto para la web. Se guarda en la base (no se pierde si el servidor se reinicia) y reemplaza la anterior.
+usuariosRouter.post("/:id/foto", subirFoto.single("foto"), async (req, res) => {
   const id = Number(req.params.id);
-  const archivo = req.file;
-  if (!archivo) {
+  if (!req.file) {
     res.status(400).json({ error: "Elegí una foto (JPG, PNG o WEBP)" });
     return;
   }
   const usuario = await delPersonal(id, req.usuario!.clinicaId);
   if (!usuario) {
-    borrarArchivoSubido(urlFotoEquipo(archivo.filename));
     res.status(404).json({ error: "Usuario no encontrado" });
     return;
   }
-  if (usuario.fotoUrl) borrarArchivoSubido(usuario.fotoUrl);
+  const archivo = await guardarArchivo(req, req.file, { publico: true, soloImagen: true });
+  if (!archivo) {
+    res.status(400).json({ error: "El archivo no es una foto válida" });
+    return;
+  }
   const actualizado = await prisma.usuario.update({
     where: { id },
-    data: { fotoUrl: urlFotoEquipo(archivo.filename) },
+    data: { fotoUrl: urlArchivo(archivo.id) },
     select: camposPublicos,
   });
+  await borrarFotoAnterior(usuario.fotoUrl);
   res.json(actualizado);
 });
 
@@ -211,6 +249,13 @@ usuariosRouter.delete("/:id/foto", async (req, res) => {
     res.status(404).json({ error: "Usuario no encontrado" });
     return;
   }
-  if (usuario.fotoUrl) borrarArchivoSubido(usuario.fotoUrl);
-  res.json(await prisma.usuario.update({ where: { id }, data: { fotoUrl: null }, select: camposPublicos }));
+  const actualizado = await prisma.usuario.update({ where: { id }, data: { fotoUrl: null }, select: camposPublicos });
+  await borrarFotoAnterior(usuario.fotoUrl);
+  res.json(actualizado);
 });
+
+// Las fotos de ejemplo (/fotos/...) son parte de la web y no se tocan.
+async function borrarFotoAnterior(url: string | null) {
+  const anterior = idDeUrl(url);
+  if (anterior) await prisma.archivo.delete({ where: { id: anterior } }).catch(() => {});
+}

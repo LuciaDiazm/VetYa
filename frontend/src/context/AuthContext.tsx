@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { apiGet, apiPost, ErrorApi, guardarToken, leerToken } from '../lib/api'
+import { apiGet, apiPost, marcarSesion } from '../lib/api'
 import type { RespuestaSesion, Usuario } from '../types'
 
 export interface DatosRegistro {
@@ -16,6 +16,7 @@ interface ContextoAuth {
   ingresar: (email: string, password: string) => Promise<Usuario>
   registrarse: (datos: DatosRegistro) => Promise<Usuario>
   salir: () => void
+  actualizar: (usuario: Usuario) => void
 }
 
 const AuthContext = createContext<ContextoAuth | null>(null)
@@ -23,46 +24,43 @@ const AuthContext = createContext<ContextoAuth | null>(null)
 // Guarda quién tiene la sesión iniciada y lo comparte con toda la aplicación.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
-  // Solo hay algo que cargar si quedó un token guardado de una visita anterior.
-  const [cargando, setCargando] = useState(() => leerToken() !== null)
+  const [cargando, setCargando] = useState(true)
 
-  // Al abrir la página, si hay un token guardado se recupera el usuario.
+  function entrar(u: Usuario) {
+    marcarSesion(true)
+    setUsuario(u)
+  }
+
+  // Al abrir la página se pregunta si hay una sesión abierta (la cookie la manda el navegador solo).
+  // Cada visita la renueva: así no se vence mientras sigan entrando.
   useEffect(() => {
-    if (!leerToken()) return
-    // Cada visita trae una sesión renovada: así no se vence mientras sigan entrando.
-    apiGet<Usuario & { token?: string }>('/auth/yo')
-      .then(({ token, ...usuario }) => {
-        if (token) guardarToken(token)
-        setUsuario(usuario)
-      })
-      // Solo se cierra la sesión si el servidor dice que venció; si no hubo conexión, se conserva.
-      .catch((error) => {
-        if (error instanceof ErrorApi && error.status === 401) guardarToken(null)
-      })
+    apiGet<Usuario>('/auth/yo')
+      .then(entrar)
+      .catch(() => {})
       .finally(() => setCargando(false))
   }, [])
 
   async function ingresar(email: string, password: string) {
-    const { token, usuario } = await apiPost<RespuestaSesion>('/auth/login', { email, password })
-    guardarToken(token)
-    setUsuario(usuario)
+    const { usuario } = await apiPost<RespuestaSesion>('/auth/login', { email, password })
+    entrar(usuario)
     return usuario
   }
 
   async function registrarse(datos: DatosRegistro) {
-    const { token, usuario } = await apiPost<RespuestaSesion>('/auth/registro', datos)
-    guardarToken(token)
-    setUsuario(usuario)
+    const { usuario } = await apiPost<RespuestaSesion>('/auth/registro', datos)
+    entrar(usuario)
     return usuario
   }
 
   function salir() {
-    guardarToken(null)
+    marcarSesion(false)
     setUsuario(null)
+    // El servidor borra la cookie. Si no hay conexión, igual se sale en esta pantalla.
+    apiPost('/auth/salir', {}).catch(() => {})
   }
 
   return (
-    <AuthContext.Provider value={{ usuario, cargando, ingresar, registrarse, salir }}>
+    <AuthContext.Provider value={{ usuario, cargando, ingresar, registrarse, salir, actualizar: setUsuario }}>
       {children}
     </AuthContext.Provider>
   )

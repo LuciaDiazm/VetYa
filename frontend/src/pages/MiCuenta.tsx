@@ -104,9 +104,13 @@ function TarjetaMascota({ mascota }: { mascota: MascotaDelDueno }) {
   return (
     <article className="mascota-dueno">
       <header className="mascota-dueno-encabezado">
-        <span className="icono-circulo">
-          <IconoEspecie especie={mascota.especie} size={26} />
-        </span>
+        {mascota.fotoUrl ? (
+          <img src={mascota.fotoUrl} alt="" className="mascota-dueno-foto" width={52} height={52} />
+        ) : (
+          <span className="icono-circulo">
+            <IconoEspecie especie={mascota.especie} size={26} />
+          </span>
+        )}
         <div>
           <h3>{mascota.nombre}</h3>
           <p>

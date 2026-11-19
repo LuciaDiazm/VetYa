@@ -2,12 +2,13 @@ import { Router } from "express";
 import { z } from "zod";
 import { aFechaUTC, diaArgentina, sumarDias } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
+import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { prisma } from "../lib/prisma";
 
 // Recordatorios por WhatsApp: el sistema arma la lista de a quién avisar y el mensaje;
 // la veterinaria lo envía con un toque y queda registrado para no avisar dos veces.
 export const recordatoriosRouter = Router();
-recordatoriosRouter.use(requiereSesion, requiereRol("VETERINARIO", "ADMIN"));
+recordatoriosRouter.use(requiereSesion, requiereRol(...PERSONAL), requierePermiso("recordatorios"));
 
 const DIAS_ANTES_DE_LA_DOSIS = 7; // se avisa desde una semana antes
 const DIAS_VENCIDA_PARA_AVISAR = 30; // y hasta un mes después de vencida (después pasa a "recuperar")
@@ -49,6 +50,7 @@ async function calcularPendientes(clinicaId: number) {
   const candidatas = await prisma.aplicacionSanitaria.findMany({
     where: {
       mascota: { activo: true, cliente: { clinicaId } },
+      anulada: false, // las anuladas (cargadas por error) no avisan
       fechaProximaDosis: {
         gte: aFechaSinHora(sumarDias(hoy, -DIAS_VENCIDA_PARA_AVISAR)),
         lte: aFechaSinHora(sumarDias(hoy, DIAS_ANTES_DE_LA_DOSIS)),
@@ -61,7 +63,7 @@ async function calcularPendientes(clinicaId: number) {
 
   // Si después se aplicó el mismo producto (el refuerzo ya se dio), esa dosis no se recuerda.
   const posteriores = await prisma.aplicacionSanitaria.findMany({
-    where: { mascotaId: { in: candidatas.map((c) => c.mascotaId) } },
+    where: { mascotaId: { in: candidatas.map((c) => c.mascotaId) }, anulada: false },
     select: { mascotaId: true, producto: true, fechaAplicacion: true },
   });
   const dosis = candidatas
@@ -100,7 +102,7 @@ async function calcularPendientes(clinicaId: number) {
         },
       },
       consultas: { orderBy: { fecha: "desc" }, take: 1, select: { fecha: true } },
-      aplicaciones: { select: { producto: true, fechaAplicacion: true, fechaProximaDosis: true } },
+      aplicaciones: { where: { anulada: false }, select: { producto: true, fechaAplicacion: true, fechaProximaDosis: true } },
     },
   });
 

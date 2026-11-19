@@ -116,12 +116,35 @@ export function CamposMascota({ datos, cambiar }: { datos: DatosMascota; cambiar
       </label>
 
       <label className="campo">
+        Alergias (opcional)
+        <input
+          value={datos.alergias}
+          onChange={(e) => poner('alergias', e.target.value)}
+          maxLength={300}
+          placeholder="Ej.: penicilina, pollo"
+        />
+        <span className="ayuda">Se muestra en rojo en la ficha y al cargar una consulta.</span>
+      </label>
+
+      <label className="campo">
+        Microchip (opcional)
+        <input
+          value={datos.microchip}
+          onChange={(e) => poner('microchip', e.target.value)}
+          inputMode="numeric"
+          maxLength={30}
+          autoComplete="off"
+          placeholder="15 números"
+        />
+      </label>
+
+      <label className="campo">
         Observaciones (opcional)
         <textarea
           value={datos.observaciones}
           onChange={(e) => poner('observaciones', e.target.value)}
           rows={2}
-          placeholder="Alergias, carácter, si muerde…"
+          placeholder="Carácter, si muerde, cómo se maneja…"
         />
       </label>
     </>

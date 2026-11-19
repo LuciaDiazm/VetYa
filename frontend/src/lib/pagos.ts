@@ -34,7 +34,7 @@ export function montoParaEditar(monto: number | null) {
   return monto === null ? '' : String(monto).replace('.', ',')
 }
 
-// ¿Esta persona puede anular el pago? El administrador, siempre; el resto, solo uno suyo de hoy.
+// ¿Esta persona puede anular el pago? La administración, siempre; el resto, solo uno suyo de hoy.
 export function puedeAnular(pago: Pago, usuario: { id: number; rol: string } | null, hoy: string, diaDelPago: string) {
   if (!usuario || pago.anulado) return false
   return usuario.rol === 'ADMIN' || (pago.registradoPor.id === usuario.id && diaDelPago === hoy)

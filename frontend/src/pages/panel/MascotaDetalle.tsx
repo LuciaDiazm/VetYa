@@ -1,11 +1,16 @@
-import { Ban, CalendarDays, CalendarPlus, MessageCircle, Pencil, Stethoscope, Syringe, TriangleAlert, X } from 'lucide-react'
+import { Ban, CalendarDays, CalendarPlus, MessageCircle, Paperclip, Pencil, ShieldAlert, Stethoscope, Syringe, TriangleAlert, X } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BotonesCarnet } from '../../components/BotonesCarnet'
 import { CamposMascota } from '../../components/CamposMascota'
 import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
+import { AdjuntosMascota } from '../../components/AdjuntosMascota'
+import { CorregirConsulta } from '../../components/CorregirConsulta'
+import { FotoMascota } from '../../components/FotoMascota'
+import { useAuth } from '../../context/AuthContext'
+import { apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
+import { esDeHoy, puede } from '../../lib/permisos'
 import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
 import { datosDeMascota, type DatosMascota } from '../../lib/formularios'
 import { edadTexto, nombreEspecie, FECHA_CORTA, formatearTelefono } from '../../lib/mascotas'
@@ -28,6 +33,11 @@ function cambioDePeso(consultas: ConsultaResumen[], indice: number) {
 
 export function MascotaDetalle() {
   const { id } = useParams()
+  const { usuario } = useAuth()
+  const atiende = puede(usuario, 'clinica.escribir')
+  const edita = puede(usuario, 'clientes.editar')
+  const daTurnos = puede(usuario, 'turnos.dar')
+  const [corrigiendo, setCorrigiendo] = useState<number | null>(null)
   const [mascota, setMascota] = useState<FichaMascota | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
@@ -70,11 +80,26 @@ export function MascotaDetalle() {
     cargar()
   }
 
-  async function borrarAplicacion(a: AplicacionSanitaria) {
-    if (!window.confirm(`¿Borrar el registro de ${a.producto} del ${FECHA_CORTA.format(new Date(a.fechaAplicacion))}?`)) return
-    await apiDelete(`/consultas/aplicaciones/${a.id}`)
-    cargar()
+  // Una vacuna mal cargada no se borra: se anula con el motivo y queda tachada (deja de avisar y de salir en el carnet).
+  async function anularAplicacion(a: AplicacionSanitaria) {
+    const motivo = window.prompt(
+      `¿Por qué se anula ${a.producto} del ${FECHA_CORTA.format(new Date(a.fechaAplicacion))}? (queda anotado)`,
+      'Cargada por error',
+    )
+    if (!motivo?.trim()) return
+    try {
+      await apiPatch(`/consultas/aplicaciones/${a.id}/anular`, { motivo: motivo.trim() })
+      cargar()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo anular')
+    }
   }
+  const puedeAnular = (a: AplicacionSanitaria) =>
+    !a.anulada &&
+    (puede(usuario, 'vacunas.anular') ||
+      (atiende && a.registradoPor?.id === usuario?.id && !!a.creadoEn && esDeHoy(a.creadoEn)))
+  const puedeCorregir = (c: ConsultaResumen) =>
+    atiende && (usuario?.rol === 'ADMIN' || (c.veterinario.id === usuario?.id && esDeHoy(c.fecha)))
 
   if (!mascota) {
     return error ? <p className="mensaje-error">{error}</p> : <Cargando />
@@ -83,6 +108,7 @@ export function MascotaDetalle() {
   const { cliente } = mascota
   const edad = edadTexto(mascota.fechaNacimiento)
   const dosis = ultimasPorProducto(mascota.aplicaciones)
+  const anuladas = mascota.aplicaciones.filter((a) => a.anulada)
 
   return (
     <>
@@ -91,15 +117,33 @@ export function MascotaDetalle() {
       {/* Igual que la ficha del cliente: datos y botones al costado; vacunas, turnos e historia clínica a la derecha */}
       <div className="ficha-con-costado">
         <aside className="tarjeta ficha-costado" aria-label={`Datos de ${mascota.nombre}`}>
-          <span className="icono-circulo icono-grande">
-            <IconoEspecie especie={mascota.especie} size={30} />
-          </span>
+          <FotoMascota
+            mascotaId={mascota.id}
+            nombre={mascota.nombre}
+            fotoUrl={mascota.fotoUrl}
+            editable={edita && !editando}
+            alCambiar={(fotoUrl) => setMascota({ ...mascota, fotoUrl })}
+            sinFoto={
+              <span className="icono-circulo icono-grande">
+                <IconoEspecie especie={mascota.especie} size={30} />
+              </span>
+            }
+          />
           <h1>{mascota.nombre}</h1>
           <p className="ficha-costado-bajada">
             {[nombreEspecie(mascota), mascota.sexo === 'HEMBRA' ? 'hembra' : 'macho', mascota.raza, edad]
               .filter(Boolean)
               .join(', ')}
           </p>
+          {/* Arriba de todo, al lado del nombre: se ve primero también en el celular */}
+          {mascota.alergias && (
+            <p className="aviso-alergia aviso-alergia-costado" role="note">
+              <ShieldAlert size={20} aria-hidden="true" />
+              <span>
+                <strong>Alergias:</strong> {mascota.alergias}
+              </span>
+            </p>
+          )}
           {!mascota.activo && (
             <p className="ficha-inactiva">
               <Ban size={16} aria-hidden="true" /> Ya no se atiende
@@ -136,6 +180,10 @@ export function MascotaDetalle() {
                   <dd>{mascota.castrado ? 'Sí' : 'No'}</dd>
                 </div>
                 <div>
+                  <dt>Microchip</dt>
+                  <dd className={mascota.microchip ? 'dato-numero' : 'sin-cargar'}>{mascota.microchip ?? 'Sin cargar'}</dd>
+                </div>
+                <div>
                   <dt>Dueño</dt>
                   <dd>
                     <Link to={`/panel/clientes/${cliente.id}`}>
@@ -146,7 +194,7 @@ export function MascotaDetalle() {
                 </div>
               </dl>
               <div className="ficha-costado-botones">
-                {mascota.activo && (
+                {atiende && mascota.activo && (
                   <Link to={`/panel/mascotas/${mascota.id}/consulta`} className="boton boton-secundario">
                     <Stethoscope size={20} aria-hidden="true" /> Nueva consulta
                   </Link>
@@ -159,29 +207,33 @@ export function MascotaDetalle() {
                 >
                   <MessageCircle size={20} aria-hidden="true" /> Escribir a {cliente.nombre}
                 </a>
-                {mascota.activo && (
+                {daTurnos && mascota.activo && (
                   <Link to={`/panel/agenda/nuevo?mascota=${mascota.id}`} className="boton boton-contorno">
                     <CalendarPlus size={20} aria-hidden="true" /> Dar turno
                   </Link>
                 )}
+                {edita && (
+                  <button
+                    type="button"
+                    className="boton boton-contorno"
+                    onClick={() => {
+                      setDatos(datosDeMascota(mascota))
+                      setEditando(true)
+                    }}
+                  >
+                    <Pencil size={18} aria-hidden="true" /> Editar datos
+                  </button>
+                )}
+              </div>
+              {edita && (
                 <button
                   type="button"
-                  className="boton boton-contorno"
-                  onClick={() => {
-                    setDatos(datosDeMascota(mascota))
-                    setEditando(true)
-                  }}
+                  className={`boton-texto ficha-costado-extra ${mascota.activo ? 'texto-peligro' : ''}`}
+                  onClick={() => cambiarActivo(!mascota.activo)}
                 >
-                  <Pencil size={18} aria-hidden="true" /> Editar datos
+                  {mascota.activo ? 'Marcar que ya no se atiende' : 'Volver a marcar como activa'}
                 </button>
-              </div>
-              <button
-                type="button"
-                className={`boton-texto ficha-costado-extra ${mascota.activo ? 'texto-peligro' : ''}`}
-                onClick={() => cambiarActivo(!mascota.activo)}
-              >
-                {mascota.activo ? 'Marcar que ya no se atiende' : 'Volver a marcar como activa'}
-              </button>
+              )}
             </>
           )}
         </aside>
@@ -213,7 +265,7 @@ export function MascotaDetalle() {
                           {dia === hoy ? 'Hoy' : diaLargo(dia)} a las {horaDe(t.fechaHoraInicio)}
                         </span>
                       </span>
-                      {dia === hoy && (
+                      {atiende && dia === hoy && (
                         <Link to={`/panel/mascotas/${mascota.id}/consulta?turno=${t.id}`} className="boton">
                           Atender
                         </Link>
@@ -280,21 +332,42 @@ export function MascotaDetalle() {
                         ) : (
                           <span className="ayuda">Sin refuerzo</span>
                         )}
-                        <button
-                          type="button"
-                          className="boton-icono"
-                          onClick={() => borrarAplicacion(a)}
-                          aria-label={`Borrar ${a.producto}`}
-                        >
-                          <X size={18} />
-                        </button>
+                        {puedeAnular(a) && (
+                          <button
+                            type="button"
+                            className="boton-icono"
+                            onClick={() => anularAplicacion(a)}
+                            aria-label={`Anular ${a.producto}`}
+                            title="Anular (cargada por error)"
+                          >
+                            <X size={18} aria-hidden="true" />
+                          </button>
+                        )}
                       </div>
                     </li>
                   )
                 })}
               </ul>
             )}
-            {mascota.activo && <AplicacionAnterior mascota={mascota} alGuardar={cargar} />}
+            {anuladas.length > 0 && (
+              <details className="dosis-anuladas">
+                <summary>
+                  {anuladas.length === 1 ? '1 anulada (cargada por error)' : `${anuladas.length} anuladas (cargadas por error)`}
+                </summary>
+                <ul>
+                  {anuladas.map((a) => (
+                    <li key={a.id}>
+                      <s>{a.producto}</s> del {FECHA_CORTA.format(new Date(a.fechaAplicacion))}
+                      <span className="ayuda">
+                        {' '}
+                        · “{a.motivoAnulacion}”{a.anuladaPor && `, anuló ${a.anuladaPor.nombre} ${a.anuladaPor.apellido}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {atiende && mascota.activo && <AplicacionAnterior mascota={mascota} alGuardar={cargar} />}
             {dosis.length > 0 && <BotonesCarnet mascota={mascota} cliente={cliente} />}
           </section>
           )}
@@ -313,6 +386,20 @@ export function MascotaDetalle() {
               <ol className="lista-consultas historia-linea">
                 {mascota.consultas.map((c, i) => {
                   const cambio = cambioDePeso(mascota.consultas, i)
+                  if (corrigiendo === c.id) {
+                    return (
+                      <li key={c.id}>
+                        <p className="consulta-fecha">{fechaCortaDe(c.fecha)}</p>
+                        <CorregirConsulta
+                          consulta={c}
+                          alTerminar={(guardada) => {
+                            setCorrigiendo(null)
+                            if (guardada) cargar()
+                          }}
+                        />
+                      </li>
+                    )
+                  }
                   return (
                     <li key={c.id}>
                       <p className="consulta-fecha">{fechaCortaDe(c.fecha)}</p>
@@ -349,21 +436,48 @@ export function MascotaDetalle() {
                         <p className="chips chips-chicas">
                           {c.aplicaciones.map((a) => (
                             <span key={a.id} className="chip-dato">
-                              <Syringe size={14} aria-hidden="true" /> {a.producto}
+                              <Syringe size={14} aria-hidden="true" /> {a.anulada ? <s>{a.producto} (anulada)</s> : a.producto}
                             </span>
                           ))}
                         </p>
                       )}
+                      {c.reservada && <p className="ayuda">El detalle clínico lo ve quien atiende.</p>}
                       <p className="ayuda">
                         Atendió {c.veterinario.nombre} {c.veterinario.apellido}
                         {c.turno ? ` (turno de ${c.turno.servicio.nombre.toLowerCase()})` : ''}
+                        {c.editadaEn &&
+                          ` · Corregida${c.editadaPor ? ` por ${c.editadaPor.nombre} ${c.editadaPor.apellido}` : ''} el ${fechaCortaDe(c.editadaEn)}`}
                       </p>
+                      {puedeCorregir(c) && (
+                        <button type="button" className="boton-texto enlace-chico" onClick={() => setCorrigiendo(c.id)}>
+                          <Pencil size={14} aria-hidden="true" /> Corregir
+                        </button>
+                      )}
                     </li>
                   )
                 })}
               </ol>
             )}
           </section>
+          )}
+
+          {/* ---------- Análisis y estudios (lo clínico: no lo ve recepción) ---------- */}
+          {puede(usuario, 'clinica.ver') && ver !== 'vacunas' && (
+            <section className="tarjeta bloque-ficha">
+              <div className="bloque-ficha-titulo">
+                <h2>
+                  <Paperclip size={22} aria-hidden="true" /> Análisis y estudios
+                </h2>
+              </div>
+              <AdjuntosMascota
+                mascotaId={mascota.id}
+                adjuntos={mascota.adjuntos}
+                consultas={mascota.consultas}
+                usuario={usuario}
+                puedeSubir={atiende && mascota.activo}
+                alCambiar={cargar}
+              />
+            </section>
           )}
         </div>
       </div>

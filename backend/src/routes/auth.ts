@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
-import { firmarToken, requiereSesion } from "../lib/auth";
+import { cerrarSesion, iniciarSesion, requiereSesion } from "../lib/auth";
 import { borrarIntentos, MINUTO, minutosBloqueado, sumarIntento } from "../lib/limites";
 import { prisma } from "../lib/prisma";
 import { normalizarTelefono } from "../lib/telefono";
@@ -118,8 +118,8 @@ authRouter.post("/registro", async (req, res) => {
     return nuevo;
   });
 
-  const token = firmarToken({ id: usuario.id, clinicaId: CLINICA_ID, rol: usuario.rol });
-  res.status(201).json({ token, usuario });
+  iniciarSesion(req, res, { id: usuario.id, clinicaId: CLINICA_ID, rol: usuario.rol });
+  res.status(201).json({ usuario });
 });
 
 authRouter.post("/login", async (req, res) => {
@@ -151,9 +151,15 @@ authRouter.post("/login", async (req, res) => {
   }
   borrarIntentos(claveFallos);
 
-  const token = firmarToken({ id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol });
-  const { passwordHash: _, ...usuarioPublico } = usuario;
-  res.json({ token, usuario: usuarioPublico });
+  iniciarSesion(req, res, { id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol });
+  const { passwordHash: _, sesionesDesde: __, ...usuarioPublico } = usuario;
+  res.json({ usuario: usuarioPublico });
+});
+
+// Cerrar sesión: borra la cookie de este navegador.
+authRouter.post("/salir", (req, res) => {
+  cerrarSesion(req, res);
+  res.json({ ok: true });
 });
 
 // Devuelve los datos del usuario que tiene la sesión iniciada.
@@ -168,8 +174,8 @@ authRouter.get("/yo", requiereSesion, async (req, res) => {
     return;
   }
   const { activo: _, clinicaId, ...publico } = usuario;
-  const token = firmarToken({ id: usuario.id, clinicaId, rol: usuario.rol });
-  res.json({ ...publico, token });
+  iniciarSesion(req, res, { id: usuario.id, clinicaId, rol: usuario.rol });
+  res.json(publico);
 });
 
 // Cambiar mi contraseña (dueños y personal). Pide la actual, para que nadie la cambie
@@ -203,5 +209,6 @@ authRouter.post("/cambiar-password", requiereSesion, async (req, res) => {
     data: { passwordHash: await bcrypt.hash(nueva, 10), sesionesDesde: new Date() },
   });
   // Sesión nueva para esta compu; las demás se cierran solas.
-  res.json({ token: firmarToken({ id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol }) });
+  iniciarSesion(req, res, { id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol });
+  res.json({ ok: true });
 });
