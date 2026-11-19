@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { apiGet, apiPost } from '../../lib/api'
 import { diaAmigable, diaLargo, hoyArgentina, sumarDias } from '../../lib/fechas'
 import { formatearTelefono } from '../../lib/mascotas'
-import type { Cliente, FichaMascota, Mascota, Servicio } from '../../types'
+import type { Cliente, FichaMascota, Mascota, Servicio, Turno } from '../../types'
 import { IconoEspecie } from './Clientes'
 
 interface MascotaElegida extends Pick<Mascota, 'id' | 'nombre' | 'especie'> {
@@ -265,6 +265,25 @@ export function NuevoTurno() {
 function BuscadorMascota({ alElegir }: { alElegir: (m: MascotaElegida) => void }) {
   const [texto, setTexto] = useState('')
   const [clientes, setClientes] = useState<Cliente[]>([])
+  // Las mascotas con turno hoy: muchas veces piden el próximo turno al salir de la consulta.
+  const [deHoy, setDeHoy] = useState<MascotaElegida[]>([])
+
+  useEffect(() => {
+    const hoy = hoyArgentina()
+    apiGet<Turno[]>(`/turnos?desde=${hoy}&hasta=${hoy}`)
+      .then((turnos) => {
+        const vistas = new Set<number>()
+        const lista: MascotaElegida[] = []
+        for (const t of turnos) {
+          if (t.estado === 'CANCELADO' || vistas.has(t.mascota.id)) continue
+          vistas.add(t.mascota.id)
+          const c = t.mascota.cliente
+          lista.push({ id: t.mascota.id, nombre: t.mascota.nombre, especie: t.mascota.especie, dueno: `${c.nombre} ${c.apellido}` })
+        }
+        setDeHoy(lista)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (texto.trim().length < 2) return
@@ -316,6 +335,27 @@ function BuscadorMascota({ alElegir }: { alElegir: (m: MascotaElegida) => void }
         </ul>
       )}
       {texto.trim().length >= 2 && resultados.length === 0 && <p className="vacio">No encontramos a nadie con ese dato.</p>}
+      {texto.trim().length < 2 && deHoy.length > 0 && (
+        <>
+          <p className="buscador-subtitulo">O elegí una de las que tienen turno hoy:</p>
+          <ul className="resultados-mascota">
+            {deHoy.map((m) => (
+              <li key={m.id}>
+                <button type="button" className="mascota-fila" onClick={() => alElegir(m)}>
+                  <span className="icono-circulo">
+                    <IconoEspecie especie={m.especie} size={22} />
+                  </span>
+                  <span>
+                    <strong>{m.nombre}</strong>
+                    <span className="mascota-fila-detalle">de {m.dueno}</span>
+                  </span>
+                  <span className="mascota-fila-ver">Elegir</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
       <Link to="/panel/clientes/nuevo" className="boton-texto enlace-chico">
         <Plus size={16} aria-hidden="true" /> ¿Es un cliente nuevo? Cargalo primero
       </Link>

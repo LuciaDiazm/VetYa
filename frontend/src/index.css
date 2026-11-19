@@ -5460,6 +5460,50 @@ button.volver:hover {
   list-style: none;
 }
 
+/* Ficha del cliente: cada mascota con su "Dar turno" al lado (debajo en el celular) */
+.mascota-con-turno {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.mascota-con-turno .mascota-fila {
+  flex: 1;
+  min-width: 0;
+}
+
+.mascota-con-turno > .boton {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+@media (max-width: 560px) {
+  .mascota-con-turno {
+    flex-direction: column;
+  }
+
+  .mascota-con-turno > .boton {
+    align-self: stretch;
+  }
+}
+
+/* Consulta: las vacunas que le tocan, para agregarlas con un toque */
+.dosis-que-tocan p {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.dosis-que-tocan .dosis-estado {
+  color: var(--gris);
+  font-weight: 400;
+}
+
+/* Dar turno: "O elegí una de las que tienen turno hoy" */
+.buscador-subtitulo {
+  margin: 4px 0 0;
+  color: var(--gris);
+}
+
 .resultados-mascota .mascota-fila {
   width: 100%;
   font: inherit;

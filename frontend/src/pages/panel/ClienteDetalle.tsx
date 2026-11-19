@@ -1,4 +1,4 @@
-import { Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { CalendarPlus, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -246,7 +246,8 @@ export function ClienteDetalle() {
             ) : (
               <ul className="lista-mascotas">
                 {activas.map((m) => (
-                  <li key={m.id}>
+                  // La ficha y, al lado, "Dar turno" con la mascota ya elegida (sin buscarla de nuevo)
+                  <li key={m.id} className="mascota-con-turno">
                     <Link to={`/panel/mascotas/${m.id}`} className="mascota-fila">
                       <span className="icono-circulo">
                         <IconoEspecie especie={m.especie} size={22} />
@@ -260,6 +261,10 @@ export function ClienteDetalle() {
                         </span>
                       </span>
                       <span className="mascota-fila-ver">Ver ficha</span>
+                    </Link>
+                    <Link to={`/panel/agenda/nuevo?mascota=${m.id}`} className="boton boton-contorno">
+                      <CalendarPlus size={20} aria-hidden="true" /> Dar turno
+                      <span className="solo-lectores"> a {m.nombre}</span>
                     </Link>
                   </li>
                 ))}

@@ -4,10 +4,10 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
 import { apiGet, apiPost } from '../../lib/api'
-import { fechaCortaDe } from '../../lib/fechas'
+import { fechaCortaDe, hoyArgentina } from '../../lib/fechas'
 import { hayPantallaAnterior } from '../../lib/navegacion'
 import { edadTexto, nombreEspecie } from '../../lib/mascotas'
-import { vacunaNueva } from '../../lib/sanitario'
+import { dosisQueTocan, vacunaNueva } from '../../lib/sanitario'
 import type { FichaMascota } from '../../types'
 import { Cargando } from '../../components/Cargando'
 
@@ -85,6 +85,12 @@ export function NuevaConsulta() {
 
   const ultimoPeso = mascota.consultas.find((c) => c.pesoKg)
   const turno = mascota.turnos.find((t) => t.id === turnoId)
+  // Vacunas y desparasitaciones vencidas o por vencer que todavía no se agregaron a esta consulta
+  const yaAgregados = new Set(aplicaciones.map((a) => `${a.tipo}-${a.producto.toLowerCase()}`))
+  const tocan = dosisQueTocan(mascota.aplicaciones, hoyArgentina()).filter(
+    (d) => !yaAgregados.has(`${d.datos.tipo}-${d.datos.producto.toLowerCase()}`),
+  )
+  const pesoAnterior = ultimoPeso ? Number(ultimoPeso.pesoKg).toLocaleString('es-AR') : null
 
   return (
     <>
@@ -112,9 +118,14 @@ export function NuevaConsulta() {
             <label className="campo">
               Peso (kg)
               <input inputMode="decimal" value={peso} onChange={(e) => setPeso(e.target.value)} placeholder="Ej.: 12,5" />
-              {ultimoPeso && (
+              {ultimoPeso && pesoAnterior && (
                 <span className="ayuda">
-                  Último: {Number(ultimoPeso.pesoKg).toLocaleString('es-AR')} kg ({fechaCortaDe(ultimoPeso.fecha)})
+                  Último: {pesoAnterior} kg ({fechaCortaDe(ultimoPeso.fecha)}).{' '}
+                  {peso !== pesoAnterior && (
+                    <button type="button" className="boton-texto enlace-chico" onClick={() => setPeso(pesoAnterior)}>
+                      Usar {pesoAnterior} kg
+                    </button>
+                  )}
                 </span>
               )}
             </label>
@@ -139,6 +150,25 @@ export function NuevaConsulta() {
 
         <section className="tarjeta formulario">
           <h2>Vacunas y desparasitaciones de hoy</h2>
+          {tocan.length > 0 && (
+            // Lo que le toca hoy, para agregarlo con un toque (producto y próxima fecha ya puestos)
+            <div className="dosis-que-tocan">
+              <p>Le toca:</p>
+              <div className="chips">
+                {tocan.map((d) => (
+                  <button
+                    key={`${d.datos.tipo}-${d.datos.producto}`}
+                    type="button"
+                    className="chip chip-grande"
+                    onClick={() => setAplicaciones((lista) => [...lista, d.datos])}
+                  >
+                    <Plus size={18} aria-hidden="true" /> {d.datos.producto}{' '}
+                    <span className={`dosis-estado ${d.estado.clase}`}>({d.estado.texto.toLowerCase()})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {aplicaciones.length === 0 && <p className="vacio">No se aplicó nada en esta consulta.</p>}
           {aplicaciones.map((a, i) => (
             <FilaAplicacion

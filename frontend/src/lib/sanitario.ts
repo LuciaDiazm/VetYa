@@ -63,6 +63,26 @@ export function ultimasPorProducto(aplicaciones: AplicacionSanitaria[]) {
   })
 }
 
+// Dosis que tocan en esta consulta: la última de cada producto, vencida o que vence en los próximos 15 días.
+// Cada una viene lista para cargar: mismo producto y la próxima fecha con el mismo plazo que la vez anterior.
+export function dosisQueTocan(aplicaciones: AplicacionSanitaria[], hoy: string) {
+  return ultimasPorProducto(aplicaciones)
+    .filter((a) => {
+      const e = estadoDosis(a, hoy)
+      return e && e.clase !== 'al-dia'
+    })
+    .map((a) => {
+      const meses = Math.max(
+        1,
+        Math.round(
+          (new Date(a.fechaProximaDosis!).getTime() - new Date(a.fechaAplicacion).getTime()) / (30.44 * 24 * 3600 * 1000),
+        ),
+      )
+      const datos: DatosAplicacion = { tipo: a.tipo, producto: a.producto, lote: '', fechaProximaDosis: sumarMeses(hoy, meses) }
+      return { datos, estado: estadoDosis(a, hoy)! }
+    })
+}
+
 // Vacuna nueva aplicada hoy: ya propone el refuerzo en 1 año, que es lo que más se olvida.
 export function vacunaNueva(): DatosAplicacion {
   return { tipo: 'VACUNA', producto: '', lote: '', fechaProximaDosis: sumarMeses(hoyArgentina(), 12) }
