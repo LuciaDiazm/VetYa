@@ -1,8 +1,8 @@
-import { Armchair, Bell, CalendarDays, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter, Stethoscope } from 'lucide-react'
+import { Armchair, Bell, CalendarDays, CheckCheck, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter, Stethoscope } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { apiGet } from '../lib/api'
+import { apiGet, apiPatch } from '../lib/api'
 import { diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, primeroDeMes, saludoSegunHora, sumarDias } from '../lib/fechas'
 import { useHoraActual } from '../lib/horaActual'
 import { useSitio } from '../lib/sitio'
@@ -215,6 +215,25 @@ const DIAS_PARA_ATRAS = 60
 function TurnosSinMarcar({ hoy }: { hoy: string }) {
   const [turnos, setTurnos] = useState<Turno[] | null>(null)
   const [abierto, setAbierto] = useState(false)
+  const [marcando, setMarcando] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const reemplazar = (nuevo: Turno) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)
+
+  // Para el día en que la clínica no usó la app: primero se toca "No vino" en los que faltaron
+  // y después un solo botón marca el resto como atendidos (sin consulta; se puede cargar después).
+  async function marcarRestoAtendidos(dia: string, pendientes: Turno[]) {
+    const cuantos = pendientes.length === 1 ? 'el turno que queda' : `los ${pendientes.length} turnos que quedan`
+    if (!window.confirm(`¿Marcar ${cuantos} del ${diaLargo(dia)} como atendidos?`)) return
+    setMarcando(dia)
+    setError(null)
+    const resultados = await Promise.allSettled(
+      pendientes.map((t) => apiPatch<Turno>(`/turnos/${t.id}/estado`, { estado: 'ATENDIDO' })),
+    )
+    for (const r of resultados) if (r.status === 'fulfilled') reemplazar(r.value)
+    if (resultados.some((r) => r.status === 'rejected')) setError('Algunos turnos no se pudieron marcar. Probá de nuevo.')
+    setMarcando(null)
+  }
 
   useEffect(() => {
     apiGet<Turno[]>(`/turnos?desde=${sumarDias(hoy, -DIAS_PARA_ATRAS)}&hasta=${sumarDias(hoy, -1)}`)
@@ -251,24 +270,45 @@ function TurnosSinMarcar({ hoy }: { hoy: string }) {
           {abierto ? 'Cerrar' : 'Ver y marcar'}
         </button>
       </div>
+      {abierto && faltan > 1 && (
+        <p className="ayuda sin-marcar-ayuda">
+          ¿Ese día no usaron la app? Tocá <strong>No vino</strong> en los que faltaron y después{' '}
+          <strong>Marcar el resto como atendidos</strong>.
+        </p>
+      )}
+      {abierto && error && (
+        <p className="mensaje-error sin-marcar-ayuda" role="alert">
+          {error}
+        </p>
+      )}
       {abierto &&
-        dias.map((d) => (
-          <div key={d} className="sin-marcar-dia">
-            <h3>{diaLargo(d)}</h3>
-            <ul className="filas-turnos">
-              {turnos
-                .filter((t) => diaDe(t.fechaHoraInicio) === d)
-                .map((t) => (
-                  <FilaTurno
-                    key={t.id}
-                    turno={t}
-                    paso={t.estado === 'CONFIRMADO'}
-                    alCambiar={(nuevo) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)}
-                  />
+        dias.map((d) => {
+          const delDia = turnos.filter((t) => diaDe(t.fechaHoraInicio) === d)
+          const pendientes = delDia.filter((t) => t.estado === 'CONFIRMADO' || t.estado === 'PENDIENTE')
+          return (
+            <div key={d} className="sin-marcar-dia">
+              <div className="sin-marcar-dia-titulo">
+                <h3>{diaLargo(d)}</h3>
+                {pendientes.length > 1 && (
+                  <button
+                    type="button"
+                    className="boton-fila"
+                    disabled={marcando !== null}
+                    onClick={() => marcarRestoAtendidos(d, pendientes)}
+                  >
+                    <CheckCheck size={18} aria-hidden="true" />
+                    {marcando === d ? 'Marcando…' : `Marcar el resto como atendidos (${pendientes.length})`}
+                  </button>
+                )}
+              </div>
+              <ul className="filas-turnos">
+                {delDia.map((t) => (
+                  <FilaTurno key={t.id} turno={t} paso={t.estado === 'CONFIRMADO'} alCambiar={reemplazar} />
                 ))}
-            </ul>
-          </div>
-        ))}
+              </ul>
+            </div>
+          )
+        })}
     </section>
   )
 }

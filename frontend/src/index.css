@@ -8383,3 +8383,26 @@ form.campo-en-linea {
 .casilla.casilla-urgencia svg {
   flex-shrink: 0;
 }
+
+/* Turnos sin marcar: título del día con el botón "Marcar el resto como atendidos" */
+.sin-marcar-dia-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-right: 14px;
+}
+
+.sin-marcar-dia-titulo h3 {
+  margin: 0;
+}
+
+.sin-marcar-dia-titulo .boton-fila {
+  margin: 8px 0 0 14px;
+}
+
+.sin-marcar-ayuda {
+  margin: 0;
+  padding: 10px 16px 0;
+}
