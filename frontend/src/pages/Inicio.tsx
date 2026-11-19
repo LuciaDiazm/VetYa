@@ -84,24 +84,22 @@ const SERVICIOS: {
 ]
 
 // Cómo se saca un turno por la web, tal como funciona hoy el sistema.
-// "lado": las fotos de animales que se asoman van pegadas a su borde.
-const PASOS: { titulo: string; texto: string; foto: string; lado?: 'izquierda' | 'derecha' }[] = [
+// Las fotos son del mismo corgi (una pequeña historia): mira la compu, espera al lado y queda contento.
+const PASOS: { titulo: string; texto: string; foto: string }[] = [
   {
     titulo: 'Creá tu cuenta',
     texto: 'Con tu nombre, tu email y el teléfono de WhatsApp.',
-    foto: '/fotos/gato-choca.webp',
+    foto: '/fotos/paso-cuenta.webp',
   },
   {
     titulo: 'Elegí servicio, día y hora',
     texto: 'Ves los horarios libres y el turno queda confirmado en el momento.',
-    foto: '/fotos/perrito-asoma.webp',
-    lado: 'izquierda',
+    foto: '/fotos/paso-dia.webp',
   },
   {
     titulo: 'Te avisamos el día anterior',
     texto: 'Te escribimos por WhatsApp para recordarte el turno.',
-    foto: '/fotos/gato-asoma.webp',
-    lado: 'derecha',
+    foto: '/fotos/paso-aviso.webp',
   },
 ]
 
@@ -306,8 +304,8 @@ export function Inicio() {
           <ol className="pasos">
             {PASOS.map((p, i) => (
               <li key={p.titulo} className="paso">
-                <div className={p.lado ? `paso-foto paso-foto--${p.lado}` : 'paso-foto'}>
-                  <img src={p.foto} alt="" loading="lazy" />
+                <div className="paso-foto">
+                  <img src={p.foto} alt="" loading="lazy" width={800} height={640} />
                 </div>
                 <span className="paso-numero" aria-hidden="true">
                   {i + 1}

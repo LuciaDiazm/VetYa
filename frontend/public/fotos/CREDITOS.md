@@ -10,15 +10,14 @@ Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con intelig
 
 | Archivo | Dónde se usa |
 |---|---|
-| perro-inicio.webp | Foto original de la portada |
-| perro-huella.webp | Portada: la misma foto con más fondo arriba, para recortarla con forma de huella |
-| perrito-asoma.webp | Sobre nosotros: cachorro que espía desde el borde izquierdo (pantallas anchas) |
-| gato-asoma.webp | Sobre nosotros: gato que espía desde el borde derecho (pantallas anchas) |
-| gatito-vacuna.webp | Planes de vacunas del primer año |
-| pastor-aleman-ingreso.webp | Ingresar (el fondo de la página usa el mismo verde azulado de la foto) |
-| dalmata-espia.webp | Preguntas frecuentes (espía desde el borde derecho) |
-| gatito-papel.webp | ¿Te quedaron dudas? (gatito que sale de un papel roto) |
-| gato-choca.webp | Crear cuenta |
-| equipo-laura.webp, equipo-martin.webp | Nuestro equipo |
+| siames-saluda.webp, dalmata-espia.webp | Portada (los dos arcos) |
+| vacuna-gatito.webp, analisis.webp, cirugia.webp, limpieza-dental.webp, perro-toalla.webp | Inicio: foto de cada servicio |
+| paso-cuenta.webp, paso-dia.webp, paso-aviso.webp | Inicio: "Sacá turno en 3 pasos" (ver abajo) |
+| gatito-vacuna.webp | Inicio: vacunas |
+| perrito-asoma.webp | Ingresar (cachorro que se asoma detrás de la tarjeta) |
+| gato-asoma.webp | Crear cuenta (gato que se asoma detrás de la tarjeta) |
+| equipo-laura.webp, equipo-martin.webp | Nuestro equipo (las carga el seed) |
 
-Las tarjetas de servicios del inicio ya no usan fotos: llevan íconos de lucide-react (licencia libre ISC) y un diente dibujado con el mismo estilo (`src/components/IconoDiente.tsx`). Quedaron sin uso, por si se quieren volver a poner: `gato-costado.webp`, `vacuna-gatito.webp`, `analisis.webp`, `cirugia.webp`, `limpieza-dental.webp`, `perro-toalla.webp` y `siames-saluda.webp`.
+Las tres fotos de los pasos (el mismo corgi) son de **Nataliya Vaitkevich en Pexels** (fotos 5122189, 5122186 y 5122190), con la licencia de Pexels: uso gratis, también comercial, sin obligación de nombrar a la autora. Se bajaron en 900 px y se recortaron a 800 × 640.
+
+Quedaron sin uso, por si se quieren volver a poner: `gato-choca.webp`, `gato-costado.webp`, `gatito-papel.webp`, `pastor-aleman-ingreso.webp`, `perro-huella.webp` y `perro-inicio.webp`.
