@@ -1335,7 +1335,7 @@ html[data-turno-portada='visible'] .boton-turno {
   list-style: none;
 }
 
-.paso {
+.pasos .paso {
   padding: 12px 12px 28px;
   border: 1px solid var(--borde);
   border-radius: var(--radio-grande);
@@ -1381,17 +1381,17 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 600;
 }
 
-.paso h3,
-.paso p {
+.pasos .paso h3,
+.pasos .paso p {
   margin-inline: 16px;
 }
 
-.paso h3 {
+.pasos .paso h3 {
   margin-bottom: 6px;
   color: var(--azul);
 }
 
-.paso p {
+.pasos .paso p {
   margin-bottom: 0;
   color: var(--gris);
 }
@@ -2157,44 +2157,90 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
-/* Ingresar: el mismo panel, en el verde azulado de la foto, con el perro abajo */
-.ingreso-saludo {
-  justify-content: flex-start;
-  padding-bottom: 0;
-  background: #196370;
-}
-
-/* Sin el círculo claro: así no se nota el borde de la foto */
-.ingreso-saludo::before {
-  content: none;
-}
-
-.ingreso-saludo img {
+/* Ingresar: la tarjeta con el formulario al centro, sobre el crema con una mancha amarilla y otra azul */
+.ingreso {
   position: relative;
-  align-self: center;
-  width: auto;
-  max-width: 100%;
-  height: min(600px, 74dvh);
-  margin-top: auto;
-  object-fit: contain;
-  object-position: bottom;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: calc(100dvh - 73px);
+  overflow: hidden;
+  padding: 64px 16px;
+  background: var(--fondo);
+}
+
+.ingreso::before,
+.ingreso::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.ingreso::before {
+  top: 10%;
+  left: 12%;
+  width: 38%;
+  height: 70%;
+  background: rgba(246, 195, 67, 0.4);
+}
+
+.ingreso::after {
+  right: 12%;
+  bottom: 6%;
+  width: 32%;
+  height: 60%;
+  background: rgba(28, 45, 99, 0.16);
+}
+
+.ingreso .ingreso-formulario {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  margin: 0;
+  padding: 40px 36px;
+  border: 1px solid #eee6d9;
+  border-radius: 24px;
+  background: var(--superficie);
+  box-shadow: 0 24px 60px -24px rgba(28, 45, 99, 0.3);
+}
+
+/* El cachorro se asoma por detrás del borde derecho de la tarjeta */
+.ingreso-perro {
+  position: absolute;
+  z-index: 0;
+  top: calc(50% - 170px);
+  left: calc(50% + 140px);
+  width: 200px;
+  height: auto;
+  pointer-events: none;
+}
+
+/* En el celular la tarjeta ocupa todo el ancho: el cachorro, dado vuelta, se asoma desde el borde de la pantalla, arriba */
+@media (max-width: 640px) {
+  .ingreso {
+    align-items: start;
+    padding: 96px 16px 48px;
+  }
+
+  .ingreso .ingreso-formulario {
+    padding: 28px 20px;
+  }
+
+  .ingreso-perro {
+    top: 6px;
+    right: -6px;
+    left: auto;
+    width: 116px;
+    transform: scaleX(-1);
+  }
 }
 
 .registro-formulario h1 {
   margin: 0;
   font-size: 2.4rem;
-}
-
-/* En la compu, el formulario de Ingresar se ve más chico (como con el zoom al 80 %).
-   El botón se agranda antes de achicar para que siga midiendo unos 45 px de alto. */
-@media (min-width: 861px) {
-  .ingreso-formulario {
-    zoom: 0.8;
-  }
-
-  .acceso-formulario.ingreso-formulario .boton.ingreso-boton {
-    min-height: 56px;
-  }
 }
 
 .registro-formulario .formulario {
@@ -3363,23 +3409,6 @@ html[data-turno-portada='visible'] .boton-turno {
     font-size: 2rem;
   }
 
-  /* En el celular el perro asoma más chico, a la derecha del saludo */
-  .ingreso-saludo {
-    flex-direction: row;
-    align-items: flex-end;
-    padding-top: 20px;
-  }
-
-  .ingreso-saludo .registro-lema {
-    align-self: center;
-    font-size: 1.7rem;
-  }
-
-  .ingreso-saludo img {
-    height: 170px;
-    margin: 0 -8px 0 auto;
-  }
-
   .acceso-formulario {
     padding: 28px 16px 48px;
   }
@@ -4355,7 +4384,7 @@ html[data-turno-portada='visible'] .boton-turno {
 }
 
 .avance-barra span {
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: #dfe3ec;
   transition: background-color 300ms var(--curva-salida);
@@ -4363,6 +4392,27 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .avance-barra span.hecho {
   background: var(--azul);
+}
+
+/* El nombre de cada paso debajo de su rayita: el actual en azul, los que faltan en gris */
+.avance-pasos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--gris);
+  font-size: 0.95rem;
+}
+
+.avance-pasos .hecho {
+  color: var(--azul);
+}
+
+.avance-pasos .actual {
+  color: var(--azul);
+  font-weight: 600;
 }
 
 /* Volver a la izquierda y Siguiente (o Pedir turno) a la derecha */
@@ -4394,8 +4444,8 @@ html[data-turno-portada='visible'] .boton-turno {
   place-items: center;
   min-height: 96px;
   padding: 12px 8px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio-chico);
+  border: 1px solid #d9d2c5;
+  border-radius: 12px;
   background: var(--superficie);
   color: var(--azul);
   font: inherit;
@@ -4443,15 +4493,17 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 700;
 }
 
-.paso {
+/* (solo en Pedir turno: los pasos del inicio tienen su propio estilo) */
+.sacar-turno .paso {
   margin-top: 24px;
   padding: 28px;
+  border: 1px solid #eee6d9;
   border-radius: var(--radio);
   background: var(--superficie);
   scroll-margin-top: 100px;
 }
 
-.paso h2 {
+.sacar-turno .paso h2 {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -4485,8 +4537,8 @@ html[data-turno-portada='visible'] .boton-turno {
   gap: 4px;
   min-height: 76px;
   padding: 14px 18px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio-chico);
+  border: 1px solid #d9d2c5;
+  border-radius: 12px;
   background: var(--superficie);
   color: var(--tinta);
   font: inherit;
@@ -4533,10 +4585,6 @@ html[data-turno-portada='visible'] .boton-turno {
   color: var(--azul);
 }
 
-.grupo-horarios h3 svg {
-  color: #b07d00;
-}
-
 .grupo-horarios h3 span {
   color: var(--gris);
   font-family: var(--fuente);
@@ -4555,13 +4603,13 @@ html[data-turno-portada='visible'] .boton-turno {
   display: grid;
   place-items: center;
   min-height: 52px;
-  border: 2px solid var(--borde);
-  border-radius: var(--radio-chico);
+  border: 1px solid #d9d2c5;
+  border-radius: 12px;
   background: var(--superficie);
   color: var(--azul);
   font: inherit;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -4585,18 +4633,74 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 }
 
+/* Paso 4: lo elegido, un dato por renglón, cada uno con su "Cambiar" */
 .resumen-turno {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: var(--radio-chico);
+  margin-bottom: 8px;
+  padding: 16px 20px;
+  border-radius: 12px;
   background: var(--amarillo-suave);
-  font-size: 1.05rem;
 }
 
-.resumen-turno svg {
+.resumen-turno-titulo {
+  margin: 0 0 4px;
   color: var(--azul);
+  font-weight: 600;
+}
+
+.resumen-turno dl {
+  margin: 0;
+}
+
+.resumen-turno-fila {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  border-top: 1px solid rgba(28, 45, 99, 0.1);
+}
+
+.resumen-turno-fila:first-child {
+  border-top: none;
+}
+
+.resumen-turno dt {
+  color: var(--gris);
+}
+
+.resumen-turno dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.resumen-turno .boton-texto {
+  min-height: 44px;
+}
+
+/* En el celular: el nombre del dato arriba, chiquito, y el dato debajo; "Cambiar" a la derecha */
+@media (max-width: 560px) {
+  .resumen-turno {
+    padding: 14px 16px;
+  }
+
+  .resumen-turno-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 12px;
+    padding-block: 8px;
+  }
+
+  .resumen-turno dt {
+    font-size: 0.9rem;
+  }
+
+  .resumen-turno dd {
+    grid-column: 1;
+  }
+
+  .resumen-turno .boton-texto {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
 }
 
 .paso .formulario .ayuda {
@@ -4628,6 +4732,19 @@ html[data-turno-portada='visible'] .boton-turno {
 .turno-listo-detalle {
   font-size: 1.2rem;
   line-height: 1.7;
+}
+
+.turno-listo-direccion {
+  color: var(--gris);
+}
+
+/* Listo: "Ver mis turnos" y "Cómo llegar", uno al lado del otro (uno debajo del otro en el celular) */
+.turno-listo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
 }
 
 .turno-acceso > svg {

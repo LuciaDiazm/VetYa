@@ -33,13 +33,10 @@ export function Ingresar() {
   }
 
   return (
-    // Mismo armado que Crear cuenta: a la izquierda el saludo y el perro (sobre el verde azulado de la foto),
-    // a la derecha el formulario.
-    <main className="registro">
-      <section className="registro-ventajas ingreso-saludo">
-        <p className="registro-lema">¡Qué bueno verte de nuevo!</p>
-        <img src="/fotos/pastor-aleman-ingreso.webp" alt="" />
-      </section>
+    // El formulario en una tarjeta blanca al centro, sobre el crema con las manchas suaves de la portada,
+    // y un cachorro que se asoma por detrás de la tarjeta (es solo un adorno).
+    <main className="ingreso">
+      <img src="/fotos/perrito-asoma.webp" alt="" className="ingreso-perro" />
       <div className="acceso-formulario registro-formulario ingreso-formulario">
         <h1>Ingresar</h1>
         <p className="acceso-bajada">Con el email y la contraseña de tu cuenta.</p>

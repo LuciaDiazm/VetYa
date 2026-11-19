@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Ban, CalendarCheck, CircleCheck, Clock, MessageCircle, Moon, Sun, UserRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Ban, CircleCheck, MapPin, MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -10,6 +10,9 @@ import { Cargando } from '../components/Cargando'
 
 // Por día, todos los horarios de atención: los ocupados se muestran tachados.
 type Disponibilidad = Record<string, { hora: string; libre: boolean }[]>
+
+// Nombre de cada paso, debajo de la barra de avance: así se sabe qué viene después.
+const NOMBRES_PASOS = ['Servicio', 'Día', 'Hora', 'Mascota']
 
 // Pedir turno online exige cuenta: sin sesión se invita a crearla (o a pedirlo por WhatsApp).
 export function SacarTurno() {
@@ -36,7 +39,6 @@ export function SacarTurno() {
       <main className="fondo-huellas">
         <section className="contenedor seccion">
           <div className="turno-listo turno-acceso">
-            <UserRound size={56} aria-hidden="true" />
             <h1>Para pedir turno necesitás tu cuenta</h1>
             <p className="turno-listo-detalle">
               Se crea una sola vez. Si ya viniste a la clínica, usá el mismo teléfono y vas a ver a tus mascotas.
@@ -68,7 +70,6 @@ export function SacarTurno() {
       <main className="fondo-huellas">
         <section className="contenedor seccion">
           <div className="turno-listo turno-acceso">
-            <UserRound size={56} aria-hidden="true" />
             <h1>Entraste con una cuenta de la clínica</h1>
             <p className="turno-listo-detalle">Los turnos de los clientes se cargan desde el panel.</p>
             <Link to="/panel/agenda/nuevo" className="boton boton-grande">
@@ -197,9 +198,22 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
               a las <strong>{confirmado.hora}</strong>
             </p>
             <p>Te vamos a recordar por WhatsApp el día anterior. Si no podés venir, avisanos con tiempo.</p>
-            <Link to="/mi-cuenta" className="boton boton-grande">
-              Ver mis turnos
-            </Link>
+            {sitio && <p className="turno-listo-direccion">Te esperamos en {sitio.clinica.direccion}.</p>}
+            <div className="turno-listo-botones">
+              <Link to="/mi-cuenta" className="boton boton-grande">
+                Ver mis turnos
+              </Link>
+              {sitio && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${sitio.clinica.latitud},${sitio.clinica.longitud}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="boton boton-grande boton-contorno"
+                >
+                  <MapPin size={20} aria-hidden="true" /> Cómo llegar
+                </a>
+              )}
+            </div>
           </div>
         </section>
       </main>
@@ -251,13 +265,20 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
               <span key={n} className={n <= paso ? 'hecho' : undefined} />
             ))}
           </div>
+          <ol className="avance-pasos" aria-hidden="true">
+            {NOMBRES_PASOS.map((nombre, i) => (
+              <li key={nombre} className={i + 1 === paso ? 'actual' : i + 1 < paso ? 'hecho' : undefined}>
+                {nombre}
+              </li>
+            ))}
+          </ol>
         </div>
 
         {/* ---------- 1. Servicio ---------- */}
         {paso === 1 && (
           <section className="paso" aria-labelledby="paso-1">
             <h2 id="paso-1" ref={titulo} tabIndex={-1}>
-              <span className="paso-numero">1</span> ¿Qué necesita tu mascota?
+              ¿Qué necesita tu mascota?
             </h2>
             {servicios === null ? (
               <Cargando />
@@ -272,9 +293,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
                     onClick={() => elegirServicio(s)}
                   >
                     <strong>{s.nombre}</strong>
-                    <span>
-                      <Clock size={16} aria-hidden="true" /> {s.duracionMin} min
-                    </span>
+                    <span>{s.duracionMin} min</span>
                   </button>
                 ))}
               </div>
@@ -297,7 +316,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
         {paso === 2 && servicio && (
           <section className="paso" aria-labelledby="paso-2">
             <h2 id="paso-2" ref={titulo} tabIndex={-1}>
-              <span className="paso-numero">2</span> ¿Qué día?
+              ¿Qué día?
             </h2>
             {!disponibilidad ? (
               <p className="cargando">Buscando días con lugar…</p>
@@ -341,22 +360,21 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
         {paso === 3 && dia && (
           <section className="paso" aria-labelledby="paso-3">
             <h2 id="paso-3" ref={titulo} tabIndex={-1}>
-              <span className="paso-numero">3</span> ¿A qué hora?
+              ¿A qué hora?
             </h2>
             {horas.some((h) => !h.libre) && <p className="ayuda">Los horarios tachados ya están ocupados.</p>}
             {/* Cuadritos en grilla, por la mañana y por la tarde, con cuántos quedan libres */}
             {(
               [
-                ['Mañana', maniana, <Sun key="sol" size={22} aria-hidden="true" />],
-                ['Tarde', tarde, <Moon key="luna" size={22} aria-hidden="true" />],
+                ['Mañana', maniana],
+                ['Tarde', tarde],
               ] as const
-            ).map(([nombre, lista, icono]) => {
+            ).map(([nombre, lista]) => {
               if (lista.length === 0) return null
               const libres = lista.filter((h) => h.libre).length
               return (
                 <div key={nombre} className="grupo-horarios">
                   <h3>
-                    {icono}
                     {nombre}
                     <span>
                       · {libres} {libres === 1 ? 'libre' : 'libres'}
@@ -393,14 +411,28 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
         {paso === 4 && servicio && dia && hora && (
           <section className="paso" aria-labelledby="paso-4">
             <h2 id="paso-4" ref={titulo} tabIndex={-1}>
-              <span className="paso-numero">4</span> ¿Para quién es?
+              ¿Para quién es?
             </h2>
-            <p className="resumen-turno">
-              <CalendarCheck size={22} aria-hidden="true" />
-              <span>
-                <strong>{servicio.nombre}</strong>, {diaLargo(dia)} a las <strong>{hora}</strong>
-              </span>
-            </p>
+            <div className="resumen-turno">
+              <p className="resumen-turno-titulo">Tu turno</p>
+              <dl>
+                {(
+                  [
+                    ['Servicio', servicio.nombre, 1],
+                    ['Día', diaLargo(dia), 2],
+                    ['Hora', hora, 3],
+                  ] as const
+                ).map(([nombre, valor, n]) => (
+                  <div key={nombre} className="resumen-turno-fila">
+                    <dt>{nombre}</dt>
+                    <dd>{valor}</dd>
+                    <button type="button" className="boton-texto" onClick={() => irAPaso(n)}>
+                      Cambiar<span className="solo-lectores"> {nombre.toLowerCase()}</span>
+                    </button>
+                  </div>
+                ))}
+              </dl>
+            </div>
             <FormularioDatos
               servicio={servicio}
               dia={dia}
@@ -580,9 +612,7 @@ function FormularioDatos({
           {enviando ? 'Pidiendo turno…' : 'Pedir turno'}
         </button>
       </div>
-      <p className="ayuda">
-        <MessageCircle size={16} aria-hidden="true" /> El día anterior te llega un recordatorio al WhatsApp de tu cuenta.
-      </p>
+      <p className="ayuda">El día anterior te llega un recordatorio al WhatsApp de tu cuenta.</p>
     </form>
   )
 }

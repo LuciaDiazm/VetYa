@@ -8,6 +8,7 @@
 //   admin@vetya.test        / vetya-admin-2026   (ADMIN)
 //   veterinario@vetya.test  / vetya-vet-2026     (VETERINARIO)
 //   martin.rodriguez@vetya.test / vetya-vet-2026 (VETERINARIO)
+//   duenio@vetya.test       / vetya-duenio-2026  (DUENIO: "Prueba Turnos", para probar Pedir turno y Mi cuenta)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
 // Las fotos están en frontend/public/fotos (ver CREDITOS.md).
@@ -117,6 +118,32 @@ async function main() {
       rol: "ADMIN",
     },
   });
+
+  // Dueño de prueba, para recorrer Pedir turno y Mi cuenta sin crear cuentas a mano.
+  // Arranca sin mascotas (la carga en el paso 4 del turno, como un cliente nuevo).
+  if (!(await prisma.usuario.findUnique({ where: { email: "duenio@vetya.test" } }))) {
+    const duenio = await prisma.usuario.create({
+      data: {
+        clinicaId,
+        nombre: "Prueba",
+        apellido: "Turnos",
+        email: "duenio@vetya.test",
+        telefono: "5493777000099",
+        passwordHash: await bcrypt.hash("vetya-duenio-2026", 10),
+        rol: "DUENIO",
+      },
+    });
+    await prisma.cliente.create({
+      data: {
+        clinicaId,
+        usuarioId: duenio.id,
+        nombre: "Prueba",
+        apellido: "Turnos",
+        telefono: "5493777000099",
+        email: "duenio@vetya.test",
+      },
+    });
+  }
 
   const perfilLaura = {
     visibleEnWeb: true,
