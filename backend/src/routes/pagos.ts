@@ -230,7 +230,7 @@ pagosRouter.patch("/:id/anular", async (req, res) => {
   const esAdmin = req.usuario!.rol === "ADMIN";
   const esSuyoDeHoy = pago.registradoPorId === req.usuario!.id && diaArgentina(pago.fecha) === diaArgentina(new Date());
   if (!esAdmin && !esSuyoDeHoy) {
-    res.status(403).json({ error: "Solo el administrador puede anular este pago" });
+    res.status(403).json({ error: "Solo la veterinaria o el veterinario a cargo puede anular este pago" });
     return;
   }
   const anulado = await prisma.pago.update({
@@ -259,4 +259,17 @@ pagosRouter.post("/informe.pdf", async (req, res) => {
   res.setHeader("Content-Disposition", 'attachment; filename="informe-de-pagos.pdf"');
   res.setHeader("Cache-Control", "no-store");
   escribirInformePagos(datos.data, clinica, res);
+});
+
+// Un pago, para su comprobante (se imprime o se manda por WhatsApp).
+pagosRouter.get("/:id", async (req, res) => {
+  const pago = await prisma.pago.findFirst({
+    where: { id: Number(req.params.id) || 0, clinicaId: req.usuario!.clinicaId },
+    include: conDatos,
+  });
+  if (!pago) {
+    res.status(404).json({ error: "Pago no encontrado" });
+    return;
+  }
+  res.json(aJson(pago));
 });

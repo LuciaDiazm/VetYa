@@ -6,7 +6,7 @@ export function MiClave() {
     <>
       <div className="panel-encabezado">
         <h1>Mi contraseña</h1>
-        <p>Cambiala cuando quieras. Si te la olvidaste, pedile al administrador que te dé una nueva.</p>
+        <p>Cambiala cuando quieras. Si te la olvidaste, pedile a quien está a cargo de la clínica que te dé una nueva.</p>
       </div>
       <section className="tarjeta formulario mi-clave">
         <CambiarClave />

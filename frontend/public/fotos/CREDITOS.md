@@ -6,7 +6,7 @@ Las fotos de animales se descargaron de internet para mostrar el diseño en el T
 
 El dibujo del logo (`public/logo.png` y `public/favicon.png`, un perro y un gato) también se bajó de internet; antes de un uso real hay que reemplazarlo por uno propio o con licencia.
 
-Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con inteligencia artificial: son personas ficticias, igual que los nombres del equipo.
+La foto de `equipo-martin.webp` se generó con inteligencia artificial: es una persona ficticia, igual que su nombre.
 
 | Archivo | Dónde se usa |
 |---|---|
@@ -16,7 +16,7 @@ Las fotos de `equipo-laura.webp` y `equipo-martin.webp` se generaron con intelig
 | gatito-vacuna.webp | Inicio: vacunas |
 | perrito-asoma.webp | Ingresar (cachorro que se asoma detrás de la tarjeta) |
 | gato-asoma.webp | Crear cuenta (gato que se asoma detrás de la tarjeta) |
-| equipo-laura.webp, equipo-martin.webp | Nuestro equipo (las carga el seed) |
+| equipo-martin.webp | Nuestro equipo (la carga el seed) |
 
 Las tres fotos de los pasos (el mismo corgi) son de **Nataliya Vaitkevich en Pexels** (fotos 5122189, 5122186 y 5122190), con la licencia de Pexels: uso gratis, también comercial, sin obligación de nombrar a la autora. Se bajaron en 900 px y se recortaron a 800 × 640.
 

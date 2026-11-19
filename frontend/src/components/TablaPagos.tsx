@@ -1,9 +1,10 @@
-import { Ban, CircleCheck } from 'lucide-react'
+import { Ban, CircleCheck, ReceiptText } from 'lucide-react'
 import { Fragment, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiPatch } from '../lib/api'
 import { diaCorto, diaDe, horaDe, hoyArgentina } from '../lib/fechas'
+import { rutaComprobante } from '../lib/comprobante'
 import { MEDIOS_PAGO, pesos, puedeAnular } from '../lib/pagos'
 import type { Pago } from '../types'
 
@@ -112,6 +113,9 @@ export function TablaPagos({
                   {nombre(p.registradoPor)}
                 </td>
                 <td className="pago-acciones no-imprimir">
+                  <Link to={rutaComprobante(p)} className="boton-fila">
+                    <ReceiptText size={16} aria-hidden="true" /> Comprobante
+                  </Link>
                   {puedeAnular(p, usuario, hoy, dia) && anulando !== p.id && (
                     <button
                       type="button"

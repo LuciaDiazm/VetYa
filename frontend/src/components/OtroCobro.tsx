@@ -2,7 +2,8 @@ import { Plus } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { apiPost } from '../lib/api'
 import { leerMonto, MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../lib/pagos'
-import type { MedioPago } from '../types'
+import type { MedioPago, Pago } from '../types'
+import { BotonesComprobante } from './BotonesComprobante'
 
 // Un cobro que no viene de un turno: alimento, un medicamento, un accesorio…
 // Desde la ficha del cliente queda a su nombre; desde Pagos, como venta en el mostrador.
@@ -12,7 +13,7 @@ export function OtroCobro({ clienteId, alGuardar }: { clienteId?: number; alGuar
   const [monto, setMonto] = useState('')
   const [medio, setMedio] = useState<MedioPago>('EFECTIVO')
   const [error, setError] = useState<string | null>(null)
-  const [listo, setListo] = useState<string | null>(null)
+  const [listo, setListo] = useState<Pago | null>(null)
   const [guardando, setGuardando] = useState(false)
   const id = useId()
   const valor = leerMonto(monto)
@@ -26,8 +27,7 @@ export function OtroCobro({ clienteId, alGuardar }: { clienteId?: number; alGuar
     setGuardando(true)
     setError(null)
     try {
-      await apiPost('/pagos', { clienteId, concepto, monto: valor, medio })
-      setListo(`Listo: ${concepto}, ${pesos(valor)} en ${MEDIOS_PAGO[medio].texto.toLowerCase()}.`)
+      setListo(await apiPost<Pago>('/pagos', { clienteId, concepto, monto: valor, medio }))
       setConcepto('')
       setMonto('')
       setMedio('EFECTIVO')
@@ -44,9 +44,12 @@ export function OtroCobro({ clienteId, alGuardar }: { clienteId?: number; alGuar
     return (
       <div className="otro-cobro">
         {listo && (
-          <p className="mensaje-exito" role="status">
-            {listo}
-          </p>
+          <div className="mensaje-exito otro-cobro-listo" role="status">
+            <span>
+              Listo: {listo.concepto}, {pesos(listo.monto)} en {MEDIOS_PAGO[listo.medio].texto.toLowerCase()}.
+            </span>
+            <BotonesComprobante pago={listo} />
+          </div>
         )}
         <button
           type="button"

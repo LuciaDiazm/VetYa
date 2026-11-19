@@ -10,7 +10,7 @@ import { Paginacion } from '../../components/Paginacion'
 import { TablaPagos } from '../../components/TablaPagos'
 import { apiDescargar, apiGet } from '../../lib/api'
 import { descargarPlanilla } from '../../lib/descargas'
-import { diaCorto, diaDe, horaDe, hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, sumarDias } from '../../lib/fechas'
+import { diaCorto, diaDe, horaDe, hoyArgentina, problemaDePeriodo } from '../../lib/fechas'
 import { MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../../lib/pagos'
 import { useSitio } from '../../lib/sitio'
 import type { ListaPagos, MedioPago, Pago, TurnoPorCobrar } from '../../types'
@@ -44,7 +44,6 @@ export function Pagos() {
   const [hoy] = useState(hoyArgentina)
   const desde = parametros.get('desde') ?? hoy
   const hasta = parametros.get('hasta') ?? desde
-  const medio = (parametros.get('medio') ?? '') as MedioPago | ''
   const pagina = Math.max(1, Number(parametros.get('pagina')) || 1)
   const problema = problemaDePeriodo(desde, hasta)
 
@@ -112,23 +111,15 @@ export function Pagos() {
     setParametros(nuevos)
   }
 
-  const pagos = (lista?.datos.pagos ?? []).filter((p) => !medio || p.medio === medio)
+  const pagos = lista?.datos.pagos ?? []
   const validos = pagos.filter((p) => !p.anulado)
   const total = validos.reduce((s, p) => s + p.monto, 0)
   const porMedio = (m: MedioPago) => validos.filter((p) => p.medio === m).reduce((s, p) => s + p.monto, 0)
   const paginaReal = Math.min(pagina, Math.max(1, Math.ceil(pagos.length / PAGOS_POR_PAGINA)))
 
-  // Atajos de período: una sola acción para lo que más se mira.
-  const atajos = [
-    ['Hoy', hoy, hoy],
-    ['Ayer', sumarDias(hoy, -1), sumarDias(hoy, -1)],
-    ['Esta semana', lunesDe(hoy), hoy],
-    ['Este mes', primeroDeMes(hoy), hoy],
-  ] as const
-
   const periodoEscrito =
     desde === hasta ? FECHA_LARGA.format(aFecha(desde)) : `Del ${FECHA_LARGA.format(aFecha(desde))} al ${FECHA_LARGA.format(aFecha(hasta))}`
-  const subtitulo = [periodoEscrito, medio && MEDIOS_PAGO[medio].texto].filter(Boolean).join(' · ')
+  const subtitulo = periodoEscrito
   const resumen = [
     `Total cobrado: ${pesos(total)}`,
     `${validos.length} ${validos.length === 1 ? 'cobro' : 'cobros'}`,
@@ -247,33 +238,9 @@ export function Pagos() {
       )}
 
       <div className="informe-caja">
-        <section className="informe-filtros no-imprimir" aria-label="Período y medio de pago">
-          <div className="chips chips-chicas caja-atajos">
-            {atajos.map(([texto, d, h]) => (
-              <button
-                key={texto}
-                type="button"
-                className={`chip${desde === d && hasta === h ? ' chip-activo' : ''}`}
-                aria-pressed={desde === d && hasta === h}
-                onClick={() => cambiar({ desde: d === hoy && h === hoy ? '' : d, hasta: d === h ? '' : h })}
-              >
-                {texto}
-              </button>
-            ))}
-          </div>
+        <section className="informe-filtros no-imprimir" aria-label="Período">
           <div className="informe-campos">
             <ElegirFechas compacto desde={desde} hasta={hasta} alCambiar={(d, h) => cambiar({ desde: d, hasta: h })} />
-            <label className="campo-compacto">
-              <span>Medio</span>
-              <select value={medio} onChange={(e) => cambiar({ medio: e.target.value })}>
-                <option value="">Todos</option>
-                {(Object.keys(MEDIOS_PAGO) as MedioPago[]).map((m) => (
-                  <option key={m} value={m}>
-                    {MEDIOS_PAGO[m].texto}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
         </section>
 

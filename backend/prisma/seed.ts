@@ -5,15 +5,13 @@
 // Así se puede volver a correr cada vez que se agregan tablas nuevas.
 //
 // Usuarios de prueba (solo para desarrollo, no usar en producción):
-//   admin@vetya.test        / vetya-admin-2026   (ADMIN)
-//   veterinario@vetya.test  / vetya-vet-2026     (VETERINARIO)
-//   martin.rodriguez@vetya.test / vetya-vet-2026 (VETERINARIO)
+//   martin.rodriguez@vetya.test / vetya-vet-2026 (ADMIN: el veterinario a cargo, la única cuenta de la clínica)
 //   duenio@vetya.test       / vetya-duenio-2026  (DUENIO: "Prueba Turnos", para probar Pedir turno y Mi cuenta)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
 // Las fotos están en frontend/public/fotos (ver CREDITOS.md).
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type MedioPago } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -123,18 +121,6 @@ async function main() {
   }
 
   // ---------- Usuarios y equipo ----------
-  await prisma.usuario.upsert({
-    where: { email: "admin@vetya.test" },
-    update: {},
-    create: {
-      clinicaId,
-      nombre: "Admin",
-      apellido: "VetYa",
-      email: "admin@vetya.test",
-      passwordHash: await bcrypt.hash("vetya-admin-2026", 10),
-      rol: "ADMIN",
-    },
-  });
 
   // Dueño de prueba, para recorrer Pedir turno y Mi cuenta sin crear cuentas a mano.
   // Arranca sin mascotas (la carga en el paso 4 del turno, como un cliente nuevo).
@@ -162,51 +148,56 @@ async function main() {
     });
   }
 
-  const perfilLaura = {
-    visibleEnWeb: true,
-    matricula: "M.P. 0001",
-    especialidad: "Clínica de pequeños animales",
-    presentacion: "Me sigo capacitando todo el tiempo para atender mejor a cada paciente, desde cachorro.",
-  };
-  const vet = await prisma.usuario.upsert({
-    where: { email: "veterinario@vetya.test" },
-    update: perfilLaura,
-    create: {
-      clinicaId,
-      nombre: "Laura",
-      apellido: "Gómez",
-      email: "veterinario@vetya.test",
-      passwordHash: await bcrypt.hash("vetya-vet-2026", 10),
-      rol: "VETERINARIO",
-      ...perfilLaura,
-    },
-  });
-
   // En noviembre el veterinario de ejemplo pasó de "Martín Sosa" a "Martín Rodríguez": se corrige si quedó el viejo.
   await prisma.usuario.updateMany({
     where: { email: "martin.sosa@vetya.test" },
     data: { apellido: "Rodríguez", email: "martin.rodriguez@vetya.test" },
   });
-  await prisma.usuario.upsert({
+  const martin = await prisma.usuario.upsert({
     where: { email: "martin.rodriguez@vetya.test" },
-    update: {},
+    update: { rol: "ADMIN" },
     create: {
       clinicaId,
       nombre: "Martín",
       apellido: "Rodríguez",
       email: "martin.rodriguez@vetya.test",
       passwordHash: await bcrypt.hash("vetya-vet-2026", 10),
-      rol: "VETERINARIO",
+      rol: "ADMIN",
       visibleEnWeb: true,
       matricula: "M.P. 0002",
-      especialidad: "Cirugía y diagnóstico por imágenes",
-      presentacion: "Realizo las cirugías programadas y las ecografías de la clínica.",
+      especialidad: "Clínica, cirugía y ecografías",
+      presentacion: "Atiendo las consultas, las cirugías programadas y las ecografías. Me sigo capacitando para cuidar mejor a cada paciente.",
     },
   });
 
+  // (19/11) La clínica de ejemplo tiene un solo veterinario, que también la administra: una sola cuenta.
+  // Lo que habían hecho las dos cuentas de ejemplo anteriores (consultas, turnos, avisos, pagos) pasa a Martín y
+  // esas dos cuentas se borran. Así la historia clínica no pierde nada.
+  await prisma.usuario.updateMany({
+    where: { email: "martin.rodriguez@vetya.test", especialidad: "Cirugía y diagnóstico por imágenes" },
+    data: {
+      especialidad: "Clínica, cirugía y ecografías",
+      presentacion: "Atiendo las consultas, las cirugías programadas y las ecografías. Me sigo capacitando para cuidar mejor a cada paciente.",
+    },
+  });
+  const sobran = await prisma.usuario.findMany({
+    where: { email: { in: ["admin@vetya.test", "veterinario@vetya.test"] } },
+    select: { id: true },
+  });
+  if (sobran.length > 0) {
+    const ids = sobran.map((u) => u.id);
+    await prisma.$transaction([
+      prisma.consulta.updateMany({ where: { veterinarioId: { in: ids } }, data: { veterinarioId: martin.id } }),
+      prisma.turno.updateMany({ where: { veterinarioId: { in: ids } }, data: { veterinarioId: martin.id } }),
+      prisma.recordatorio.updateMany({ where: { usuarioId: { in: ids } }, data: { usuarioId: martin.id } }),
+      prisma.pago.updateMany({ where: { registradoPorId: { in: ids } }, data: { registradoPorId: martin.id } }),
+      prisma.pago.updateMany({ where: { anuladoPorId: { in: ids } }, data: { anuladoPorId: martin.id } }),
+      prisma.usuario.deleteMany({ where: { id: { in: ids } } }),
+    ]);
+  }
+
   // Foto de cada profesional, solo si todavía no tiene una (si la clínica subió otra, se respeta).
   for (const [email, fotoUrl] of [
-    ["veterinario@vetya.test", "/fotos/equipo-laura.webp"],
     ["martin.rodriguez@vetya.test", "/fotos/equipo-martin.webp"],
   ]) {
     await prisma.usuario.updateMany({ where: { email, fotoUrl: null }, data: { fotoUrl } });
@@ -347,7 +338,7 @@ async function main() {
     await prisma.consulta.create({
       data: {
         mascotaId: cliente.mascotas[0].id,
-        veterinarioId: vet.id,
+        veterinarioId: martin.id,
         fecha: haceUnAnio,
         motivo: "Control anual y vacunación",
         pesoKg: 18.5,
@@ -402,7 +393,7 @@ async function main() {
     // Lola: no viene hace 8 meses y tiene la séxtuple vencida hace 2 meses → "para recuperar".
     await prisma.consulta.create({
       data: {
-        mascotaId: lola.id, veterinarioId: vet.id, fecha: fecha(-240), motivo: "Control y vacunación", pesoKg: 21.3,
+        mascotaId: lola.id, veterinarioId: martin.id, fecha: fecha(-240), motivo: "Control y vacunación", pesoKg: 21.3,
         diagnostico: "Buen estado general",
         aplicaciones: { create: { mascotaId: lola.id, tipo: "VACUNA", producto: "Séxtuple", fechaAplicacion: fecha(-240), fechaProximaDosis: fecha(-60) } },
       },
@@ -410,7 +401,7 @@ async function main() {
     // Simón: le toca la desparasitación en 3 días → "por vencer".
     await prisma.consulta.create({
       data: {
-        mascotaId: simon.id, veterinarioId: vet.id, fecha: fecha(-87), motivo: "Desparasitación", pesoKg: 4.2,
+        mascotaId: simon.id, veterinarioId: martin.id, fecha: fecha(-87), motivo: "Desparasitación", pesoKg: 4.2,
         aplicaciones: { create: { mascotaId: simon.id, tipo: "DESPARASITACION", producto: "Desparasitación interna", fechaAplicacion: fecha(-87), fechaProximaDosis: fecha(3) } },
       },
     });
@@ -480,7 +471,7 @@ async function main() {
       const mascotaId = cliente.mascotas[0].id;
       await prisma.consulta.create({
         data: {
-          mascotaId, veterinarioId: vet.id, fecha: fecha(-c.visitaHace), motivo: c.motivo, pesoKg: c.pesoKg,
+          mascotaId, veterinarioId: martin.id, fecha: fecha(-c.visitaHace), motivo: c.motivo, pesoKg: c.pesoKg,
           diagnostico: "Buen estado general",
           aplicaciones: {
             create: { mascotaId, tipo: c.dosis.tipo, producto: c.dosis.producto, fechaAplicacion: fecha(-c.visitaHace), fechaProximaDosis: fecha(c.dosis.proximaEn) },
@@ -501,7 +492,7 @@ async function main() {
       include: { cliente: true },
     });
     const serviciosHistorial = await prisma.servicio.findMany({ where: { clinicaId, reservableOnline: true } });
-    const veterinaria = await prisma.usuario.findFirst({ where: { clinicaId, rol: "VETERINARIO" } });
+    const veterinaria = martin;
     const horas = ["09:00", "09:45", "10:30", "11:15", "17:00", "17:45", "18:30", "19:15"];
 
     // Números "al azar" pero siempre iguales, para que la demo sea reproducible.
@@ -567,7 +558,7 @@ async function main() {
   // Solo si todavía no hay ningún pago. Se cobran los turnos atendidos hasta hace 3 días; los de los
   // últimos días quedan "Por cobrar" para mostrar cómo funciona. Más un par de ventas sin turno y un anulado.
   if ((await prisma.pago.count({ where: { clinicaId } })) === 0) {
-    const quienCobra = await prisma.usuario.findFirst({ where: { clinicaId, rol: "VETERINARIO" } });
+    const quienCobra = martin;
     const hace3Dias = new Date(inicioDeHoy.getTime() - 3 * 24 * 3600 * 1000);
     const atendidos = await prisma.turno.findMany({
       where: { clinicaId, estado: "ATENDIDO", fechaHoraInicio: { lt: hace3Dias } },
@@ -583,7 +574,17 @@ async function main() {
       return r < 0.45 ? ("EFECTIVO" as const) : r < 0.75 ? ("TRANSFERENCIA" as const) : r < 0.9 ? ("DEBITO" as const) : ("CREDITO" as const);
     };
     if (quienCobra && atendidos.length > 0) {
-      const pagos = atendidos.map((turno) => {
+      type PagoEjemplo = {
+        clinicaId: number;
+        clienteId: number | null;
+        turnoId: number | null;
+        monto: number;
+        medio: MedioPago;
+        concepto: string;
+        fecha: Date;
+        registradoPorId: number;
+      };
+      const pagos: PagoEjemplo[] = atendidos.map((turno) => {
         // Uno de cada 20 fue un control sin cargo
         const sinCargo = azar() < 0.05;
         return {
@@ -612,7 +613,7 @@ async function main() {
           concepto,
           fecha: new Date(inicioDeHoy.getTime() - dias * 24 * 3600 * 1000 + 14 * 3600 * 1000),
           registradoPorId: quienCobra.id,
-        } as (typeof pagos)[number]);
+        });
       }
       await prisma.pago.createMany({ data: pagos });
 

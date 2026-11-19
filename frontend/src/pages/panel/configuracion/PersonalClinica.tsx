@@ -7,7 +7,7 @@ import { olvidarSitio } from '../../../lib/sitio'
 import type { Personal } from '../../../types'
 import { Cargando } from '../../../components/Cargando'
 
-const ROLES = { VETERINARIO: 'Veterinaria/o', ADMIN: 'Administración' } as const
+const ROLES = { VETERINARIO: 'Veterinaria/o', ADMIN: 'Veterinaria/o a cargo' } as const
 
 interface Formulario {
   nombre: string
@@ -114,13 +114,13 @@ function FormularioPersona({
             onChange={(e) => poner('rol', e.target.value as Formulario['rol'])}
             disabled={esUnoMismo}
           >
+            <option value="ADMIN">Veterinaria/o a cargo</option>
             <option value="VETERINARIO">Veterinaria/o</option>
-            <option value="ADMIN">Administración</option>
           </select>
           <span className="ayuda">
             {datos.rol === 'ADMIN'
-              ? 'Puede hacer todo, también cambiar esta configuración.'
-              : 'Agenda, clientes, historia clínica y recordatorios.'}
+              ? 'Hace todo, también cambiar estos ajustes. Es la cuenta de quien está a cargo de la clínica.'
+              : 'Para un segundo profesional: agenda, clientes, historia clínica, pagos y avisos, sin Ajustes.'}
           </span>
         </label>
         {esNueva && (

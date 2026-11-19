@@ -2,6 +2,7 @@ import { Check, Undo2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { apiPatch, apiPost } from '../lib/api'
+import { BotonesComprobante } from './BotonesComprobante'
 import { diaCorto, diaDe, esHoy, horaDe } from '../lib/fechas'
 import { leerMonto, MEDIOS_PAGO, MEDIOS_PARA_COBRAR, montoParaEditar, pesos } from '../lib/pagos'
 import type { MedioPago, Pago, TurnoPorCobrar } from '../types'
@@ -88,9 +89,12 @@ export function CobrarTurno({
           <Check size={20} aria-hidden="true" />
           {pago.medio === 'SIN_CARGO' ? 'Sin cargo' : `Cobrado ${pesos(pago.monto)} · ${MEDIOS_PAGO[pago.medio].texto}`}
         </p>
-        <button type="button" className="boton-fila" onClick={deshacer} disabled={guardando}>
-          <Undo2 size={16} aria-hidden="true" /> Deshacer
-        </button>
+        <span className="cobro-listo-acciones">
+          <BotonesComprobante pago={pago} />
+          <button type="button" className="boton-fila" onClick={deshacer} disabled={guardando}>
+            <Undo2 size={16} aria-hidden="true" /> Deshacer
+          </button>
+        </span>
         {error && (
           <p className="mensaje-error cobro-error" role="alert">
             {error}
