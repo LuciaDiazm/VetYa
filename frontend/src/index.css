@@ -3247,6 +3247,39 @@ html[data-turno-portada='visible'] .boton-turno {
   padding-block: 32px 72px;
 }
 
+/* En la compu, todo el sitio público se ve más chico (como con el zoom del navegador al 80 %),
+   así en una notebook no parece gigante. Las alturas de pantalla se dividen por 0,8 para seguir
+   ocupando lo mismo, y los botones se agrandan antes de achicar para seguir midiendo unos 45 px.
+   Mi cuenta y Pedir turno ya tenían su propio achique (75 %): adentro del sitio se compensa. */
+@media (min-width: 861px) {
+  .sitio-publico {
+    zoom: 0.8;
+  }
+
+  .sitio-publico :is(.boton, .boton-arriba, .barra-enlace, .menu-cuenta-boton, .fila-enlace, .pie a) {
+    min-height: 56px;
+  }
+
+  .sitio-publico .mapa.leaflet-container .leaflet-control-zoom a {
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+  }
+
+  .sitio-publico .portada-escena {
+    min-height: calc(100svh / 0.8 - 80px);
+  }
+
+  .sitio-publico .ingreso {
+    min-height: calc(100dvh / 0.8 - 73px);
+  }
+
+  .sitio-publico .mi-cuenta,
+  .sitio-publico .sacar-turno {
+    zoom: 0.9375; /* 0,8 × 0,9375 = 0,75: quedan igual que antes */
+  }
+}
+
 /* En la compu, Mi cuenta se ve más chica (como con el zoom al 75 %).
    Los botones se agrandan antes de achicar para seguir midiendo unos 45 px de alto. */
 @media (min-width: 861px) {

@@ -30,13 +30,14 @@ import { SacarTurno } from './pages/SacarTurno'
 // Páginas públicas y de dueños: llevan la barra de arriba.
 function DisenoPublico() {
   return (
-    <>
+    // "sitio-publico": en la compu todo el sitio se ve al 80 % (ver index.css)
+    <div className="sitio-publico">
       <SaltarAlContenido />
       <BarraNavegacion />
       <Outlet />
       <Pie />
       <BotonArriba />
-    </>
+    </div>
   )
 }
 
