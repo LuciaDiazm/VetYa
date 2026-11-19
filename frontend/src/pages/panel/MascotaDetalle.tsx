@@ -1,4 +1,5 @@
-import { ArrowLeft, Ban, CalendarDays, CalendarPlus, MessageCircle, Pencil, Stethoscope, Syringe, TriangleAlert, X } from 'lucide-react'
+import { Ban, CalendarDays, CalendarPlus, MessageCircle, Pencil, Stethoscope, Syringe, TriangleAlert, X } from 'lucide-react'
+import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BotonesCarnet } from '../../components/BotonesCarnet'
@@ -7,7 +8,7 @@ import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplic
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
 import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina } from '../../lib/fechas'
 import { datosDeMascota, type DatosMascota } from '../../lib/formularios'
-import { edadTexto, ESPECIES, FECHA_CORTA, formatearTelefono } from '../../lib/mascotas'
+import { edadTexto, nombreEspecie, FECHA_CORTA, formatearTelefono } from '../../lib/mascotas'
 import { estadoDosis, ultimasPorProducto } from '../../lib/sanitario'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import type { AplicacionSanitaria, ConsultaResumen, FichaMascota } from '../../types'
@@ -83,9 +84,7 @@ export function MascotaDetalle() {
 
   return (
     <>
-      <Link to={`/panel/clientes/${cliente.id}`} className="volver">
-        <ArrowLeft size={20} aria-hidden="true" /> {cliente.nombre} {cliente.apellido}
-      </Link>
+      <BotonVolver siNoHay={`/panel/clientes/${cliente.id}`} />
 
       {/* Igual que la ficha del cliente: datos y botones al costado; vacunas, turnos e historia clínica a la derecha */}
       <div className="ficha-con-costado">
@@ -95,7 +94,7 @@ export function MascotaDetalle() {
           </span>
           <h1>{mascota.nombre}</h1>
           <p className="ficha-costado-bajada">
-            {[ESPECIES[mascota.especie], mascota.sexo === 'HEMBRA' ? 'hembra' : 'macho', mascota.raza, edad]
+            {[nombreEspecie(mascota), mascota.sexo === 'HEMBRA' ? 'hembra' : 'macho', mascota.raza, edad]
               .filter(Boolean)
               .join(', ')}
           </p>

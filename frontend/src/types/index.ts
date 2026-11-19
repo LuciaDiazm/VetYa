@@ -133,6 +133,7 @@ export interface Mascota {
   clienteId: number
   nombre: string
   especie: EspecieMascota
+  otraEspecie: string | null
   raza: string | null
   sexo: 'MACHO' | 'HEMBRA'
   fechaNacimiento: string | null

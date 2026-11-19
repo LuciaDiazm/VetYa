@@ -166,6 +166,8 @@ model Mascota {
   clienteId       Int       @map("id_cliente")
   nombre          String
   especie         Especie
+  // Si la especie es OTRO: qué animal es (conejo, tortuga…), escrito por quien la carga.
+  otraEspecie     String?   @map("otra_especie")
   raza            String?
   sexo            Sexo
   fechaNacimiento DateTime? @map("fecha_nacimiento") @db.Date

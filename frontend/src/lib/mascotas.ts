@@ -6,6 +6,12 @@ export const ESPECIES: Record<EspecieMascota, string> = {
   OTRO: 'Otro',
 }
 
+// Cómo se nombra la especie de una mascota: "Perro", "Gato" o, si es "Otro", lo que se escribió ("Conejo").
+export function nombreEspecie(m: { especie: EspecieMascota; otraEspecie?: string | null }) {
+  if (m.especie === 'OTRO' && m.otraEspecie) return m.otraEspecie.charAt(0).toUpperCase() + m.otraEspecie.slice(1)
+  return ESPECIES[m.especie]
+}
+
 // "5493777222333" → "3777 222333" (como lo escribe la gente en Goya).
 export function formatearTelefono(telefono: string) {
   const d = telefono.replace(/\D/g, '')

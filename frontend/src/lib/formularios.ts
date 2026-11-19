@@ -6,6 +6,7 @@ import { formatearTelefono } from './mascotas'
 export interface DatosMascota {
   nombre: string
   especie: EspecieMascota
+  otraEspecie: string // solo si la especie es "Otro"
   sexo: 'MACHO' | 'HEMBRA'
   raza: string
   color: string
@@ -17,6 +18,7 @@ export interface DatosMascota {
 export const MASCOTA_VACIA: DatosMascota = {
   nombre: '',
   especie: 'PERRO',
+  otraEspecie: '',
   sexo: 'MACHO',
   raza: '',
   color: '',
@@ -29,6 +31,7 @@ export function datosDeMascota(m: Mascota): DatosMascota {
   return {
     nombre: m.nombre,
     especie: m.especie,
+    otraEspecie: m.otraEspecie ?? '',
     sexo: m.sexo,
     raza: m.raza ?? '',
     color: m.color ?? '',

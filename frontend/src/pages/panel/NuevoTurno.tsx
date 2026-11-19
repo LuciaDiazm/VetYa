@@ -1,8 +1,9 @@
-import { ArrowLeft, Plus, Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
+import { BotonVolver } from '../../components/BotonVolver'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { apiGet, apiPost } from '../../lib/api'
-import { diaAmigable, diaLargo, hoyArgentina } from '../../lib/fechas'
+import { diaAmigable, diaLargo, hoyArgentina, sumarDias } from '../../lib/fechas'
 import { formatearTelefono } from '../../lib/mascotas'
 import type { Cliente, FichaMascota, Mascota, Servicio } from '../../types'
 import { IconoEspecie } from './Clientes'
@@ -69,7 +70,7 @@ export function NuevoTurno() {
         observaciones: observaciones || undefined,
         sobreturno,
       })
-      navegar(fecha === hoyArgentina() ? '/panel/agenda' : `/panel/agenda?dia=${fecha}`)
+      navegar(fecha === hoyArgentina() ? '/panel/agenda' : `/panel/agenda?dia=${fecha}`, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar el turno')
     } finally {
@@ -79,9 +80,7 @@ export function NuevoTurno() {
 
   return (
     <>
-      <Link to="/panel/agenda" className="volver">
-        <ArrowLeft size={20} aria-hidden="true" /> Volver a la agenda
-      </Link>
+      <BotonVolver siNoHay="/panel/agenda" />
       <div className="panel-encabezado">
         <h1>Dar turno</h1>
       </div>
@@ -157,7 +156,21 @@ export function NuevoTurno() {
                 {libres === null ? (
                   <p className="cargando">Buscando horarios libres…</p>
                 ) : libres.length === 0 ? (
-                  <p className="vacio">No quedan horarios libres ese día (o la clínica no atiende).</p>
+                  // Sin lugar ese día: se ofrece pasar al siguiente con un toque.
+                  <div className="sin-horarios">
+                    <p className="vacio">No quedan horarios libres ese día (o la clínica no atiende).</p>
+                    <button
+                      type="button"
+                      className="boton boton-contorno"
+                      onClick={() => {
+                        setFecha(sumarDias(fecha, 1))
+                        setHora(null)
+                        setLibres(null)
+                      }}
+                    >
+                      Ver el día siguiente
+                    </button>
+                  </div>
                 ) : (
                   <div className="chips">
                     {libres.map((h) => (
@@ -229,6 +242,11 @@ export function NuevoTurno() {
           <p className="mensaje-error" role="alert">
             {error}
           </p>
+        )}
+
+        {/* Mientras falte el horario, se dice qué falta (el botón aparece al elegirlo) */}
+        {mascota && servicio && !hora && (
+          <p className="ayuda falta-horario">Elegí un horario para poder dar el turno.</p>
         )}
 
         {mascota && servicio && hora && (

@@ -5,7 +5,7 @@ import { GuiaVacunas } from '../components/GuiaVacunas'
 import { useAuth } from '../context/AuthContext'
 import { apiGet, apiPatch, ErrorApi } from '../lib/api'
 import { diaDe, diaLargo, fechaCortaDe, horaDe, hoyArgentina, partesDeFecha } from '../lib/fechas'
-import { edadTexto, ESPECIES, FECHA_CORTA } from '../lib/mascotas'
+import { edadTexto, nombreEspecie, FECHA_CORTA } from '../lib/mascotas'
 import { estadoDosis, ultimasPorProducto } from '../lib/sanitario'
 import { enlaceWhatsapp, useSitio } from '../lib/sitio'
 import type { DatosMiCuenta, MascotaDelDueno } from '../types'
@@ -109,7 +109,7 @@ function TarjetaMascota({ mascota }: { mascota: MascotaDelDueno }) {
         <div>
           <h3>{mascota.nombre}</h3>
           <p>
-            {ESPECIES[mascota.especie]}
+            {nombreEspecie(mascota)}
             {mascota.raza && `, ${mascota.raza}`}
             {edad && `, ${edad}`}
           </p>

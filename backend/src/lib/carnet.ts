@@ -185,7 +185,7 @@ export function escribirCarnet(m: DatosCarnet, salida: NodeJS.WritableStream) {
     .text(`Emitido el ${FECHA_EMISION.format(new Date())}`, 48, yTitulo + 6, { width: ancho, align: "right" });
 
   // ---------- Tarjeta celeste con los datos de la mascota ----------
-  const especie = { PERRO: "Perro", GATO: "Gato", OTRO: "Otra especie" }[m.especie];
+  const especie = m.especie === "OTRO" ? m.otraEspecie || "Otra especie" : { PERRO: "Perro", GATO: "Gato" }[m.especie];
   const sexo = m.sexo === "HEMBRA" ? "Hembra" : "Macho";
   const yTarjeta = yTitulo + 44;
   const altoTarjeta = 128;

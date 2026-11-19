@@ -55,6 +55,18 @@ export function CamposMascota({ datos, cambiar }: { datos: DatosMascota; cambiar
         valor={datos.especie}
         cambiar={(v) => poner('especie', v)}
       />
+      {datos.especie === 'OTRO' && (
+        <label className="campo">
+          ¿Qué animal es?
+          <input
+            value={datos.otraEspecie}
+            onChange={(e) => poner('otraEspecie', e.target.value)}
+            required
+            maxLength={60}
+            placeholder="Ej.: conejo, tortuga, hurón"
+          />
+        </label>
+      )}
       <Botones
         titulo="Sexo"
         opciones={[['MACHO', 'Macho'], ['HEMBRA', 'Hembra']]}

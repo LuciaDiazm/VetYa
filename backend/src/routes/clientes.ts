@@ -40,6 +40,8 @@ const esquemaCliente = z.object({
 const esquemaMascota = z.object({
   nombre: z.string().trim().min(1, "Escribí el nombre de la mascota"),
   especie: z.enum(["PERRO", "GATO", "OTRO"]),
+  // Solo si es "Otro": qué animal es. Para perro o gato se guarda vacío.
+  otraEspecie: textoOpcional,
   sexo: z.enum(["MACHO", "HEMBRA"]),
   raza: textoOpcional,
   color: textoOpcional,
@@ -54,7 +56,12 @@ const esquemaMascota = z.object({
     ),
   castrado: z.boolean().default(false),
   observaciones: textoOpcional,
-});
+})
+  .refine((m) => m.especie !== "OTRO" || m.otraEspecie, {
+    message: "Escribí qué animal es (por ejemplo: conejo)",
+    path: ["otraEspecie"],
+  })
+  .transform((m) => ({ ...m, otraEspecie: m.especie === "OTRO" ? m.otraEspecie : null }));
 
 // Alta rápida en el mostrador: dueño y su primera mascota en un solo paso.
 const esquemaAltaRapida = esquemaCliente.extend({ mascota: esquemaMascota.optional() });

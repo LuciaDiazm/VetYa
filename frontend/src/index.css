@@ -3642,6 +3642,22 @@ html[data-turno-portada='visible'] .boton-turno {
   text-decoration: none;
 }
 
+/* "Volver" es un botón (vuelve a la pantalla anterior): se ve como el enlace de siempre */
+button.volver {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button.volver:hover {
+  text-decoration: underline;
+}
+
 .ficha-tabla {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3744,6 +3760,24 @@ html[data-turno-portada='visible'] .boton-turno {
 
 .formulario-animal h2 {
   font-size: 1.3rem;
+}
+
+/* Dar turno: sin lugar ese día, el aviso y "Ver el día siguiente" uno debajo del otro */
+.sin-horarios {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sin-horarios .vacio {
+  margin: 0;
+}
+
+/* Dar turno: qué falta para que aparezca el botón */
+.falta-horario {
+  margin: 0;
+  font-size: 1rem;
 }
 
 /* Ajustes: títulos parejos en todas las secciones y, en Clínica, las tarjetas de a dos */

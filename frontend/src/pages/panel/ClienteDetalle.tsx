@@ -1,11 +1,12 @@
-import { ArrowLeft, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CamposCliente } from '../../components/CamposCliente'
 import { CamposMascota } from '../../components/CamposMascota'
 import { datosDeCliente, MASCOTA_VACIA, type DatosCliente, type DatosMascota } from '../../lib/formularios'
 import { apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
-import { edadTexto, ESPECIES, formatearTelefono } from '../../lib/mascotas'
+import { edadTexto, nombreEspecie, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import { TurnosDelCliente } from '../../components/TurnosDelCliente'
 import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
@@ -87,9 +88,7 @@ export function ClienteDetalle() {
 
   return (
     <>
-      <Link to="/panel/clientes" className="volver">
-        <ArrowLeft size={20} aria-hidden="true" /> Volver a clientes
-      </Link>
+      <BotonVolver siNoHay="/panel/clientes" />
 
       {error && <p className="mensaje-error">{error}</p>}
 
@@ -255,7 +254,7 @@ export function ClienteDetalle() {
                       <span>
                         <strong>{m.nombre}</strong>
                         <span className="mascota-fila-detalle">
-                          {[ESPECIES[m.especie], m.sexo === 'HEMBRA' ? 'hembra' : 'macho', edadTexto(m.fechaNacimiento)]
+                          {[nombreEspecie(m), m.sexo === 'HEMBRA' ? 'hembra' : 'macho', edadTexto(m.fechaNacimiento)]
                             .filter(Boolean)
                             .join(', ')}
                         </span>

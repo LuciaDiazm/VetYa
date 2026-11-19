@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { BotonVolver } from '../../components/BotonVolver'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CamposCliente } from '../../components/CamposCliente'
@@ -23,7 +23,7 @@ export function NuevoCliente() {
     try {
       const creado = await apiPost<Cliente>('/clientes', { ...cliente, mascota: conMascota ? mascota : undefined })
       // Si cargó una mascota, va directo a su ficha (lo más común es atenderla en ese momento).
-      navegar(creado.mascotas[0] ? `/panel/mascotas/${creado.mascotas[0].id}` : `/panel/clientes/${creado.id}`)
+      navegar(creado.mascotas[0] ? `/panel/mascotas/${creado.mascotas[0].id}` : `/panel/clientes/${creado.id}`, { replace: true })
     } catch (err) {
       if (err instanceof ErrorApi && err.status === 409) {
         setError({ texto: err.message, clienteId: err.datos?.clienteId as number | undefined })
@@ -37,9 +37,7 @@ export function NuevoCliente() {
 
   return (
     <>
-      <Link to="/panel/clientes" className="volver">
-        <ArrowLeft size={20} aria-hidden="true" /> Volver
-      </Link>
+      <BotonVolver siNoHay="/panel/clientes" />
       <div className="panel-encabezado">
         <h1>Nuevo cliente</h1>
         <p>Cargá al dueño y a su mascota. Lo demás se puede completar después.</p>

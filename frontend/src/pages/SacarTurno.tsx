@@ -483,6 +483,7 @@ function FormularioDatos({
   const [elegida, setElegida] = useState<number | 'nueva' | null>(null)
   const [mascota, setMascota] = useState('')
   const [especie, setEspecie] = useState<EspecieMascota>('PERRO')
+  const [otraEspecie, setOtraEspecie] = useState('')
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
@@ -513,7 +514,10 @@ function FormularioDatos({
         servicioId: servicio.id,
         fecha: dia,
         hora,
-        mascota: elegida === 'nueva' ? { nombre: mascota, especie } : { id: elegida },
+        mascota:
+          elegida === 'nueva'
+            ? { nombre: mascota, especie, otraEspecie: especie === 'OTRO' ? otraEspecie : undefined }
+            : { id: elegida },
         motivo: motivo || undefined,
       })
       const nombreMascota = elegida === 'nueva' ? mascota : mascotas?.find((m) => m.id === elegida)?.nombre ?? ''
@@ -587,6 +591,18 @@ function FormularioDatos({
               ))}
             </div>
           </fieldset>
+          {especie === 'OTRO' && (
+            <label className="campo">
+              ¿Qué animal es?
+              <input
+                value={otraEspecie}
+                onChange={(e) => setOtraEspecie(e.target.value)}
+                required
+                maxLength={60}
+                placeholder="Ej.: conejo, tortuga, hurón"
+              />
+            </label>
+          )}
         </div>
       )}
       <label className="campo">

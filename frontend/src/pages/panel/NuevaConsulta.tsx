@@ -1,10 +1,12 @@
-import { ArrowLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { BotonVolver } from '../../components/BotonVolver'
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { FilaAplicacion, type DatosAplicacion } from '../../components/FilaAplicacion'
 import { apiGet, apiPost } from '../../lib/api'
 import { fechaCortaDe } from '../../lib/fechas'
-import { edadTexto, ESPECIES } from '../../lib/mascotas'
+import { hayPantallaAnterior } from '../../lib/navegacion'
+import { edadTexto, nombreEspecie } from '../../lib/mascotas'
 import { vacunaNueva } from '../../lib/sanitario'
 import type { FichaMascota } from '../../types'
 import { Cargando } from '../../components/Cargando'
@@ -70,7 +72,9 @@ export function NuevaConsulta() {
           fechaProximaDosis: a.fechaProximaDosis || undefined,
         })),
       })
-      navegar(`/panel/mascotas/${id}`)
+      // Vuelve a donde se tocó "Atender" o "Nueva consulta" (Hoy, Agenda o la ficha)
+      if (hayPantallaAnterior()) navegar(-1)
+      else navegar(`/panel/mascotas/${id}`, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar la consulta')
       setGuardando(false)
@@ -84,13 +88,11 @@ export function NuevaConsulta() {
 
   return (
     <>
-      <Link to={`/panel/mascotas/${mascota.id}`} className="volver">
-        <ArrowLeft size={20} aria-hidden="true" /> {mascota.nombre}
-      </Link>
+      <BotonVolver siNoHay={`/panel/mascotas/${mascota.id}`} />
       <div className="panel-encabezado">
         <h1>Consulta de {mascota.nombre}</h1>
         <p>
-          {[ESPECIES[mascota.especie], mascota.sexo === 'HEMBRA' ? 'hembra' : 'macho', mascota.raza, edadTexto(mascota.fechaNacimiento)]
+          {[nombreEspecie(mascota), mascota.sexo === 'HEMBRA' ? 'hembra' : 'macho', mascota.raza, edadTexto(mascota.fechaNacimiento)]
             .filter(Boolean)
             .join(', ')}
           . Dueño: {mascota.cliente.nombre} {mascota.cliente.apellido}.

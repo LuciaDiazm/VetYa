@@ -78,10 +78,17 @@ const esquemaTurnoOnline = z.object({
   // Una mascota que ya está en su ficha, o una nueva.
   mascota: z.union([
     z.object({ id: z.number().int() }),
-    z.object({
-      nombre: z.string().trim().min(1, "Escribí el nombre de tu mascota"),
-      especie: z.enum(["PERRO", "GATO", "OTRO"]),
-    }),
+    z
+      .object({
+        nombre: z.string().trim().min(1, "Escribí el nombre de tu mascota"),
+        especie: z.enum(["PERRO", "GATO", "OTRO"]),
+        // Solo si es "Otro": qué animal es.
+        otraEspecie: z.string().trim().max(60).optional(),
+      })
+      .refine((m) => m.especie !== "OTRO" || m.otraEspecie, {
+        message: "Escribí qué animal es (por ejemplo: conejo)",
+        path: ["otraEspecie"],
+      }),
   ]),
   motivo: z.string().trim().max(500).optional(),
 });
@@ -160,6 +167,8 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
             clienteId: cliente.id,
             nombre: (pedida as { nombre: string }).nombre,
             especie: (pedida as { especie: "PERRO" | "GATO" | "OTRO" }).especie,
+            otraEspecie:
+              (pedida as { especie: string }).especie === "OTRO" ? (pedida as { otraEspecie?: string }).otraEspecie : null,
             sexo: "MACHO",
           },
         }));
