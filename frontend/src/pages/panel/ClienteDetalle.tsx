@@ -27,6 +27,9 @@ export function ClienteDetalle() {
   const [cambiandoClave, setCambiandoClave] = useState(false)
   const [claveNueva, setClaveNueva] = useState('')
   const [claveLista, setClaveLista] = useState(false)
+  const [emailCuenta, setEmailCuenta] = useState('')
+  const [cuentaUnida, setCuentaUnida] = useState(false)
+  const [errorUnir, setErrorUnir] = useState<string | null>(null)
 
   const cargar = useCallback(() => {
     apiGet<DatosClienteDetalle>(`/clientes/${id}`)
@@ -74,6 +77,22 @@ export function ClienteDetalle() {
       setClaveLista(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cambiar la contraseña')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function unirCuenta(e: FormEvent) {
+    e.preventDefault()
+    setGuardando(true)
+    setErrorUnir(null)
+    try {
+      await apiPatch(`/clientes/${id}/unir-cuenta`, { email: emailCuenta })
+      setEmailCuenta('')
+      setCuentaUnida(true)
+      cargar()
+    } catch (err) {
+      setErrorUnir(err instanceof Error ? err.message : 'No se pudo unir la cuenta')
     } finally {
       setGuardando(false)
     }
@@ -162,6 +181,37 @@ export function ClienteDetalle() {
             </>
           )}
 
+          {/* Sin cuenta: si se registró en la web con otro email, la clínica la une acá */}
+          {!cliente.usuario && (
+            <section className="ficha-cliente-clave" aria-labelledby="titulo-unir-cuenta">
+              <h2 id="titulo-unir-cuenta">Cuenta en la web</h2>
+              <p>
+                No tiene cuenta unida. Si ya se registró y no ve a sus mascotas, escribí el email con el que se registró.
+              </p>
+              <form className="formulario subformulario" onSubmit={unirCuenta}>
+                <label className="campo">
+                  Email de su cuenta
+                  <input
+                    type="email"
+                    value={emailCuenta}
+                    onChange={(e) => setEmailCuenta(e.target.value)}
+                    required
+                    autoComplete="off"
+                    placeholder="Ej.: juan@gmail.com"
+                  />
+                </label>
+                {errorUnir && (
+                  <p className="mensaje-error" role="alert">
+                    {errorUnir}
+                  </p>
+                )}
+                <button type="submit" className="boton boton-contorno" disabled={guardando}>
+                  <Globe size={18} aria-hidden="true" /> Unir cuenta
+                </button>
+              </form>
+            </section>
+          )}
+
           {cliente.usuario && (
             <section className="ficha-cliente-clave" aria-labelledby="titulo-cuenta-web">
               <h2 id="titulo-cuenta-web">Cuenta en la web</h2>
@@ -206,6 +256,11 @@ export function ClienteDetalle() {
                     </button>
                   </div>
                 </form>
+              )}
+              {cuentaUnida && (
+                <p className="mensaje-exito" role="status">
+                  Listo. Ya ve sus mascotas y turnos en su cuenta.
+                </p>
               )}
               {claveLista && (
                 <p className="mensaje-exito" role="status">

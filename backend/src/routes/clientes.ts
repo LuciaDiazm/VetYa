@@ -299,7 +299,53 @@ clientesRouter.patch("/:id/password", async (req, res) => {
   }
   await prisma.usuario.update({
     where: { id: cliente.usuarioId },
-    data: { passwordHash: await bcrypt.hash(resultado.data.password, 10) },
+    // Las sesiones abiertas con la contraseña vieja se cierran (por si alguien más la sabía).
+    data: { passwordHash: await bcrypt.hash(resultado.data.password, 10), sesionesDesde: new Date() },
+  });
+  res.json({ ok: true });
+});
+
+// Unir a esta ficha la cuenta web con la que se registró el dueño. Pasa cuando se registra con un email
+// que la clínica no tenía cargado: el sistema no las une solo (por seguridad) y le crea una ficha vacía.
+// La clínica, que lo conoce, escribe el email de la cuenta y las une. Lo que tuviera la ficha nueva
+// (mascotas o avisos) pasa a esta, y la ficha nueva se borra.
+clientesRouter.patch("/:id/unir-cuenta", async (req, res) => {
+  const resultado = z
+    .object({ email: z.string().trim().toLowerCase().pipe(z.email("Escribí un email válido")) })
+    .safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: primerError(resultado.error) });
+    return;
+  }
+  const clinicaId = req.usuario!.clinicaId;
+  const ficha = await prisma.cliente.findFirst({ where: { id: Number(req.params.id), clinicaId } });
+  if (!ficha) {
+    res.status(404).json({ error: "Cliente no encontrado" });
+    return;
+  }
+  if (ficha.usuarioId) {
+    res.status(400).json({ error: "Esta ficha ya tiene una cuenta web" });
+    return;
+  }
+  const usuario = await prisma.usuario.findFirst({
+    where: { email: resultado.data.email, clinicaId, rol: "DUENIO" },
+    include: { cliente: true },
+  });
+  if (!usuario) {
+    res.status(404).json({ error: "No hay ninguna cuenta de dueño con ese email" });
+    return;
+  }
+  await prisma.$transaction(async (tx) => {
+    const vieja = usuario.cliente;
+    if (vieja && vieja.id !== ficha.id) {
+      await tx.mascota.updateMany({ where: { clienteId: vieja.id }, data: { clienteId: ficha.id } });
+      await tx.recordatorio.updateMany({ where: { clienteId: vieja.id }, data: { clienteId: ficha.id } });
+      await tx.cliente.delete({ where: { id: vieja.id } });
+    }
+    await tx.cliente.update({
+      where: { id: ficha.id },
+      data: { usuarioId: usuario.id, email: ficha.email ?? usuario.email },
+    });
   });
   res.json({ ok: true });
 });

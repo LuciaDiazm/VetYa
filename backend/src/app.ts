@@ -14,6 +14,23 @@ import { usuariosRouter } from "./routes/usuarios";
 
 export const app = express();
 
+// No contar qué programa usa el servidor (es un dato que ayuda a quien busca fallas).
+app.disable("x-powered-by");
+// En internet (Render) el pedido pasa por un intermediario: así se sabe la conexión real de cada
+// persona, que es lo que usa el límite de intentos.
+app.set("trust proxy", 1);
+
+// Encabezados de seguridad: el navegador no deja meter la página dentro de otra (contra engaños),
+// no adivina tipos de archivo y no le cuenta a otras páginas desde dónde se vino.
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (req.secure) res.setHeader("Strict-Transport-Security", "max-age=31536000");
+  next();
+});
+
 app.use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:5173" }));
 // 2 MB alcanzan para mandar un informe de turnos largo y armar su PDF.
 app.use(express.json({ limit: "2mb" }));

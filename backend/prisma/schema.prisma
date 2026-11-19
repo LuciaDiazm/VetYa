@@ -116,6 +116,8 @@ model Usuario {
   rol          Rol
   activo       Boolean  @default(true)
   creadoEn     DateTime @default(now()) @map("creado_en")
+  // Las sesiones iniciadas antes de esta fecha ya no valen (se completa al cambiar la contraseña).
+  sesionesDesde DateTime? @map("sesiones_desde")
 
   // Perfil público (sección "Nuestro equipo" de la web)
   visibleEnWeb Boolean @default(false) @map("visible_en_web")

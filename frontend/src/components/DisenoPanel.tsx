@@ -1,4 +1,4 @@
-import { BarChart3, Bell, CalendarDays, FileText, House, LogOut, PawPrint, Settings } from 'lucide-react'
+import { BarChart3, Bell, CalendarDays, FileText, House, KeyRound, LogOut, PawPrint, Settings } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -53,6 +53,10 @@ export function DisenoPanel() {
             </NavLink>
           ))}
         </nav>
+        <NavLink to="/panel/contrasena" className="panel-enlace panel-clave">
+          <KeyRound size={24} aria-hidden="true" />
+          <span className="panel-enlace-nombre">Contraseña</span>
+        </NavLink>
         <button type="button" className="panel-enlace panel-salir" onClick={cerrarSesion}>
           <LogOut size={24} aria-hidden="true" />
           <span className="panel-enlace-nombre">Salir</span>

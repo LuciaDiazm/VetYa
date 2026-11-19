@@ -173,7 +173,11 @@ usuariosRouter.patch("/:id/password", async (req, res) => {
     res.status(404).json({ error: "Usuario no encontrado" });
     return;
   }
-  await prisma.usuario.update({ where: { id }, data: { passwordHash: await bcrypt.hash(resultado.data.password, 10) } });
+  // Las sesiones abiertas con la contraseña vieja se cierran.
+  await prisma.usuario.update({
+    where: { id },
+    data: { passwordHash: await bcrypt.hash(resultado.data.password, 10), sesionesDesde: new Date() },
+  });
   res.json({ ok: true });
 });
 

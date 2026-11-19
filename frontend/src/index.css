@@ -7440,3 +7440,27 @@ form.campo-en-linea {
     background: var(--azul-suave);
   }
 }
+
+/* Panel: "Contraseña" queda abajo, junto a "Salir" */
+.panel-clave {
+  margin-top: auto;
+}
+
+.panel-clave + .panel-salir {
+  margin-top: 0;
+}
+
+@media (max-width: 860px) {
+  .panel-clave {
+    margin-top: 0;
+  }
+}
+
+/* Cambiar mi contraseña (Mi cuenta y panel) */
+.cambiar-clave-formulario {
+  max-width: 440px;
+}
+
+.mi-clave {
+  max-width: 520px;
+}

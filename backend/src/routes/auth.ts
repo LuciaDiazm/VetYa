@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
 import { firmarToken, requiereSesion } from "../lib/auth";
+import { borrarIntentos, MINUTO, minutosBloqueado, sumarIntento } from "../lib/limites";
 import { prisma } from "../lib/prisma";
 import { normalizarTelefono } from "../lib/telefono";
 
@@ -17,6 +18,23 @@ const esquemaRegistro = z.object({
   telefono: z.string().trim().min(8, "Teléfono inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
+
+const esquemaCambioClave = z.object({
+  actual: z.string().min(1, "Escribí tu contraseña actual"),
+  nueva: z.string().min(8, "La contraseña nueva tiene que tener al menos 8 caracteres").max(100),
+});
+
+// Límites de intentos: 5 contraseñas mal en 15 minutos (por email y conexión, para que nadie
+// pueda bloquearle la cuenta a otro), 20 en total por conexión y 5 cuentas nuevas por hora.
+const MAX_FALLOS = 5;
+const MAX_FALLOS_CONEXION = 20;
+const MAX_REGISTROS = 5;
+const VENTANA_FALLOS = 15 * MINUTO;
+const VENTANA_REGISTROS = 60 * MINUTO;
+
+function avisoBloqueo(minutos: number) {
+  return `Probaste muchas veces. Esperá ${minutos} ${minutos === 1 ? "minuto" : "minutos"} o pedile a la clínica que te dé una contraseña nueva.`;
+}
 
 const esquemaLogin = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email("Email inválido")),
@@ -43,6 +61,14 @@ authRouter.post("/registro", async (req, res) => {
   const datos = resultado.data;
   const telefono = normalizarTelefono(datos.telefono);
 
+  const claveRegistro = `registro:${req.ip}`;
+  const espera = minutosBloqueado(claveRegistro, MAX_REGISTROS);
+  if (espera) {
+    res.status(429).json({ error: `Se crearon muchas cuentas desde esta conexión. Probá de nuevo en ${espera} minutos.` });
+    return;
+  }
+  sumarIntento(claveRegistro, VENTANA_REGISTROS);
+
   const existente = await prisma.usuario.findUnique({ where: { email: datos.email } });
   if (existente) {
     res.status(409).json({ error: "Ya existe una cuenta con ese email" });
@@ -63,14 +89,12 @@ authRouter.post("/registro", async (req, res) => {
       select: camposPublicos,
     });
 
-    // Regla de negocio 6: si la clínica ya lo tenía cargado como cliente
-    // (mismo teléfono o email, sin cuenta), se vinculan y aparecen sus mascotas.
+    // Regla de negocio 6: si la clínica ya lo tenía cargado como cliente (sin cuenta), se vinculan
+    // y aparecen sus mascotas. Tienen que coincidir el teléfono Y el email: con uno solo, alguien
+    // que supiera el teléfono de otra persona podría ver sus mascotas. Si no coinciden los dos,
+    // se crea una ficha nueva y la clínica la une desde la ficha del cliente ("Unir cuenta").
     const clienteExistente = await tx.cliente.findFirst({
-      where: {
-        clinicaId: CLINICA_ID,
-        usuarioId: null,
-        OR: [{ telefono }, { email: datos.email }],
-      },
+      where: { clinicaId: CLINICA_ID, usuarioId: null, telefono, email: datos.email },
     });
 
     if (clienteExistente) {
@@ -106,12 +130,26 @@ authRouter.post("/login", async (req, res) => {
   }
   const { email, password } = resultado.data;
 
+  const claveFallos = `login:${req.ip}:${email}`;
+  const claveConexion = `login:${req.ip}`;
+  const espera = Math.max(
+    minutosBloqueado(claveFallos, MAX_FALLOS),
+    minutosBloqueado(claveConexion, MAX_FALLOS_CONEXION),
+  );
+  if (espera) {
+    res.status(429).json({ error: avisoBloqueo(espera) });
+    return;
+  }
+
   const usuario = await prisma.usuario.findUnique({ where: { email } });
   // Mismo mensaje si no existe o si la contraseña es incorrecta, para no revelar qué emails están registrados.
   if (!usuario || !usuario.activo || !(await bcrypt.compare(password, usuario.passwordHash))) {
+    sumarIntento(claveFallos, VENTANA_FALLOS);
+    sumarIntento(claveConexion, VENTANA_FALLOS);
     res.status(401).json({ error: "Email o contraseña incorrectos" });
     return;
   }
+  borrarIntentos(claveFallos);
 
   const token = firmarToken({ id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol });
   const { passwordHash: _, ...usuarioPublico } = usuario;
@@ -132,4 +170,38 @@ authRouter.get("/yo", requiereSesion, async (req, res) => {
   const { activo: _, clinicaId, ...publico } = usuario;
   const token = firmarToken({ id: usuario.id, clinicaId, rol: usuario.rol });
   res.json({ ...publico, token });
+});
+
+// Cambiar mi contraseña (dueños y personal). Pide la actual, para que nadie la cambie
+// si encuentra la sesión abierta en una compu ajena. Cierra las otras sesiones abiertas.
+authRouter.post("/cambiar-password", requiereSesion, async (req, res) => {
+  const resultado = esquemaCambioClave.safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: resultado.error.issues[0].message });
+    return;
+  }
+  const { actual, nueva } = resultado.data;
+  const clave = `cambio-clave:${req.usuario!.id}`;
+  const espera = minutosBloqueado(clave, MAX_FALLOS);
+  if (espera) {
+    res.status(429).json({ error: avisoBloqueo(espera) });
+    return;
+  }
+  const usuario = await prisma.usuario.findUniqueOrThrow({ where: { id: req.usuario!.id } });
+  if (!(await bcrypt.compare(actual, usuario.passwordHash))) {
+    sumarIntento(clave, VENTANA_FALLOS);
+    res.status(400).json({ error: "La contraseña actual no es correcta" });
+    return;
+  }
+  if (actual === nueva) {
+    res.status(400).json({ error: "La contraseña nueva tiene que ser distinta de la actual" });
+    return;
+  }
+  borrarIntentos(clave);
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { passwordHash: await bcrypt.hash(nueva, 10), sesionesDesde: new Date() },
+  });
+  // Sesión nueva para esta compu; las demás se cierran solas.
+  res.json({ token: firmarToken({ id: usuario.id, clinicaId: usuario.clinicaId, rol: usuario.rol }) });
 });

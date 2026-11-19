@@ -11,6 +11,7 @@ import { Cirugias } from './pages/Cirugias'
 import { Configuracion } from './pages/panel/configuracion/Configuracion'
 import { Estadisticas } from './pages/panel/Estadisticas'
 import { InformeTurnos } from './pages/panel/InformeTurnos'
+import { MiClave } from './pages/panel/MiClave'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -84,6 +85,7 @@ function App() {
             <Route path="recordatorios" element={<Recordatorios />} />
             <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="informe" element={<InformeTurnos />} />
+            <Route path="contrasena" element={<MiClave />} />
             <Route
               path="configuracion"
               element={

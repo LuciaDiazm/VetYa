@@ -44,6 +44,12 @@ async function apiFetch<T>(ruta: string, opciones: RequestInit = {}): Promise<T>
   })
   const cuerpo = respuesta.status === 204 ? null : await respuesta.json().catch(() => null)
   if (!respuesta.ok) {
+    // La sesión ya no vale (se cambió la contraseña, se desactivó la cuenta o venció): se cierra
+    // y se pide entrar de nuevo, en lugar de mostrar errores raros en cada pantalla.
+    if (respuesta.status === 401 && token && !ruta.startsWith('/auth/login')) {
+      guardarToken(null)
+      window.location.assign('/ingresar')
+    }
     throw new ErrorApi(respuesta.status, cuerpo?.error ?? `Error ${respuesta.status}`, cuerpo)
   }
   return cuerpo as T

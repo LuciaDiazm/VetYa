@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { Rol } from "@prisma/client";
+import { prisma } from "./prisma";
 
 // Datos que viajan dentro del token de sesión.
 export interface UsuarioToken {
@@ -32,19 +33,36 @@ export function firmarToken(usuario: UsuarioToken): string {
 }
 
 // Middleware: exige un token válido en el encabezado "Authorization: Bearer <token>".
-export function requiereSesion(req: Request, res: Response, next: NextFunction) {
+// Además mira la base en cada pedido: si la cuenta se desactivó o cambió la contraseña,
+// las sesiones viejas dejan de valer enseguida (no hay que esperar a que venzan).
+export async function requiereSesion(req: Request, res: Response, next: NextFunction) {
   const encabezado = req.headers.authorization;
   if (!encabezado?.startsWith("Bearer ")) {
     res.status(401).json({ error: "Tenés que iniciar sesión" });
     return;
   }
+  let datos: UsuarioToken & { iat?: number };
   try {
-    const datos = jwt.verify(encabezado.slice(7), secreto()) as UsuarioToken;
-    req.usuario = { id: datos.id, clinicaId: datos.clinicaId, rol: datos.rol };
-    next();
+    datos = jwt.verify(encabezado.slice(7), secreto()) as UsuarioToken & { iat?: number };
   } catch {
     res.status(401).json({ error: "La sesión expiró. Volvé a iniciar sesión" });
+    return;
   }
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: datos.id },
+    select: { activo: true, rol: true, clinicaId: true, sesionesDesde: true },
+  });
+  if (!usuario || !usuario.activo) {
+    res.status(401).json({ error: "Tu cuenta no está activa. Consultá con la clínica" });
+    return;
+  }
+  if (usuario.sesionesDesde && (datos.iat ?? 0) < Math.floor(usuario.sesionesDesde.getTime() / 1000)) {
+    res.status(401).json({ error: "Se cambió la contraseña. Volvé a iniciar sesión" });
+    return;
+  }
+  // El rol sale de la base, no del token: si el administrador lo cambia, vale desde el próximo pedido.
+  req.usuario = { id: datos.id, clinicaId: usuario.clinicaId, rol: usuario.rol };
+  next();
 }
 
 // Middleware: además de la sesión, exige que el usuario tenga alguno de los roles indicados.
