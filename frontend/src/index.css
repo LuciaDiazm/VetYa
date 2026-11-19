@@ -1369,6 +1369,21 @@ html[data-turno-portada='visible'] .boton-turno {
   font-weight: 600;
 }
 
+/* En el inicio el número va dentro de una pata de perro amarilla (en la almohadilla grande) */
+.pasos .paso-numero {
+  box-sizing: border-box;
+  width: 58px;
+  height: 58px;
+  padding-top: 19px;
+  border-radius: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='%23f6c343'%3E%3Cellipse cx='24' cy='32' rx='13' ry='11.5'/%3E%3Cellipse cx='8.5' cy='20' rx='4.6' ry='5.6' transform='rotate(-20 8.5 20)'/%3E%3Cellipse cx='17.5' cy='10.5' rx='5' ry='6.2' transform='rotate(-8 17.5 10.5)'/%3E%3Cellipse cx='30.5' cy='10.5' rx='5' ry='6.2' transform='rotate(8 30.5 10.5)'/%3E%3Cellipse cx='39.5' cy='20' rx='4.6' ry='5.6' transform='rotate(20 39.5 20)'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  color: var(--azul);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .pasos .paso h3,
 .pasos .paso p {
   margin-inline: 16px;
