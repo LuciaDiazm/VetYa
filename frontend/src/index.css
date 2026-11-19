@@ -7464,3 +7464,432 @@ form.campo-en-linea {
 .mi-clave {
   max-width: 520px;
 }
+
+/* ---------- Pagos: por cobrar y caja ---------- */
+.por-cobrar {
+  margin-bottom: 22px;
+}
+
+.cobros {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Un turno para cobrar: quién y qué a la izquierda; monto, medio y "Cobrar" a la derecha */
+.cobro {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+.cobro-quien {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
+.cobro-quien strong {
+  color: var(--tinta);
+  font-size: 1rem;
+}
+
+.cobro-cliente {
+  color: var(--azul);
+  font-size: 0.92rem;
+}
+
+.cobro-detalle {
+  flex-basis: 100%;
+  color: var(--gris);
+  font-size: 0.88rem;
+}
+
+.cobro-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+
+.cobro-monto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gris);
+  font-size: 0.85rem;
+}
+
+.cobro-monto-campo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid #d3d8e2;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.cobro-monto-campo:focus-within {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(28, 45, 99, 0.15);
+}
+
+.cobro-monto-campo input {
+  width: 7ch;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  box-shadow: none;
+}
+
+.cobro-medios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.cobro-medios legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.otro-cobro .cobro-medios legend {
+  position: static;
+  width: auto;
+  height: auto;
+  margin-bottom: 6px;
+  clip-path: none;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.cobro-medio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+}
+
+.cobro-acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cobro-boton {
+  white-space: nowrap;
+}
+
+.cobro-error {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: right;
+}
+
+/* Recién cobrado: queda a la vista con "Deshacer" */
+.cobro-listo {
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  background: #f1f8f3;
+}
+
+.cobro-hecho {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #1f6b3c;
+  font-weight: 700;
+}
+
+.por-cobrar-pie {
+  padding: 12px 14px;
+}
+
+.otro-cobro-abierto {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.otro-cobro-campos {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+}
+
+.otro-cobro .mensaje-exito {
+  margin: 0 0 10px;
+}
+
+.caja-encabezado h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 1.2rem;
+}
+
+.caja-encabezado h2 svg {
+  color: var(--gris);
+}
+
+.caja-atajos .chip {
+  min-height: 44px;
+}
+
+.caja-total strong {
+  color: var(--azul);
+}
+
+.tabla-pagos .pago-monto {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pago-medio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.pago-medio svg {
+  color: var(--gris);
+}
+
+.pago-anulado td {
+  color: var(--gris);
+}
+
+.pago-motivo {
+  display: block;
+  color: var(--rojo);
+  font-size: 0.8rem;
+}
+
+/* "Anulado" escrito, no solo tachado */
+.pago-estado-anulado {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--rojo-suave);
+  color: var(--rojo);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pago-acciones {
+  width: 1%;
+  text-align: right;
+}
+
+.pago-anular td {
+  background: #fffaf0;
+}
+
+.pago-anular-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.pago-anular-formulario .campo-compacto {
+  flex: 1;
+  min-width: 260px;
+}
+
+.pago-anular-formulario .mensaje-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .cobro,
+  .cobro-listo {
+    grid-template-columns: 1fr;
+  }
+
+  .cobro-formulario {
+    justify-content: flex-start;
+  }
+
+  .cobro-error {
+    text-align: left;
+  }
+}
+
+@media (max-width: 760px) {
+  .otro-cobro-campos {
+    grid-template-columns: 1fr;
+  }
+
+  .cobro-acciones {
+    width: 100%;
+  }
+
+  .cobro-boton {
+    flex: 1;
+  }
+
+  .tabla-pagos .pago-monto {
+    text-align: left;
+  }
+
+  .pago-acciones {
+    grid-column: 1 / -1;
+    width: auto;
+    text-align: left;
+  }
+}
+
+/* Caja de hoy (pantalla Hoy) */
+.caja-de-hoy-cuerpo {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+.caja-de-hoy-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.caja-de-hoy-total strong {
+  color: var(--azul);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.caja-de-hoy-medios {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.caja-de-hoy-medios li {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gris);
+}
+
+.caja-de-hoy-medios strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.caja-de-hoy-boton {
+  justify-content: center;
+  width: 100%;
+}
+
+.caja-de-hoy-nada {
+  margin: 0;
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+/* Pagos en la ficha del cliente */
+.pagos-cliente-deuda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--amarillo-suave);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.pagos-cliente-deuda svg {
+  flex-shrink: 0;
+  color: #a06b00;
+}
+
+.pagos-cliente-cobros {
+  margin-bottom: 14px;
+  border-top: 1px solid var(--panel-borde);
+}
+
+.pagos-cliente-cobros .cobro {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.pagos-cliente .tabla-pagos th:first-child,
+.pagos-cliente .tabla-pagos td:first-child {
+  padding-left: 0;
+}
+
+.pagos-cliente-pie {
+  margin-top: 14px;
+}
+
+/* Estadísticas: total de ingresos */
+.ingresos-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+}
+
+.ingresos-total strong {
+  color: var(--azul);
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El cobro se acomoda al lugar que tiene (en la ficha del cliente es más angosto que en Pagos) */
+.cobros {
+  container-type: inline-size;
+}
+
+@container (max-width: 860px) {
+  .cobro,
+  .cobro-listo {
+    grid-template-columns: 1fr;
+  }
+
+  .cobro-formulario {
+    justify-content: flex-start;
+  }
+
+  .cobro-error {
+    text-align: left;
+  }
+}

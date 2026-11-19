@@ -25,6 +25,7 @@ publicoRouter.get("/clinica", async (_req, res) => {
 publicoRouter.get("/servicios", async (_req, res) => {
   const servicios = await prisma.servicio.findMany({
     where: { clinicaId: CLINICA_ID, activo: true },
+    omit: { precioReferencia: true }, // el precio se ve solo en el panel, nunca en la web
     orderBy: [{ categoria: "asc" }, { nombre: "asc" }],
   });
   res.json(servicios);
@@ -41,6 +42,7 @@ publicoRouter.get("/sitio", async (_req, res) => {
     }),
     prisma.servicio.findMany({
       where: { clinicaId: CLINICA_ID, activo: true },
+      omit: { precioReferencia: true },
       orderBy: [{ categoria: "asc" }, { nombre: "asc" }],
     }),
     prisma.usuario.findMany({
@@ -91,6 +93,7 @@ publicoRouter.get("/carnet/:token", async (req, res) => {
 publicoRouter.get("/cirugias", async (_req, res) => {
   const cirugias = await prisma.servicio.findMany({
     where: { clinicaId: CLINICA_ID, activo: true, categoria: "CIRUGIA" },
+    omit: { precioReferencia: true },
     orderBy: { nombre: "asc" },
   });
   res.json(cirugias.map((s) => ({ ...s, ...recomendacionesDe(s.nombre) })));

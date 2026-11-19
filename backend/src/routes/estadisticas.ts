@@ -18,7 +18,7 @@ function diasEntre(desde: string, hasta: string) {
 
 // Números principales de un período, para compararlos con el período anterior.
 async function resumen(clinicaId: number, inicio: Date, fin: Date) {
-  const [porEstado, clientesNuevos, consultas] = await Promise.all([
+  const [porEstado, clientesNuevos, consultas, cobrado] = await Promise.all([
     prisma.turno.groupBy({
       by: ["estado"],
       where: { clinicaId, fechaHoraInicio: { gte: inicio, lt: fin } },
@@ -26,6 +26,7 @@ async function resumen(clinicaId: number, inicio: Date, fin: Date) {
     }),
     prisma.cliente.count({ where: { clinicaId, creadoEn: { gte: inicio, lt: fin } } }),
     prisma.consulta.count({ where: { mascota: { cliente: { clinicaId } }, fecha: { gte: inicio, lt: fin } } }),
+    prisma.pago.aggregate({ where: { clinicaId, anulado: false, fecha: { gte: inicio, lt: fin } }, _sum: { monto: true } }),
   ]);
   const cuenta = (estado: string) => porEstado.find((e) => e.estado === estado)?._count ?? 0;
   const atendidos = cuenta("ATENDIDO");
@@ -39,6 +40,7 @@ async function resumen(clinicaId: number, inicio: Date, fin: Date) {
     ausentismo: atendidos + ausentes > 0 ? ausentes / (atendidos + ausentes) : null,
     clientesNuevos,
     consultas,
+    ingresos: Number(cobrado._sum.monto ?? 0),
   };
 }
 
@@ -113,7 +115,7 @@ estadisticasRouter.get("/", async (req, res) => {
   const largo = diasEntre(desde, hasta);
   const inicioAnterior = aFechaUTC(sumarDias(desde, -largo), "00:00");
 
-  const [actual, anterior, turnos, recordatorios] = await Promise.all([
+  const [actual, anterior, turnos, recordatorios, pagos] = await Promise.all([
     resumen(clinicaId, inicio, fin),
     resumen(clinicaId, inicioAnterior, inicio),
     prisma.turno.findMany({
@@ -136,7 +138,22 @@ estadisticasRouter.get("/", async (req, res) => {
         },
       },
     }),
+    prisma.pago.findMany({
+      where: { clinicaId, anulado: false, fecha: { gte: inicio, lt: fin } },
+      select: { monto: true, medio: true, turno: { select: { servicio: { select: { nombre: true } } } } },
+    }),
   ]);
+
+  // Ingresos por medio de pago y por servicio (lo cobrado sin turno va en "Otros cobros").
+  const ingresosPorMedio = { EFECTIVO: 0, TRANSFERENCIA: 0, DEBITO: 0, CREDITO: 0 };
+  const ingresosPorServicio = new Map<string, number>();
+  for (const p of pagos) {
+    if (p.medio === "SIN_CARGO") continue;
+    const monto = Number(p.monto);
+    ingresosPorMedio[p.medio] += monto;
+    const nombre = p.turno?.servicio.nombre ?? "Otros cobros";
+    ingresosPorServicio.set(nombre, (ingresosPorServicio.get(nombre) ?? 0) + monto);
+  }
 
   // Turnos por día (la pantalla los agrupa por semana o mes según el largo del período).
   const porDia = new Map<string, number>();
@@ -182,5 +199,9 @@ estadisticasRouter.get("/", async (req, res) => {
     avisos,
     avisosQueVolvieron,
     recuperados,
+    ingresosPorMedio,
+    ingresosPorServicio: [...ingresosPorServicio]
+      .map(([nombre, total]) => ({ nombre, total }))
+      .sort((a, b) => b.total - a.total),
   });
 });

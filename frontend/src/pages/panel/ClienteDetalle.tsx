@@ -9,6 +9,7 @@ import { apiGet, apiPatch, apiPost, apiPut } from '../../lib/api'
 import { edadTexto, nombreEspecie, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import { TurnosDelCliente } from '../../components/TurnosDelCliente'
+import { PagosDelCliente } from '../../components/PagosDelCliente'
 import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
 import { IconoEspecie } from './Clientes'
 import { Cargando } from '../../components/Cargando'
@@ -338,6 +339,8 @@ export function ClienteDetalle() {
           </section>
 
           <TurnosDelCliente cliente={cliente} alCambiar={(cambios) => setCliente({ ...cliente, ...cambios })} />
+
+          <PagosDelCliente clienteId={cliente.id} />
         </div>
       </div>
     </>

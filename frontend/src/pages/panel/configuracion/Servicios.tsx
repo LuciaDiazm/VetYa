@@ -1,6 +1,7 @@
 import { Pencil, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { apiGet, apiPatch, apiPost, apiPut } from '../../../lib/api'
+import { leerMonto, montoParaEditar, pesos } from '../../../lib/pagos'
 import { olvidarSitio } from '../../../lib/sitio'
 import type { CategoriaServicio, ServicioConfig } from '../../../types'
 import { Cargando } from '../../../components/Cargando'
@@ -17,10 +18,11 @@ interface Formulario {
   categoria: CategoriaServicio
   descripcion: string
   duracionMin: string
+  precio: string
   reservableOnline: boolean
 }
 
-const NUEVO: Formulario = { nombre: '', categoria: 'CLINICA', descripcion: '', duracionMin: '20', reservableOnline: true }
+const NUEVO: Formulario = { nombre: '', categoria: 'CLINICA', descripcion: '', duracionMin: '20', precio: '', reservableOnline: true }
 
 function FormularioServicio({
   inicial,
@@ -89,6 +91,17 @@ function FormularioServicio({
         />
         <span className="ayuda">Cambiarla no modifica los turnos ya dados.</span>
       </label>
+      <label className="campo campo-corto">
+        Precio en pesos
+        <input
+          inputMode="decimal"
+          value={datos.precio}
+          onChange={(e) => setDatos({ ...datos, precio: e.target.value })}
+          placeholder="Ej.: 18000"
+          autoComplete="off"
+        />
+        <span className="ayuda">Se ve solo en el panel, nunca en la web. Al cobrar un turno ya aparece puesto.</span>
+      </label>
       <label className="casilla">
         <input
           type="checkbox"
@@ -128,7 +141,8 @@ export function Servicios() {
   useEffect(cargar, [cargar])
 
   async function guardar(id: number | 'nuevo', datos: Formulario) {
-    const cuerpo = { ...datos, duracionMin: Number(datos.duracionMin) }
+    const { precio, ...resto } = datos
+    const cuerpo = { ...resto, duracionMin: Number(datos.duracionMin), precioReferencia: leerMonto(precio) }
     if (id === 'nuevo') await apiPost('/configuracion/servicios', cuerpo)
     else await apiPut(`/configuracion/servicios/${id}`, cuerpo)
     olvidarSitio()
@@ -174,6 +188,7 @@ export function Servicios() {
                   categoria: s.categoria,
                   descripcion: s.descripcion ?? '',
                   duracionMin: String(s.duracionMin),
+                  precio: montoParaEditar(s.precioReferencia === null ? null : Number(s.precioReferencia)),
                   reservableOnline: s.reservableOnline,
                 }}
                 alGuardar={(d) => guardar(s.id, d)}
@@ -186,6 +201,7 @@ export function Servicios() {
                 <strong>{s.nombre}</strong>
                 <span className="ayuda">
                   {CATEGORIAS[s.categoria]} · {s.duracionMin} min ·{' '}
+                  {s.precioReferencia === null ? 'Sin precio' : pesos(Number(s.precioReferencia))} ·{' '}
                   {s.reservableOnline ? 'Se pide desde la web' : 'Solo por WhatsApp o en la clínica'}
                   {!s.activo && ' · No se ofrece'}
                 </span>

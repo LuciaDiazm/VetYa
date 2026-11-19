@@ -5,6 +5,7 @@ import { ElegirFechas } from '../../components/ElegirFechas'
 import { Barras, Columnas, type Dato } from '../../components/Graficos'
 import { apiGet } from '../../lib/api'
 import { hoyArgentina, lunesDe, primeroDeMes, problemaDePeriodo, sumarDias } from '../../lib/fechas'
+import { MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../../lib/pagos'
 import { Cargando } from '../../components/Cargando'
 
 interface Resumen {
@@ -15,6 +16,7 @@ interface Resumen {
   ausentismo: number | null
   clientesNuevos: number
   consultas: number
+  ingresos: number
 }
 
 interface DatosEstadisticas {
@@ -29,6 +31,8 @@ interface DatosEstadisticas {
   avisos: Record<'TURNO' | 'VACUNA' | 'DESPARASITACION' | 'RECUPERO' | 'CARNET', number>
   avisosQueVolvieron: number
   recuperados: number
+  ingresosPorMedio: Record<'EFECTIVO' | 'TRANSFERENCIA' | 'DEBITO' | 'CREDITO', number>
+  ingresosPorServicio: { nombre: string; total: number }[]
 }
 
 const DIA_MES = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
@@ -266,6 +270,43 @@ export function Estadisticas() {
                 </section>
               </div>
             </>
+          )}
+
+          {/* ---------- Ingresos (lo cobrado en la clínica) ---------- */}
+          {datos.actual.ingresos === 0 && datos.anterior.ingresos === 0 ? (
+            <section className="tarjeta grafico">
+              <h2>Ingresos</h2>
+              <p className="vacio">
+                No hay pagos registrados en este período. <Link to="/panel/pagos">Ir a Pagos</Link>
+              </p>
+            </section>
+          ) : (
+            <div className="graficos-dobles">
+              <section className="tarjeta grafico">
+                <h2>Ingresos</h2>
+                <p className="ingresos-total">
+                  <strong>{pesos(datos.actual.ingresos)}</strong>
+                  <span className="ayuda">
+                    Período anterior: {pesos(datos.anterior.ingresos)}
+                    {datos.anterior.ingresos > 0 && ` (${cambioEnCantidad(datos.actual.ingresos, datos.anterior.ingresos).texto})`}
+                  </span>
+                </p>
+                <Barras
+                  datos={MEDIOS_PARA_COBRAR.map((m) => ({ etiqueta: MEDIOS_PAGO[m].texto, valor: datos.ingresosPorMedio[m] }))}
+                  unidad="pesos"
+                  columna="Medio de pago"
+                />
+              </section>
+              <section className="tarjeta grafico">
+                <h2>Ingresos por servicio</h2>
+                <p className="ayuda">Lo cobrado sin turno (alimento, accesorios…) va en “Otros cobros”.</p>
+                <Barras
+                  datos={datos.ingresosPorServicio.slice(0, 8).map((s) => ({ etiqueta: s.nombre, valor: s.total }))}
+                  unidad="pesos"
+                  columna="Servicio"
+                />
+              </section>
+            </div>
           )}
 
           {/* ---------- Avisos ---------- */}

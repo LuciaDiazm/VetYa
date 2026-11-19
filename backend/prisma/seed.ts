@@ -83,6 +83,23 @@ async function main() {
     }
   }
 
+  // ---------- Precios de referencia (inventados; se ven solo en el panel, nunca en la web) ----------
+  // Solo se ponen si el servicio todavía no tiene precio: si la clínica lo cambió, queda el suyo.
+  const precios: Record<string, number> = {
+    "Consulta y control": 18000,
+    Vacunación: 22000,
+    Desparasitación: 9000,
+    "Análisis de sangre y orina": 35000,
+    Electrocardiograma: 30000,
+    Ecografía: 38000,
+    "Castración / esterilización": 90000,
+    "Limpieza dental": 70000,
+    "Baño y peluquería": 25000,
+  };
+  for (const [nombre, precio] of Object.entries(precios)) {
+    await prisma.servicio.updateMany({ where: { clinicaId, nombre, precioReferencia: null }, data: { precioReferencia: precio } });
+  }
+
   // ---------- Preguntas frecuentes ----------
   // (18/11) Se sacó "¿Necesito crear una cuenta…?": el inicio ya lo explica debajo de los 3 pasos.
   // Y la de las vacunas ya no repite el aviso por WhatsApp (lo cuenta la franja de vacunas).
@@ -543,6 +560,81 @@ async function main() {
           });
         }
       }
+    }
+  }
+
+  // ---------- Pagos de ejemplo (para la pantalla Pagos y los ingresos de Estadísticas) ----------
+  // Solo si todavía no hay ningún pago. Se cobran los turnos atendidos hasta hace 3 días; los de los
+  // últimos días quedan "Por cobrar" para mostrar cómo funciona. Más un par de ventas sin turno y un anulado.
+  if ((await prisma.pago.count({ where: { clinicaId } })) === 0) {
+    const quienCobra = await prisma.usuario.findFirst({ where: { clinicaId, rol: "VETERINARIO" } });
+    const hace3Dias = new Date(inicioDeHoy.getTime() - 3 * 24 * 3600 * 1000);
+    const atendidos = await prisma.turno.findMany({
+      where: { clinicaId, estado: "ATENDIDO", fechaHoraInicio: { lt: hace3Dias } },
+      include: { servicio: true, mascota: true },
+    });
+    let semilla = 20261121;
+    const azar = () => {
+      semilla = (semilla * 1103515245 + 12345) % 2147483648;
+      return semilla / 2147483648;
+    };
+    const medio = () => {
+      const r = azar();
+      return r < 0.45 ? ("EFECTIVO" as const) : r < 0.75 ? ("TRANSFERENCIA" as const) : r < 0.9 ? ("DEBITO" as const) : ("CREDITO" as const);
+    };
+    if (quienCobra && atendidos.length > 0) {
+      const pagos = atendidos.map((turno) => {
+        // Uno de cada 20 fue un control sin cargo
+        const sinCargo = azar() < 0.05;
+        return {
+          clinicaId,
+          clienteId: turno.mascota.clienteId,
+          turnoId: turno.id,
+          monto: sinCargo ? 0 : Number(turno.servicio.precioReferencia ?? 15000),
+          medio: sinCargo ? ("SIN_CARGO" as const) : medio(),
+          concepto: `${turno.servicio.nombre} · ${turno.mascota.nombre}`,
+          fecha: new Date(turno.fechaHoraFin.getTime() + 5 * 60 * 1000),
+          registradoPorId: quienCobra.id,
+        };
+      });
+      // Ventas en el mostrador, sin turno
+      const juan = await prisma.cliente.findFirst({ where: { clinicaId, nombre: "Juan", apellido: "Pérez" } });
+      for (const [dias, concepto, monto] of [
+        [20, "Alimento balanceado 3 kg", 21000],
+        [9, "Pipeta antipulgas", 8500],
+      ] as const) {
+        pagos.push({
+          clinicaId,
+          clienteId: juan?.id ?? null,
+          turnoId: null,
+          monto,
+          medio: "EFECTIVO",
+          concepto,
+          fecha: new Date(inicioDeHoy.getTime() - dias * 24 * 3600 * 1000 + 14 * 3600 * 1000),
+          registradoPorId: quienCobra.id,
+        } as (typeof pagos)[number]);
+      }
+      await prisma.pago.createMany({ data: pagos });
+
+      // Un pago anulado (se cargó dos veces), para ver cómo queda registrado.
+      const ultimo = pagos.filter((x) => x.turnoId).at(-1);
+      if (ultimo) {
+        await prisma.pago.create({
+          data: {
+            ...ultimo,
+            fecha: new Date(ultimo.fecha.getTime() + 60 * 1000),
+            anulado: true,
+            anuladoEn: new Date(ultimo.fecha.getTime() + 10 * 60 * 1000),
+            anuladoPorId: quienCobra.id,
+            motivoAnulacion: "Se cargó dos veces",
+          },
+        });
+      }
+      // "Por cobrar" muestra los turnos atendidos desde hace una semana.
+      await prisma.clinica.update({
+        where: { id: clinicaId },
+        data: { pagosDesde: new Date(inicioDeHoy.getTime() - 7 * 24 * 3600 * 1000) },
+      });
     }
   }
 

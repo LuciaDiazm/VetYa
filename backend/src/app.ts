@@ -7,6 +7,7 @@ import { estadisticasRouter } from "./routes/estadisticas";
 import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { consultasRouter } from "./routes/consultas";
 import { miCuentaRouter } from "./routes/miCuenta";
+import { pagosRouter } from "./routes/pagos";
 import { publicoRouter } from "./routes/publico";
 import { recordatoriosRouter } from "./routes/recordatorios";
 import { turnosPublicoRouter, turnosRouter } from "./routes/turnos";
@@ -55,6 +56,7 @@ app.use("/api/recordatorios", recordatoriosRouter);
 app.use("/api/mi-cuenta", miCuentaRouter);
 app.use("/api/configuracion", configuracionRouter);
 app.use("/api/estadisticas", estadisticasRouter);
+app.use("/api/pagos", pagosRouter);
 
 app.use(erroresDeSubida);
 

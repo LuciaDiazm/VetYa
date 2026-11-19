@@ -49,6 +49,7 @@ export const turnosPublicoRouter = Router();
 turnosPublicoRouter.get("/servicios", async (_req, res) => {
   const servicios = await prisma.servicio.findMany({
     where: { clinicaId: CLINICA_ID, activo: true, reservableOnline: true },
+    omit: { precioReferencia: true }, // el precio se ve solo en el panel, nunca en la web
     orderBy: [{ categoria: "asc" }, { nombre: "asc" }],
   });
   res.json(servicios);

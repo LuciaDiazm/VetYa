@@ -12,6 +12,7 @@ import { Configuracion } from './pages/panel/configuracion/Configuracion'
 import { Estadisticas } from './pages/panel/Estadisticas'
 import { InformeTurnos } from './pages/panel/InformeTurnos'
 import { MiClave } from './pages/panel/MiClave'
+import { Pagos } from './pages/panel/Pagos'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -86,6 +87,7 @@ function App() {
             <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="informe" element={<InformeTurnos />} />
             <Route path="contrasena" element={<MiClave />} />
+            <Route path="pagos" element={<Pagos />} />
             <Route
               path="configuracion"
               element={

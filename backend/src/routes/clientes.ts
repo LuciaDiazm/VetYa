@@ -340,6 +340,7 @@ clientesRouter.patch("/:id/unir-cuenta", async (req, res) => {
     if (vieja && vieja.id !== ficha.id) {
       await tx.mascota.updateMany({ where: { clienteId: vieja.id }, data: { clienteId: ficha.id } });
       await tx.recordatorio.updateMany({ where: { clienteId: vieja.id }, data: { clienteId: ficha.id } });
+      await tx.pago.updateMany({ where: { clienteId: vieja.id }, data: { clienteId: ficha.id } });
       await tx.cliente.delete({ where: { id: vieja.id } });
     }
     await tx.cliente.update({

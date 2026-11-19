@@ -310,3 +310,53 @@ export interface TurnoAfectado {
   servicio: { nombre: string }
   mascota: { id: number; nombre: string; cliente: { nombre: string; apellido: string; telefono: string } }
 }
+
+// ---------- Pagos en la clínica ----------
+
+export type MedioPago = 'EFECTIVO' | 'TRANSFERENCIA' | 'DEBITO' | 'CREDITO' | 'SIN_CARGO'
+
+interface PersonaCorta {
+  id: number
+  nombre: string
+  apellido: string
+}
+
+export interface Pago {
+  id: number
+  monto: number
+  medio: MedioPago
+  concepto: string
+  nota: string | null
+  fecha: string
+  anulado: boolean
+  anuladoEn: string | null
+  motivoAnulacion: string | null
+  cliente: (PersonaCorta & { telefono: string }) | null
+  turno: { id: number; fechaHoraInicio: string; mascota: { id: number; nombre: string } } | null
+  registradoPor: PersonaCorta
+  anuladoPor: PersonaCorta | null
+}
+
+export interface TotalesPagos {
+  total: number
+  cantidad: number
+  porMedio: Record<MedioPago, number>
+}
+
+export interface ListaPagos extends TotalesPagos {
+  pagos: Pago[]
+}
+
+export interface ResumenCaja extends TotalesPagos {
+  porCobrar: number
+  montoPorCobrar: number
+}
+
+// Turno atendido que todavía no se cobró
+export interface TurnoPorCobrar {
+  id: number
+  fechaHoraInicio: string
+  servicio: { id: number; nombre: string; precioReferencia: number | null }
+  veterinario: PersonaCorta | null
+  mascota: { id: number; nombre: string; cliente: PersonaCorta & { telefono: string } }
+}

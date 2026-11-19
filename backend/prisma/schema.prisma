@@ -60,6 +60,15 @@ enum TipoAplicacion {
   DESPARASITACION
 }
 
+// Cómo pagó el cliente en la clínica (no hay pagos por la web). SIN_CARGO = no se cobró (control, cortesía).
+enum MedioPago {
+  EFECTIVO
+  TRANSFERENCIA
+  DEBITO
+  CREDITO
+  SIN_CARGO
+}
+
 enum TipoRecordatorio {
   TURNO
   VACUNA
@@ -89,6 +98,8 @@ model Clinica {
   diasCancelaciones   Int     @default(7) @map("dias_cancelaciones")
   diasSuspension      Int     @default(30) @map("dias_suspension")
   maxTurnosOnline     Int     @default(3) @map("max_turnos_online") // turnos futuros a la vez por la web
+  // Desde cuándo se registran los pagos: los turnos atendidos antes no aparecen "Por cobrar".
+  pagosDesde          DateTime? @map("pagos_desde")
 
   usuarios         Usuario[]
   clientes         Cliente[]
@@ -101,6 +112,7 @@ model Clinica {
   opiniones        Opinion[]
   formasPago       FormaPago[]
   planesSanitarios PlanSanitario[]
+  pagos            Pago[]
 
   @@map("clinica")
 }
@@ -131,6 +143,8 @@ model Usuario {
   turnosAtendidos       Turno[]        @relation("TurnoVeterinario")
   consultas             Consulta[]
   recordatoriosEnviados Recordatorio[]
+  pagosRegistrados      Pago[]         @relation("PagoRegistradoPor")
+  pagosAnulados         Pago[]         @relation("PagoAnuladoPor")
 
   @@map("usuario")
 }
@@ -158,6 +172,7 @@ model Cliente {
   usuario       Usuario?       @relation(fields: [usuarioId], references: [id])
   mascotas      Mascota[]
   recordatorios Recordatorio[]
+  pagos         Pago[]
 
   @@index([clinicaId, telefono])
   @@map("cliente")
@@ -256,9 +271,39 @@ model Turno {
   consulta      Consulta?
   cuestionario  CuestionarioPrevio?
   recordatorios Recordatorio[]
+  pagos         Pago[]
 
   @@index([clinicaId, fechaHoraInicio])
   @@map("turno")
+}
+
+// Pago hecho en la clínica. Nunca se borra: si hubo un error se anula (queda quién y por qué).
+model Pago {
+  id              Int       @id @default(autoincrement()) @map("id_pago")
+  clinicaId       Int       @map("id_clinica")
+  clienteId       Int?      @map("id_cliente") // vacío = venta en el mostrador a alguien sin ficha
+  turnoId         Int?      @map("id_turno") // vacío = cobro sin turno (alimento, medicamento…)
+  monto           Decimal   @db.Decimal(10, 2)
+  medio           MedioPago
+  concepto        String
+  nota            String?
+  fecha           DateTime  @default(now())
+  registradoPorId Int       @map("id_registrado_por")
+  anulado         Boolean   @default(false)
+  anuladoEn       DateTime? @map("anulado_en")
+  anuladoPorId    Int?      @map("id_anulado_por")
+  motivoAnulacion String?   @map("motivo_anulacion")
+
+  clinica       Clinica  @relation(fields: [clinicaId], references: [id])
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
+  turno         Turno?   @relation(fields: [turnoId], references: [id])
+  registradoPor Usuario  @relation("PagoRegistradoPor", fields: [registradoPorId], references: [id])
+  anuladoPor    Usuario? @relation("PagoAnuladoPor", fields: [anuladoPorId], references: [id])
+
+  @@index([clinicaId, fecha])
+  @@index([clienteId])
+  @@index([turnoId])
+  @@map("pago")
 }
 
 model Consulta {

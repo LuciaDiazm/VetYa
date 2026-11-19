@@ -8,6 +8,7 @@ import { useHoraActual } from '../lib/horaActual'
 import { useSitio } from '../lib/sitio'
 import type { ResumenRecordatorios, Turno } from '../types'
 import { AvisosSuspension } from '../components/AvisosSuspension'
+import { CajaDeHoy } from '../components/CajaDeHoy'
 import { FilaTurno } from '../components/FilaTurno'
 import { Cargando } from '../components/Cargando'
 
@@ -145,7 +146,10 @@ export function Panel() {
           )}
         </section>
 
-        <aside className="hoy-costado" aria-label="Equipo y calendario">
+        <aside className="hoy-costado" aria-label="Caja, equipo y calendario">
+          {/* Se vuelve a consultar cada vez que cambia el estado de algún turno de hoy */}
+          <CajaDeHoy version={activos.map((t) => t.estado).join()} />
+
           {/* ---------- Veterinarios: los mismos datos que se muestran en la web ---------- */}
           <section className="hoy-caja">
             <div className="hoy-caja-titulo">

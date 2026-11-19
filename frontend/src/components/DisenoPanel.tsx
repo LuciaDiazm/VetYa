@@ -1,4 +1,4 @@
-import { BarChart3, Bell, CalendarDays, FileText, House, KeyRound, LogOut, PawPrint, Settings } from 'lucide-react'
+import { BarChart3, Bell, CalendarDays, FileText, HandCoins, House, KeyRound, LogOut, PawPrint, Settings } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -26,6 +26,7 @@ export function DisenoPanel() {
     { ruta: '/panel', nombre: 'Hoy', icono: House, fin: true },
     { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
     { ruta: '/panel/clientes', nombre: 'Clientes', icono: PawPrint },
+    { ruta: '/panel/pagos', nombre: 'Pagos', icono: HandCoins },
     { ruta: '/panel/recordatorios', nombre: 'Notificaciones', icono: Bell, globo: avisosPendientes },
     { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
     { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
