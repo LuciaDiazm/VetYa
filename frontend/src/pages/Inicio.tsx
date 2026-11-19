@@ -241,7 +241,7 @@ export function Inicio() {
                   <p className="aviso-ejemplo-de">
                     Clínica VetYa <span>ahora</span>
                   </p>
-                  <p>Hola María: mañana le toca la vacuna anual a Lola.</p>
+                  <p>Hola Juan: mañana le toca la vacuna anual a Firulais.</p>
                 </div>
               </div>
               <div className="chip-ejemplo entra" style={{ '--i': 5 } as CSSProperties}>
@@ -260,7 +260,7 @@ export function Inicio() {
         <div className="contenedor servicios-grilla">
           <div>
             <h2 id="titulo-servicios">Qué atendemos en la clínica</h2>
-            <p className="bloque-bajada">Consultas, estudios, cirugías y peluquería, en el mismo lugar.</p>
+            <p className="bloque-bajada">Elegí un servicio para pedir turno o ver cómo se coordina.</p>
             <ul className="filas-servicio">
               {filas.map((c) => (
                 <li

@@ -83,18 +83,21 @@ async function main() {
   }
 
   // ---------- Preguntas frecuentes ----------
-  const RESPUESTA_CUENTA = "Sí. Se crea una sola vez, con tu nombre, tu teléfono y un email. Si preferís, pedí el turno por WhatsApp.";
-  // Las bases que ya tenían la respuesta anterior (cuando no hacía falta cuenta) se corrigen.
+  // (18/11) Se sacó "¿Necesito crear una cuenta…?": el inicio ya lo explica debajo de los 3 pasos.
+  // Y la de las vacunas ya no repite el aviso por WhatsApp (lo cuenta la franja de vacunas).
+  // Solo se tocan tal como las dejó el seed; si la clínica las cambió, quedan como estén.
+  await prisma.preguntaFrecuente.deleteMany({
+    where: { clinicaId, pregunta: "¿Necesito crear una cuenta para sacar turno?" },
+  });
   await prisma.preguntaFrecuente.updateMany({
-    where: { clinicaId, respuesta: "No. Podés sacar turno solo con tu nombre, tu teléfono y los datos de tu mascota." },
-    data: { respuesta: RESPUESTA_CUENTA },
+    where: { clinicaId, respuesta: "Depende de la edad y la vacuna. En general los refuerzos son anuales; te avisamos por WhatsApp cuando le toca." },
+    data: { respuesta: "Depende de la edad y la vacuna. En general, los refuerzos son una vez por año." },
   });
   if ((await prisma.preguntaFrecuente.count({ where: { clinicaId } })) === 0) {
     await prisma.preguntaFrecuente.createMany({
       data: [
         { clinicaId, orden: 1, pregunta: "¿Atienden urgencias?", respuesta: "Sí. Ante una urgencia comunicate directamente por teléfono o WhatsApp antes de venir." },
-        { clinicaId, orden: 2, pregunta: "¿Necesito crear una cuenta para sacar turno?", respuesta: RESPUESTA_CUENTA },
-        { clinicaId, orden: 3, pregunta: "¿Cada cuánto hay que vacunar a mi mascota?", respuesta: "Depende de la edad y la vacuna. En general los refuerzos son anuales; te avisamos por WhatsApp cuando le toca." },
+        { clinicaId, orden: 3, pregunta: "¿Cada cuánto hay que vacunar a mi mascota?", respuesta: "Depende de la edad y la vacuna. En general, los refuerzos son una vez por año." },
         { clinicaId, orden: 4, pregunta: "¿Qué tengo que hacer antes de una castración?", respuesta: "La mascota debe venir con 8 a 12 horas de ayuno. Te damos las indicaciones al confirmar el turno." },
         { clinicaId, orden: 5, pregunta: "¿Puedo cancelar un turno?", respuesta: "Sí, con al menos 24 horas de anticipación desde la web o por WhatsApp." },
       ],
