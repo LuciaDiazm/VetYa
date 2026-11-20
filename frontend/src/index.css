@@ -2506,7 +2506,6 @@ html[data-turno-portada='visible'] .boton-turno {
   gap: 10px;
 }
 
-.hoy-boton-avisos,
 .hoy-boton-turno {
   display: inline-flex;
   align-items: center;
@@ -2517,17 +2516,6 @@ html[data-turno-portada='visible'] .boton-turno {
   font-size: 0.92rem;
   font-weight: 700;
   text-decoration: none;
-}
-
-.hoy-boton-avisos {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  transition: background-color 0.15s;
-}
-
-.hoy-boton-avisos:hover {
-  background: rgba(255, 255, 255, 0.16);
 }
 
 .boton.hoy-boton-turno {
@@ -3263,7 +3251,6 @@ html[data-turno-portada='visible'] .boton-turno {
   }
 
   .hoy-saludo-acciones,
-  .hoy-boton-avisos,
   .hoy-boton-turno {
     width: 100%;
     justify-content: center;
@@ -8706,5 +8693,214 @@ form.campo-en-linea {
 @media print {
   .presupuesto-hoja {
     max-width: none;
+  }
+}
+
+/* ---------- Barra de arriba del panel: campana de avisos y menú con el nombre ---------- */
+.panel-columna {
+  min-width: 0;
+}
+
+.panel-barra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 14px 0;
+}
+
+.desplegable {
+  position: relative;
+}
+
+.barra-campana {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--azul);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.barra-campana-numero {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: var(--rojo);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.barra-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--azul);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.barra-iniciales {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--azul);
+  color: var(--amarillo);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .barra-campana:hover,
+  .barra-cuenta:hover {
+    background: #eef1f7;
+  }
+}
+
+.barra-campana:focus-visible,
+.barra-cuenta:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}
+
+.desplegable-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  width: min(300px, calc(100vw - 24px));
+  border: 1px solid var(--panel-borde);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(28, 45, 99, 0.14);
+  overflow: hidden;
+}
+
+.desplegable-titulo {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--panel-borde);
+  color: var(--azul);
+  font-weight: 700;
+}
+
+.desplegable-titulo span {
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.desplegable-panel ul {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+}
+
+.desplegable-panel li a,
+.desplegable-panel li button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.desplegable-panel li svg {
+  flex: none;
+  color: var(--azul);
+}
+
+.desplegable-panel li span:first-of-type {
+  flex: 1;
+}
+
+.desplegable-panel li a:hover,
+.desplegable-panel li button:hover,
+.desplegable-panel li a:focus-visible,
+.desplegable-panel li button:focus-visible {
+  background: #f2f4f8;
+}
+
+.barra-avisos-numero {
+  min-width: 26px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--amarillo-suave);
+  color: #7a4f00;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.barra-avisos-numero.en-cero {
+  background: #eceef2;
+  color: var(--gris);
+}
+
+.desplegable-pie {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 0 16px;
+  border-top: 1px solid var(--panel-borde);
+  color: var(--azul);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.desplegable-panel .barra-salir,
+.desplegable-panel .barra-salir svg {
+  color: var(--rojo);
+}
+
+@media (max-width: 860px) {
+  .panel-barra {
+    padding: 10px 12px 0;
+  }
+
+  .barra-nombre {
+    display: none;
+  }
+}
+
+@media print {
+  .panel-barra {
+    display: none !important;
   }
 }

@@ -1,4 +1,4 @@
-import { Armchair, Bell, CalendarDays, CheckCheck, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter, Stethoscope } from 'lucide-react'
+import { Armchair, CalendarDays, CheckCheck, CircleAlert, CalendarPlus, ChevronLeft, ChevronRight, ListFilter, Stethoscope } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -6,7 +6,7 @@ import { apiGet, apiPatch } from '../lib/api'
 import { diaDe, diaLargo, horaDe, hoyArgentina, lunesDe, primeroDeMes, saludoSegunHora, sumarDias } from '../lib/fechas'
 import { useHoraActual } from '../lib/horaActual'
 import { useSitio } from '../lib/sitio'
-import type { ResumenRecordatorios, Turno } from '../types'
+import type { Turno } from '../types'
 import { AvisosSuspension } from '../components/AvisosSuspension'
 import { CajaDeHoy } from '../components/CajaDeHoy'
 import { FilaTurno } from '../components/FilaTurno'
@@ -37,7 +37,6 @@ export function Panel() {
   const [hoy] = useState(hoyArgentina)
   const [saludo] = useState(saludoSegunHora)
   const [turnos, setTurnos] = useState<Turno[] | null>(null)
-  const [resumen, setResumen] = useState<ResumenRecordatorios | null>(null)
   const [soloFaltan, setSoloFaltan] = useState(false)
   const ahora = useHoraActual()
 
@@ -45,7 +44,6 @@ export function Panel() {
     apiGet<Turno[]>(`/turnos?desde=${hoy}&hasta=${hoy}`)
       .then(setTurnos)
       .catch(() => setTurnos([]))
-    apiGet<ResumenRecordatorios>('/recordatorios/resumen').then(setResumen).catch(() => {})
   }, [hoy])
 
   const activos = (turnos ?? []).filter((t) => t.estado !== 'CANCELADO')
@@ -59,7 +57,6 @@ export function Panel() {
   // Pizarra del día: quién espera en la sala y quién está en consulta.
   const enSala = porAtender.filter((t) => t.llegoEn && !t.enConsultaEn).length
   const enConsulta = porAtender.filter((t) => t.enConsultaEn).length
-  const avisos = resumen ? resumen.turnosManana + resumen.dosis + resumen.recuperar : 0
   const equipo = sitio?.equipo ?? []
 
   const actualizar = (nuevo: Turno) => setTurnos((l) => l?.map((x) => (x.id === nuevo.id ? nuevo : x)) ?? null)
@@ -80,13 +77,7 @@ export function Panel() {
           </p>
         </div>
         <div className="hoy-saludo-acciones">
-          {/* Los avisos están en Notificaciones: acá solo se recuerda que hay */}
-          {avisos > 0 && (
-            <Link to="/panel/recordatorios" className="hoy-boton-avisos">
-              <Bell size={22} aria-hidden="true" />
-              {avisos === 1 ? '1 aviso para mandar' : `${avisos} avisos para mandar`}
-            </Link>
-          )}
+          {/* Los avisos para mandar están en la campana de arriba */}
           {puede(usuario, 'turnos.dar') && (
             <Link to="/panel/agenda/nuevo" className="boton hoy-boton-turno">
               <CalendarPlus size={22} aria-hidden="true" /> Dar turno
