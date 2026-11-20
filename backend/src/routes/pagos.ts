@@ -7,6 +7,7 @@ import { registrarCambio } from "../lib/auditoria";
 import { PERSONAL, requierePermiso } from "../lib/permisos";
 import { CANTIDAD_COLUMNAS_PAGOS, escribirInformePagos } from "../lib/informe";
 import { prisma } from "../lib/prisma";
+import { bloquearAgenda } from "../lib/sanciones";
 
 // Registro de pagos en la clínica (en la web no se paga nada).
 // Un turno atendido queda "Por cobrar" solo, con el precio del servicio ya puesto. Se cobra con un toque,
@@ -117,15 +118,17 @@ pagosRouter.get("/por-cobrar", async (req, res) => {
 pagosRouter.get("/resumen-hoy", async (req, res) => {
   const clinicaId = req.usuario!.clinicaId;
   const hoy = diaArgentina(new Date());
-  const [pagos, porCobrar] = await Promise.all([
+  const [pagos, porCobrar, cierre] = await Promise.all([
     prisma.pago.findMany({
       where: { clinicaId, fecha: { gte: aFechaUTC(hoy, "00:00"), lt: aFechaUTC(sumarDias(hoy, 1), "00:00") } },
       select: { monto: true, medio: true, anulado: true },
     }),
     turnosPorCobrar(clinicaId),
+    cierreVigente(prisma, clinicaId, hoy),
   ]);
   res.json({
     ...totalesDe(pagos),
+    cerradaEn: cierre?.cerradoEn ?? null,
     porCobrar: porCobrar.length,
     // Lo que se puede estimar (los servicios sin precio no suman)
     montoPorCobrar: porCobrar.reduce((s, t) => s + (t.presupuesto ? t.presupuesto.falta : (t.servicio.precioReferencia ?? 0)), 0),
@@ -183,6 +186,11 @@ pagosRouter.post("/", requierePermiso("pagos.cobrar"), async (req, res) => {
   const monto = d.medio === "SIN_CARGO" ? 0 : Math.round(d.monto * 100) / 100;
   try {
     const pago = await prisma.$transaction(async (tx) => {
+      // Si la caja de hoy se está cerrando, espera; si ya está cerrada, no se cobra.
+      await bloquearAgenda(tx, clinicaId);
+      if (await cierreVigente(tx, clinicaId, diaArgentina(new Date()))) {
+        throw new ErrorPago(409, "La caja de hoy ya está cerrada. Para cobrar, la administración la tiene que reabrir");
+      }
       let clienteId: number | null = null;
       let concepto = d.concepto ?? "";
       if (d.turnoId) {
@@ -259,6 +267,157 @@ pagosRouter.post("/", requierePermiso("pagos.cobrar"), async (req, res) => {
   }
 });
 
+// ---------- Cierre de caja ----------
+// Al terminar el día, quien cobra cuenta el efectivo. VetYa calcula cuánto debería haber
+// (el cambio con el que se abrió + lo cobrado en efectivo) y muestra si sobra o falta.
+// Con la caja cerrada no se cobra ni se anula nada de ese día; la administración la puede reabrir con motivo.
+
+const fechaDia = (dia: string) => new Date(`${dia}T00:00:00.000Z`);
+
+function cierreVigente(db: Prisma.TransactionClient | typeof prisma, clinicaId: number, dia: string) {
+  return db.cierreCaja.findFirst({
+    where: { clinicaId, dia: fechaDia(dia), reabiertoEn: null },
+    include: { cerradoPor: persona },
+  });
+}
+
+const conPersonas = { cerradoPor: persona, reabiertoPor: persona } satisfies Prisma.CierreCajaInclude;
+
+function cierreAJson(c: Prisma.CierreCajaGetPayload<{ include: { cerradoPor: typeof persona } }>) {
+  return {
+    ...c,
+    dia: c.dia.toISOString().slice(0, 10),
+    cambioInicial: Number(c.cambioInicial),
+    efectivoCobrado: Number(c.efectivoCobrado),
+    transferencia: Number(c.transferencia),
+    debito: Number(c.debito),
+    credito: Number(c.credito),
+    totalCobrado: Number(c.totalCobrado),
+    efectivoContado: Number(c.efectivoContado),
+    diferencia: Number(c.diferencia),
+  };
+}
+
+async function cobrosDelDia(db: Prisma.TransactionClient | typeof prisma, clinicaId: number, dia: string) {
+  const pagos = await db.pago.findMany({
+    where: { clinicaId, fecha: { gte: aFechaUTC(dia, "00:00"), lt: aFechaUTC(sumarDias(dia, 1), "00:00") } },
+    select: { monto: true, medio: true, anulado: true },
+  });
+  return totalesDe(pagos);
+}
+
+// Lo que hace falta para cerrar hoy: los cobros del día, si ya se cerró y los últimos cierres.
+pagosRouter.get("/cierre", async (req, res) => {
+  const clinicaId = req.usuario!.clinicaId;
+  const hoy = diaArgentina(new Date());
+  const [totales, cierre, porCobrar, historial] = await Promise.all([
+    cobrosDelDia(prisma, clinicaId, hoy),
+    cierreVigente(prisma, clinicaId, hoy),
+    turnosPorCobrar(clinicaId),
+    prisma.cierreCaja.findMany({
+      where: { clinicaId },
+      include: conPersonas,
+      orderBy: { cerradoEn: "desc" },
+      take: 10,
+    }),
+  ]);
+  // El cambio para dar vuelto suele ser el mismo todos los días: se propone el del último cierre.
+  const ultimo = historial.find((c) => !c.reabiertoEn);
+  res.json({
+    dia: hoy,
+    ...totales,
+    porCobrar: porCobrar.filter((t) => diaArgentina(t.fechaHoraInicio) === hoy).length,
+    cambioSugerido: ultimo ? Number(ultimo.cambioInicial) : 0,
+    cierre: cierre ? cierreAJson(cierre) : null,
+    historial: historial.map(cierreAJson),
+  });
+});
+
+const esquemaCierre = z.object({
+  cambioInicial: z.number().min(0, "El cambio no puede ser negativo").max(10_000_000, "Revisá el cambio"),
+  efectivoContado: z.number().min(0, "Lo contado no puede ser negativo").max(10_000_000, "Revisá lo contado"),
+  nota: z.string().trim().max(300, "La nota es muy larga").optional(),
+});
+
+pagosRouter.post("/cierre", requierePermiso("pagos.cobrar"), async (req, res) => {
+  const datos = esquemaCierre.safeParse(req.body);
+  if (!datos.success) {
+    res.status(400).json({ error: datos.error.issues[0].message });
+    return;
+  }
+  const clinicaId = req.usuario!.clinicaId;
+  const hoy = diaArgentina(new Date());
+  const redondear = (n: number) => Math.round(n * 100) / 100;
+  const cambioInicial = redondear(datos.data.cambioInicial);
+  const efectivoContado = redondear(datos.data.efectivoContado);
+  try {
+    const cierre = await prisma.$transaction(async (tx) => {
+      // Se traba la caja: mientras se cierra no entra ningún cobro, y dos cierres a la vez no pasan.
+      await bloquearAgenda(tx, clinicaId);
+      if (await cierreVigente(tx, clinicaId, hoy)) throw new ErrorPago(409, "La caja de hoy ya está cerrada");
+      const t = await cobrosDelDia(tx, clinicaId, hoy);
+      const diferencia = redondear(efectivoContado - (cambioInicial + t.porMedio.EFECTIVO));
+      if (diferencia !== 0 && !datos.data.nota) {
+        throw new ErrorPago(400, "Lo contado no coincide: escribí qué pasó en la nota");
+      }
+      return tx.cierreCaja.create({
+        data: {
+          clinicaId,
+          dia: fechaDia(hoy),
+          cambioInicial,
+          efectivoCobrado: t.porMedio.EFECTIVO,
+          transferencia: t.porMedio.TRANSFERENCIA,
+          debito: t.porMedio.DEBITO,
+          credito: t.porMedio.CREDITO,
+          totalCobrado: t.total,
+          cantidadCobros: t.cantidad,
+          efectivoContado,
+          diferencia,
+          nota: datos.data.nota || null,
+          cerradoPorId: req.usuario!.id,
+        },
+        include: { cerradoPor: persona },
+      });
+    });
+    res.status(201).json(cierreAJson(cierre));
+  } catch (err) {
+    if (err instanceof ErrorPago) {
+      res.status(err.estado).json({ error: err.message });
+      return;
+    }
+    throw err;
+  }
+});
+
+// Reabrir: solo la administración, con motivo (queda en el Registro de cambios). Después se vuelve a cerrar.
+pagosRouter.patch("/cierre/:id/reabrir", requierePermiso("ajustes"), async (req, res) => {
+  const datos = esquemaAnular.safeParse(req.body);
+  if (!datos.success) {
+    res.status(400).json({ error: datos.error.issues[0].message.replace("se anula", "se reabre") });
+    return;
+  }
+  const cierre = await prisma.cierreCaja.findFirst({ where: { id: Number(req.params.id), clinicaId: req.usuario!.clinicaId } });
+  if (!cierre) {
+    res.status(404).json({ error: "Cierre no encontrado" });
+    return;
+  }
+  if (cierre.reabiertoEn) {
+    res.status(400).json({ error: "Esa caja ya está reabierta" });
+    return;
+  }
+  await prisma.cierreCaja.update({
+    where: { id: cierre.id },
+    data: { reabiertoEn: new Date(), reabiertoPorId: req.usuario!.id, motivoReapertura: datos.data.motivo },
+  });
+  await registrarCambio(req, {
+    accion: "caja.reabrir",
+    entidad: "cierre_caja",
+    entidadId: cierre.id,
+    resumen: `Reabrió la caja del ${cierre.dia.toISOString().slice(0, 10).split("-").reverse().join("/")}: ${datos.data.motivo}`,
+  });
+  res.json({ ok: true });
+});
+
 // Anular: la administración, siempre; quien cobró, solo un pago suyo de hoy (para corregir un error al toque).
 const esquemaAnular = z.object({
   motivo: z.string().trim().min(3, "Escribí por qué se anula").max(190, "El motivo es muy largo"),
@@ -277,6 +436,10 @@ pagosRouter.patch("/:id/anular", async (req, res) => {
   }
   if (pago.anulado) {
     res.status(400).json({ error: "Ese pago ya está anulado" });
+    return;
+  }
+  if (await cierreVigente(prisma, req.usuario!.clinicaId, diaArgentina(pago.fecha))) {
+    res.status(409).json({ error: "La caja de ese día está cerrada. Para anular, la administración la tiene que reabrir" });
     return;
   }
   const esAdmin = req.usuario!.rol === "ADMIN";

@@ -394,6 +394,36 @@ export interface ListaPagos extends TotalesPagos {
 export interface ResumenCaja extends TotalesPagos {
   porCobrar: number
   montoPorCobrar: number
+  // Hora (ISO) en que se cerró la caja de hoy, o null si sigue abierta
+  cerradaEn: string | null
+}
+
+// Cierre de caja de un día
+export interface CierreCaja {
+  id: number
+  dia: string
+  cambioInicial: number
+  efectivoCobrado: number
+  transferencia: number
+  debito: number
+  credito: number
+  totalCobrado: number
+  cantidadCobros: number
+  efectivoContado: number
+  diferencia: number
+  nota: string | null
+  cerradoEn: string
+  cerradoPor: { id: number; nombre: string; apellido: string }
+  reabiertoEn: string | null
+  motivoReapertura: string | null
+}
+
+export interface EstadoCaja extends TotalesPagos {
+  dia: string
+  porCobrar: number
+  cambioSugerido: number
+  cierre: CierreCaja | null
+  historial: CierreCaja[]
 }
 
 // Turno atendido que todavía no se cobró

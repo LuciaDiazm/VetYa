@@ -117,6 +117,7 @@ model Clinica {
   planesSanitarios PlanSanitario[]
   pagos            Pago[]
   presupuestos     Presupuesto[]
+  cierresCaja      CierreCaja[]
   archivos         Archivo[]
   auditoria        Auditoria[]
 
@@ -153,6 +154,8 @@ model Usuario {
   pagosAnulados         Pago[]                @relation("PagoAnuladoPor")
   presupuestosHechos    Presupuesto[]         @relation("PresupuestoCreadoPor")
   presupuestosAnulados  Presupuesto[]         @relation("PresupuestoAnuladoPor")
+  cierresHechos         CierreCaja[]          @relation("CierreCerradoPor")
+  cierresReabiertos     CierreCaja[]          @relation("CierreReabiertoPor")
   consultasEditadas     Consulta[]            @relation("ConsultaEditadaPor")
   aplicacionesCargadas  AplicacionSanitaria[] @relation("AplicacionRegistradaPor")
   aplicacionesAnuladas  AplicacionSanitaria[] @relation("AplicacionAnuladaPor")
@@ -334,6 +337,37 @@ model Pago {
   @@index([turnoId])
   @@index([presupuestoId])
   @@map("pago")
+}
+
+// Cierre de caja del día: al terminar, quien cobra cuenta el efectivo y lo compara con lo que dice VetYa.
+// Con la caja cerrada no se cobra ni se anula nada de ese día. La administración puede reabrirla con motivo
+// (el cierre no se borra: queda reabierto, y después se vuelve a cerrar).
+model CierreCaja {
+  id               Int       @id @default(autoincrement()) @map("id_cierre")
+  clinicaId        Int       @map("id_clinica")
+  dia              DateTime  @db.Date
+  cambioInicial    Decimal   @map("cambio_inicial") @db.Decimal(10, 2) // efectivo que había al abrir (para dar vuelto)
+  efectivoCobrado  Decimal   @map("efectivo_cobrado") @db.Decimal(10, 2)
+  transferencia    Decimal   @db.Decimal(10, 2)
+  debito           Decimal   @db.Decimal(10, 2)
+  credito          Decimal   @db.Decimal(10, 2)
+  totalCobrado     Decimal   @map("total_cobrado") @db.Decimal(10, 2)
+  cantidadCobros   Int       @map("cantidad_cobros")
+  efectivoContado  Decimal   @map("efectivo_contado") @db.Decimal(10, 2)
+  diferencia       Decimal   @db.Decimal(10, 2) // contado − (cambio + efectivo cobrado): + sobra, − falta
+  nota             String?   @db.VarChar(300)
+  cerradoEn        DateTime  @default(now()) @map("cerrado_en")
+  cerradoPorId     Int       @map("id_cerrado_por")
+  reabiertoEn      DateTime? @map("reabierto_en")
+  reabiertoPorId   Int?      @map("id_reabierto_por")
+  motivoReapertura String?   @map("motivo_reapertura") @db.VarChar(191)
+
+  clinica      Clinica  @relation(fields: [clinicaId], references: [id])
+  cerradoPor   Usuario  @relation("CierreCerradoPor", fields: [cerradoPorId], references: [id])
+  reabiertoPor Usuario? @relation("CierreReabiertoPor", fields: [reabiertoPorId], references: [id])
+
+  @@index([clinicaId, dia])
+  @@map("cierre_caja")
 }
 
 enum EstadoPresupuesto {

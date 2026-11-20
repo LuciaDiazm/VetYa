@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Ayuda } from '../../components/Ayuda'
 import { Cargando } from '../../components/Cargando'
+import { CierreDeCaja } from '../../components/CierreCaja'
 import { CobrarTurno } from '../../components/CobrarTurno'
 import { ElegirFechas } from '../../components/ElegirFechas'
 import { OtroCobro } from '../../components/OtroCobro'
@@ -213,6 +214,15 @@ export function Pagos() {
           <OtroCobro alGuardar={cargarLista} />
         </div>
       </section>
+
+      {/* ---------- Cierre de caja de hoy ---------- */}
+      <CierreDeCaja
+        version={`${lista?.datos.cantidad ?? ''}|${lista?.datos.total ?? ''}|${porCobrar?.length ?? ''}`}
+        alCambiar={() => {
+          cargarLista()
+          cargarPorCobrar()
+        }}
+      />
 
       {/* ---------- Caja: lo cobrado entre dos fechas ---------- */}
       <div className="informe-encabezado caja-encabezado no-imprimir">

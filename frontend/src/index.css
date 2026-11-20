@@ -9151,3 +9151,192 @@ form.campo-en-linea {
     white-space: nowrap;
   }
 }
+
+/* ---------- Cierre de caja (en Pagos) ---------- */
+.cierre-caja {
+  margin-bottom: 22px;
+}
+
+.cierre-cuerpo {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.cierre-medios,
+.cierre-cuentas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cierre-medios li,
+.cierre-cuentas li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 10px;
+  background: #f7f8fb;
+}
+
+.cierre-medios span,
+.cierre-cuentas span,
+.cierre-cuentas small {
+  color: var(--gris);
+  font-size: 0.85rem;
+}
+
+.cierre-medios strong,
+.cierre-cuentas strong {
+  color: var(--tinta);
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cierre-medios .cierre-total {
+  border-color: var(--azul);
+  background: var(--azul-suave);
+}
+
+.cierre-aviso,
+.cierre-cerrada {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--amarillo-suave);
+  color: #7a4f00;
+}
+
+.cierre-cerrada {
+  background: var(--azul-suave);
+  color: var(--azul);
+}
+
+.cierre-aviso svg,
+.cierre-cerrada svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.cierre-nota {
+  margin: 0;
+  color: var(--gris);
+}
+
+.cierre-formulario {
+  display: grid;
+  gap: 12px;
+}
+
+.cierre-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.cierre-campos small {
+  color: var(--gris);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.cierre-esperado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0;
+  color: var(--gris);
+}
+
+.cierre-esperado strong {
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Resultado del conteo: siempre ícono + texto */
+.cierre-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cierre-justo {
+  background: #e3f4ea;
+  color: #17643a;
+}
+
+.cierre-sobra {
+  background: var(--amarillo-suave);
+  color: #7a4f00;
+}
+
+.cierre-falta {
+  background: var(--rojo-suave);
+  color: var(--rojo-hover);
+}
+
+.cierre-reabierta {
+  background: #eceef2;
+  color: var(--gris);
+  font-weight: 500;
+}
+
+.cierre-historial {
+  padding: 0 14px 14px;
+}
+
+.cierre-historial summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--azul);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cierre-historial ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cierre-historial li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 8px 0;
+  border-top: 1px solid var(--panel-borde);
+  color: var(--gris);
+}
+
+.cierre-historial-dia {
+  min-width: 90px;
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+/* En Hoy: aviso de caja cerrada */
+.caja-de-hoy-cerrada {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--azul);
+  font-weight: 700;
+  text-decoration: none;
+}

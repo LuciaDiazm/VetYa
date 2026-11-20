@@ -121,6 +121,7 @@ describe("Qué puede hacer cada perfil", () => {
     expect((await request(app).post("/api/turnos").set(como("VETERINARIO")).send({})).status).toBe(403);
     expect((await request(app).post("/api/pagos").set(como("VETERINARIO")).send({})).status).toBe(403);
     expect((await request(app).post("/api/presupuestos").set(como("VETERINARIO")).send({})).status).toBe(403);
+    expect((await request(app).post("/api/pagos/cierre").set(como("VETERINARIO")).send({})).status).toBe(403);
     expect((await request(app).put("/api/clientes/1").set(como("VETERINARIO")).send({})).status).toBe(403);
   });
 
@@ -142,6 +143,13 @@ describe("Qué puede hacer cada perfil", () => {
       .set(como("VETERINARIO"))
       .send({ motivo: "No debería guardarse" });
     expect(r.status).toBe(403);
+  });
+
+  it("solo la administración reabre la caja cerrada", async () => {
+    for (const perfil of ["VETERINARIO", "RECEPCION"] as const) {
+      const r = await request(app).patch("/api/pagos/cierre/1/reabrir").set(como(perfil)).send({ motivo: "prueba" });
+      expect(r.status).toBe(403);
+    }
   });
 
   it("nadie que no sea la administración ve ni cambia el personal", async () => {

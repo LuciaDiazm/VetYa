@@ -1,9 +1,10 @@
-import { HandCoins } from 'lucide-react'
+import { HandCoins, Lock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { apiGet } from '../lib/api'
 import { puede } from '../lib/permisos'
+import { horaDe } from '../lib/fechas'
 import { MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../lib/pagos'
 import type { ResumenCaja } from '../types'
 
@@ -52,7 +53,11 @@ export function CajaDeHoy({ version }: { version: string }) {
             ))}
           </ul>
         )}
-        {caja.porCobrar > 0 && !puede(usuario, 'pagos.cobrar') ? (
+        {caja.cerradaEn ? (
+          <Link to="/panel/pagos" className="caja-de-hoy-cerrada">
+            <Lock size={18} aria-hidden="true" /> Caja cerrada a las {horaDe(caja.cerradaEn)}
+          </Link>
+        ) : caja.porCobrar > 0 && !puede(usuario, 'pagos.cobrar') ? (
           // La veterinaria o el veterinario no cobra: ve lo que falta, sin el botón.
           <p className="caja-de-hoy-nada">
             Por cobrar: {caja.porCobrar} {caja.porCobrar === 1 ? 'turno' : 'turnos'}
