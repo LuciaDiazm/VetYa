@@ -14,6 +14,7 @@ import { InformeTurnos } from './pages/panel/InformeTurnos'
 import { MiClave } from './pages/panel/MiClave'
 import { Pagos } from './pages/panel/Pagos'
 import { ComprobantePago } from './pages/panel/ComprobantePago'
+import { ImprimirPresupuesto } from './pages/panel/ImprimirPresupuesto'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
@@ -91,6 +92,7 @@ function App() {
             <Route path="contrasena" element={<MiClave />} />
             <Route path="pagos" element={<Pagos />} />
             <Route path="pagos/:id/comprobante" element={<ComprobantePago />} />
+            <Route path="presupuestos/:id" element={<ImprimirPresupuesto />} />
             <Route
               path="configuracion"
               element={

@@ -376,6 +376,7 @@ export interface Pago {
   motivoAnulacion: string | null
   cliente: (PersonaCorta & { telefono: string }) | null
   turno: { id: number; fechaHoraInicio: string; mascota: { id: number; nombre: string } } | null
+  presupuesto: { id: number; titulo: string } | null
   registradoPor: PersonaCorta
   anuladoPor: PersonaCorta | null
 }
@@ -402,4 +403,35 @@ export interface TurnoPorCobrar {
   servicio: { id: number; nombre: string; precioReferencia: number | null }
   veterinario: PersonaCorta | null
   mascota: { id: number; nombre: string; cliente: PersonaCorta & { telefono: string } }
+  // Presupuesto vigente de esa mascota para ese servicio: se cobra solo lo que falta
+  presupuesto: { id: number; titulo: string; total: number; pagado: number; falta: number } | null
+}
+
+// Presupuesto (cirugía, limpieza dental…): se manda por WhatsApp, se deja una seña y el día del turno se cobra el resto
+export interface Presupuesto {
+  id: number
+  titulo: string
+  total: number
+  validoHasta: string
+  nota: string | null
+  estado: 'VIGENTE' | 'ANULADO'
+  creadoEn: string
+  motivoAnulacion: string | null
+  cliente: PersonaCorta & { telefono: string }
+  mascota: { id: number; nombre: string } | null
+  servicio: { id: number; nombre: string } | null
+  items: { id: number; descripcion: string; monto: number }[]
+  pagos: { id: number; monto: number; medio: MedioPago; fecha: string; turnoId: number | null; concepto: string }[]
+  pagado: number
+  falta: number
+  usado: boolean
+  creadoPor: PersonaCorta
+  anuladoPor: PersonaCorta | null
+}
+
+export interface ServicioConPrecio {
+  id: number
+  nombre: string
+  categoria: CategoriaServicio
+  precioReferencia: number | null
 }

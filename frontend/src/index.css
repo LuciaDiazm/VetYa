@@ -8406,3 +8406,305 @@ form.campo-en-linea {
   margin: 0;
   padding: 10px 16px 0;
 }
+
+/* ---------- Presupuestos (ficha del cliente) ---------- */
+.presupuestos-lista {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.presupuesto {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.presupuesto-anulado {
+  background: var(--fondo);
+}
+
+.presupuesto-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.presupuesto-nombre {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.presupuesto-nombre strong {
+  color: var(--tinta);
+  font-size: 1.02rem;
+}
+
+.presupuesto-nombre span {
+  color: var(--gris);
+  font-size: 0.86rem;
+}
+
+.estado-presupuesto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.estado-presupuesto.esperando {
+  background: #e8edf8;
+  color: var(--azul);
+}
+
+.estado-presupuesto.con-sena {
+  background: var(--amarillo-suave);
+  color: #7a4f00;
+}
+
+.estado-presupuesto.pagado {
+  background: #ddf3e8;
+  color: #1e7a4c;
+}
+
+.estado-presupuesto.vencido,
+.estado-presupuesto.anulado {
+  background: #eceef2;
+  color: #4a5263;
+}
+
+.presupuesto-items {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.presupuesto-items td,
+.presupuesto-items th {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--panel-borde);
+  font-weight: 400;
+  text-align: left;
+}
+
+.presupuesto-items td:last-child {
+  padding-left: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.presupuesto-items tfoot th,
+.presupuesto-items tfoot td {
+  border-bottom: none;
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.presupuesto-items .presupuesto-pagado th,
+.presupuesto-items .presupuesto-pagado td {
+  color: #1e7a4c;
+  font-weight: 600;
+}
+
+.presupuesto-nota {
+  margin: 0;
+  color: var(--tinta);
+}
+
+.presupuesto .ayuda {
+  margin: 0;
+}
+
+.presupuesto-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.presupuesto-formulario {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--panel-borde);
+}
+
+.presupuesto-formulario .cobro-medios legend {
+  position: static;
+  width: auto;
+  height: auto;
+  margin-bottom: 6px;
+  clip-path: none;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.presupuesto-sena-monto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.presupuesto-cobrado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.presupuestos-anteriores {
+  margin-top: 12px;
+}
+
+.presupuestos-anteriores summary {
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--azul);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Armar un presupuesto */
+.nuevo-presupuesto {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 14px;
+  background: var(--fondo);
+}
+
+.nuevo-presupuesto-mascotas legend {
+  position: static;
+  width: auto;
+  height: auto;
+  margin-bottom: 6px;
+  clip-path: none;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.presupuesto-renglones {
+  display: grid;
+  gap: 8px;
+}
+
+.presupuesto-renglon {
+  display: grid;
+  grid-template-columns: 1fr 150px 44px;
+  align-items: end;
+  gap: 8px;
+}
+
+.presupuesto-renglon .campo {
+  margin: 0;
+}
+
+.presupuesto-renglon-quitar {
+  width: 44px;
+  height: 44px;
+}
+
+.presupuesto-agregar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+}
+
+.presupuesto-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0;
+  color: var(--gris);
+}
+
+.presupuesto-total strong {
+  color: var(--azul);
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.nuevo-presupuesto-pie {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+}
+
+.nuevo-presupuesto {
+  container-type: inline-size;
+}
+
+/* Angosto (celular o ficha chica): la descripción arriba, el monto y quitar abajo */
+@container (max-width: 520px) {
+  .presupuesto-renglon {
+    grid-template-columns: 1fr 44px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--panel-borde);
+  }
+
+  .presupuesto-renglon > .campo:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .nuevo-presupuesto-pie {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Al cobrar un turno con presupuesto */
+.cobro-presupuesto {
+  display: block;
+  flex-basis: 100%;
+  color: var(--tinta);
+  font-size: 0.88rem;
+}
+
+.cobro-presupuesto svg {
+  margin-right: 6px;
+  color: var(--azul);
+  vertical-align: -3px;
+}
+
+.cobro-presupuesto .enlace-chico {
+  min-height: 32px;
+  margin-left: 8px;
+  font-size: 0.88rem;
+}
+
+/* Presupuesto impreso: hoja A4/carta (no ticket) */
+.presupuesto-hoja {
+  max-width: 640px;
+}
+
+.presupuesto-hoja .comprobante-detalle td:first-child {
+  width: 100%;
+}
+
+.presupuesto-hoja-nota {
+  margin: 12px 0 0;
+}
+
+@media print {
+  .presupuesto-hoja {
+    max-width: none;
+  }
+}

@@ -1,4 +1,4 @@
-import { Check, Undo2 } from 'lucide-react'
+import { Check, FileText, Undo2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -21,13 +21,24 @@ export function CobrarTurno({
   conCliente?: boolean // en la ficha del cliente no hace falta repetir su nombre
 }) {
   const { usuario } = useAuth()
-  const [monto, setMonto] = useState(() => montoParaEditar(turno.servicio.precioReferencia))
+  const presupuesto = turno.presupuesto
+  // Si tiene presupuesto (con seña), se cobra lo que falta; "No es por este presupuesto" vuelve al precio del servicio
+  const [usarPresupuesto, setUsarPresupuesto] = useState(presupuesto !== null)
+  const [monto, setMonto] = useState(() =>
+    montoParaEditar(presupuesto ? presupuesto.falta : turno.servicio.precioReferencia),
+  )
   const [medio, setMedio] = useState<MedioPago>('EFECTIVO')
   const [pago, setPago] = useState<Pago | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
   const id = `cobro-${turno.id}`
   const valor = leerMonto(monto)
+  const yaPagado = usarPresupuesto && presupuesto !== null && presupuesto.falta === 0
+
+  function dejarPresupuesto() {
+    setUsarPresupuesto(false)
+    setMonto(montoParaEditar(turno.servicio.precioReferencia))
+  }
   const cuando = esHoy(diaDe(turno.fechaHoraInicio))
     ? `Hoy ${horaDe(turno.fechaHoraInicio)}`
     : `${diaCorto(diaDe(turno.fechaHoraInicio))} ${horaDe(turno.fechaHoraInicio)}`
@@ -43,8 +54,10 @@ export function CobrarTurno({
     try {
       const nuevo = await apiPost<Pago>('/pagos', {
         turnoId: turno.id,
+        presupuestoId: usarPresupuesto && presupuesto ? presupuesto.id : undefined,
         monto: medioElegido === 'SIN_CARGO' ? 0 : valor,
         medio: medioElegido,
+        nota: yaPagado ? 'Ya estaba pagado con el presupuesto' : undefined,
       })
       setPago(nuevo)
       alCambiar?.(true)
@@ -81,12 +94,23 @@ export function CobrarTurno({
       <span className="cobro-detalle">
         {turno.servicio.nombre} · {cuando}
       </span>
+      {presupuesto && usarPresupuesto && !pago && (
+        <span className="cobro-presupuesto">
+          <FileText size={16} aria-hidden="true" />
+          Presupuesto {pesos(presupuesto.total)} · pagó {pesos(presupuesto.pagado)} · falta {pesos(presupuesto.falta)}
+          {puede(usuario, 'pagos.cobrar') && (
+            <button type="button" className="enlace-chico" onClick={dejarPresupuesto}>
+              No es por este presupuesto
+            </button>
+          )}
+        </span>
+      )}
     </div>
   )
 
   // Quien atiende ve lo que falta cobrar, pero el cobro lo hacen recepción o la administración.
   if (!puede(usuario, 'pagos.cobrar')) {
-    const precio = turno.servicio.precioReferencia
+    const precio = presupuesto ? presupuesto.falta : turno.servicio.precioReferencia
     return (
       <li className="cobro">
         {quien}
@@ -155,12 +179,20 @@ export function CobrarTurno({
           })}
         </fieldset>
         <div className="cobro-acciones">
-          <button type="submit" className="boton cobro-boton" disabled={guardando}>
-            {guardando ? 'Guardando…' : valor ? `Cobrar ${pesos(valor)}` : 'Cobrar'}
-          </button>
-          <button type="button" className="boton-texto" onClick={() => cobrar('SIN_CARGO')} disabled={guardando}>
-            No se cobra
-          </button>
+          {yaPagado ? (
+            <button type="button" className="boton cobro-boton" onClick={() => cobrar('SIN_CARGO')} disabled={guardando}>
+              {guardando ? 'Guardando…' : 'Listo: ya estaba pagado'}
+            </button>
+          ) : (
+            <>
+              <button type="submit" className="boton cobro-boton" disabled={guardando}>
+                {guardando ? 'Guardando…' : valor ? `Cobrar ${pesos(valor)}` : 'Cobrar'}
+              </button>
+              <button type="button" className="boton-texto" onClick={() => cobrar('SIN_CARGO')} disabled={guardando}>
+                No se cobra
+              </button>
+            </>
+          )}
         </div>
         {error && (
           <p className="mensaje-error cobro-error" role="alert">

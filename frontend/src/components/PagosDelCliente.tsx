@@ -32,7 +32,7 @@ export function PagosDelCliente({ clienteId }: { clienteId: number }) {
 
   if (!deuda || !lista) return null
   const faltan = deuda.filter((t) => !cobrados.has(t.id))
-  const montoDeuda = faltan.reduce((s, t) => s + (t.servicio.precioReferencia ?? 0), 0)
+  const montoDeuda = faltan.reduce((s, t) => s + (t.presupuesto ? t.presupuesto.falta : (t.servicio.precioReferencia ?? 0)), 0)
   const paginaReal = Math.min(pagina, Math.max(1, Math.ceil(lista.pagos.length / POR_PAGINA)))
 
   function marcar(id: number, cobrado: boolean) {

@@ -13,6 +13,7 @@ import { clientesRouter, mascotasRouter } from "./routes/clientes";
 import { consultasRouter } from "./routes/consultas";
 import { miCuentaRouter } from "./routes/miCuenta";
 import { pagosRouter } from "./routes/pagos";
+import { presupuestosRouter } from "./routes/presupuestos";
 import { publicoRouter } from "./routes/publico";
 import { recordatoriosRouter } from "./routes/recordatorios";
 import { turnosPublicoRouter, turnosRouter } from "./routes/turnos";
@@ -82,6 +83,7 @@ app.use("/api/mi-cuenta", miCuentaRouter);
 app.use("/api/configuracion", configuracionRouter);
 app.use("/api/estadisticas", estadisticasRouter);
 app.use("/api/pagos", pagosRouter);
+app.use("/api/presupuestos", presupuestosRouter);
 app.use("/api/archivos", archivosRouter);
 app.use("/api/auditoria", auditoriaRouter);
 

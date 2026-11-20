@@ -10,6 +10,7 @@ import { edadTexto, nombreEspecie, formatearTelefono } from '../../lib/mascotas'
 import { enlaceWhatsapp } from '../../lib/sitio'
 import { TurnosDelCliente } from '../../components/TurnosDelCliente'
 import { PagosDelCliente } from '../../components/PagosDelCliente'
+import { PresupuestosDelCliente } from '../../components/PresupuestosDelCliente'
 import type { ClienteDetalle as DatosClienteDetalle, Mascota } from '../../types'
 import { IconoEspecie } from './Clientes'
 import { Cargando } from '../../components/Cargando'
@@ -25,6 +26,8 @@ export function ClienteDetalle() {
   const daTurnos = puede(usuario, 'turnos.dar')
   const navegar = useNavigate()
   const [cliente, setCliente] = useState<DatosClienteDetalle | null>(null)
+  // Al cobrar una seña se vuelve a cargar la sección Pagos
+  const [versionPagos, setVersionPagos] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
   const [datos, setDatos] = useState<DatosCliente | null>(null)
@@ -350,7 +353,9 @@ export function ClienteDetalle() {
 
           <TurnosDelCliente cliente={cliente} alCambiar={(cambios) => setCliente({ ...cliente, ...cambios })} />
 
-          <PagosDelCliente clienteId={cliente.id} />
+          <PresupuestosDelCliente clienteId={cliente.id} mascotas={activas} alCobrar={() => setVersionPagos((v) => v + 1)} />
+
+          <PagosDelCliente key={versionPagos} clienteId={cliente.id} />
         </div>
       </div>
     </>

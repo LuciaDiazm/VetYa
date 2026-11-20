@@ -7,6 +7,7 @@ import { apiGet } from '../../lib/api'
 import { fechaComprobante, medioEscrito, numeroComprobante, whatsappComprobante } from '../../lib/comprobante'
 import { formatearTelefono } from '../../lib/mascotas'
 import { pesos } from '../../lib/pagos'
+import { numeroPresupuesto } from '../../lib/presupuestos'
 import { useSitio } from '../../lib/sitio'
 import type { Pago } from '../../types'
 
@@ -74,6 +75,12 @@ export function ComprobantePago() {
             <dt>Cliente</dt>
             <dd>{pago.cliente ? `${pago.cliente.nombre} ${pago.cliente.apellido}` : 'Consumidor final'}</dd>
           </div>
+          {pago.presupuesto && (
+            <div>
+              <dt>Presupuesto</dt>
+              <dd>{numeroPresupuesto(pago.presupuesto)}</dd>
+            </div>
+          )}
           {pago.turno && (
             <div>
               <dt>Mascota</dt>

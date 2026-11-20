@@ -78,6 +78,7 @@ describe("Qué ve cada perfil", () => {
     ["/api/clientes", { ADMIN: 200, VETERINARIO: 200, RECEPCION: 200, DUENIO: 403 }],
     ["/api/turnos", { ADMIN: 200, VETERINARIO: 200, RECEPCION: 200, DUENIO: 403 }],
     ["/api/pagos/por-cobrar", { ADMIN: 200, VETERINARIO: 200, RECEPCION: 200, DUENIO: 403 }],
+    ["/api/presupuestos?clienteId=1", { ADMIN: 200, VETERINARIO: 200, RECEPCION: 200, DUENIO: 403 }],
     ["/api/recordatorios/resumen", { ADMIN: 200, VETERINARIO: 200, RECEPCION: 200, DUENIO: 403 }],
     ["/api/estadisticas", { ADMIN: 200, VETERINARIO: 403, RECEPCION: 403, DUENIO: 403 }],
     ["/api/usuarios", { ADMIN: 200, VETERINARIO: 403, RECEPCION: 403, DUENIO: 403 }],
@@ -119,6 +120,7 @@ describe("Qué puede hacer cada perfil", () => {
   it("la veterinaria o el veterinario no da turnos ni cobra ni cambia datos del cliente", async () => {
     expect((await request(app).post("/api/turnos").set(como("VETERINARIO")).send({})).status).toBe(403);
     expect((await request(app).post("/api/pagos").set(como("VETERINARIO")).send({})).status).toBe(403);
+    expect((await request(app).post("/api/presupuestos").set(como("VETERINARIO")).send({})).status).toBe(403);
     expect((await request(app).put("/api/clientes/1").set(como("VETERINARIO")).send({})).status).toBe(403);
   });
 

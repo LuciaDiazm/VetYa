@@ -32,6 +32,7 @@ const persona = { select: { id: true, nombre: true, apellido: true } };
 const conDatos = {
   cliente: { select: { id: true, nombre: true, apellido: true, telefono: true } },
   turno: { select: { id: true, fechaHoraInicio: true, mascota: { select: { id: true, nombre: true } } } },
+  presupuesto: { select: { id: true, titulo: true } },
   registradoPor: persona,
   anuladoPor: persona,
 } satisfies Prisma.PagoInclude;
@@ -72,7 +73,7 @@ async function turnosPorCobrar(clinicaId: number, clienteId?: number) {
     select: {
       id: true,
       fechaHoraInicio: true,
-      servicio: { select: { id: true, nombre: true, precioReferencia: true } },
+      servicio: { select: { id: true, nombre: true, precioReferencia: true, categoria: true } },
       veterinario: persona,
       mascota: {
         select: { id: true, nombre: true, cliente: { select: { id: true, nombre: true, apellido: true, telefono: true } } },
@@ -80,10 +81,31 @@ async function turnosPorCobrar(clinicaId: number, clienteId?: number) {
     },
     orderBy: { fechaHoraInicio: "desc" },
   });
-  return turnos.map((t) => ({
-    ...t,
-    servicio: { ...t.servicio, precioReferencia: t.servicio.precioReferencia === null ? null : Number(t.servicio.precioReferencia) },
-  }));
+  // Si la mascota tiene un presupuesto vigente para ese servicio (o, si no dice servicio, para una cirugía),
+  // al cobrar el turno se descuenta lo que ya pagó a cuenta (la seña).
+  const presupuestos = await prisma.presupuesto.findMany({
+    where: {
+      clinicaId,
+      estado: "VIGENTE",
+      mascotaId: { in: [...new Set(turnos.map((t) => t.mascota.id))] },
+      pagos: { none: { anulado: false, turnoId: { not: null } } },
+    },
+    select: { id: true, titulo: true, total: true, mascotaId: true, servicioId: true, pagos: { where: { anulado: false }, select: { monto: true } } },
+    orderBy: { creadoEn: "asc" },
+  });
+  return turnos.map(({ servicio: { categoria, ...servicio }, ...t }) => {
+    const p = presupuestos.find(
+      (x) => x.mascotaId === t.mascota.id && (x.servicioId ? x.servicioId === servicio.id : categoria === "CIRUGIA"),
+    );
+    const pagado = p ? p.pagos.reduce((s, x) => s + Number(x.monto), 0) : 0;
+    return {
+      ...t,
+      servicio: { ...servicio, precioReferencia: servicio.precioReferencia === null ? null : Number(servicio.precioReferencia) },
+      presupuesto: p
+        ? { id: p.id, titulo: p.titulo, total: Number(p.total), pagado, falta: Math.max(0, Math.round((Number(p.total) - pagado) * 100) / 100) }
+        : null,
+    };
+  });
 }
 
 pagosRouter.get("/por-cobrar", async (req, res) => {
@@ -106,7 +128,7 @@ pagosRouter.get("/resumen-hoy", async (req, res) => {
     ...totalesDe(pagos),
     porCobrar: porCobrar.length,
     // Lo que se puede estimar (los servicios sin precio no suman)
-    montoPorCobrar: porCobrar.reduce((s, t) => s + (t.servicio.precioReferencia ?? 0), 0),
+    montoPorCobrar: porCobrar.reduce((s, t) => s + (t.presupuesto ? t.presupuesto.falta : (t.servicio.precioReferencia ?? 0)), 0),
   });
 });
 
@@ -141,13 +163,14 @@ const esquemaPago = z
   .object({
     turnoId: z.number().int().positive().optional(),
     clienteId: z.number().int().positive().optional(),
+    presupuestoId: z.number().int().positive().optional(),
     monto: z.number().min(0, "El monto no puede ser negativo").max(10_000_000, "Revisá el monto"),
     medio: z.enum(MEDIOS, "Elegí cómo pagó"),
     concepto: z.string().trim().max(120, "El concepto es muy largo").optional(),
     nota: z.string().trim().max(190, "La nota es muy larga").optional(),
   })
   .refine((d) => d.medio === "SIN_CARGO" || d.monto > 0, { message: "Escribí el monto", path: ["monto"] })
-  .refine((d) => d.turnoId || d.concepto, { message: "Escribí qué se cobró", path: ["concepto"] });
+  .refine((d) => d.turnoId || d.presupuestoId || d.concepto, { message: "Escribí qué se cobró", path: ["concepto"] });
 
 pagosRouter.post("/", requierePermiso("pagos.cobrar"), async (req, res) => {
   const datos = esquemaPago.safeParse(req.body);
@@ -186,11 +209,37 @@ pagosRouter.post("/", requierePermiso("pagos.cobrar"), async (req, res) => {
         }
         clienteId = d.clienteId;
       }
+      if (d.presupuestoId) {
+        // Seña o pago a cuenta. Se traba el presupuesto para que dos cobros a la vez no pasen el total.
+        await tx.$queryRaw`SELECT id_presupuesto FROM presupuesto WHERE id_presupuesto = ${d.presupuestoId} FOR UPDATE`;
+        const p = await tx.presupuesto.findFirst({
+          where: { id: d.presupuestoId, clinicaId },
+          select: { titulo: true, total: true, estado: true, clienteId: true, mascota: { select: { nombre: true } }, pagos: { where: { anulado: false }, select: { monto: true, turnoId: true } } },
+        });
+        if (!p) throw new ErrorPago(404, "Presupuesto no encontrado");
+        if (p.estado === "ANULADO") throw new ErrorPago(400, "Ese presupuesto está anulado");
+        if (clienteId !== null && clienteId !== p.clienteId) throw new ErrorPago(400, "Ese presupuesto es de otro cliente");
+        if (d.turnoId && p.pagos.some((x) => x.turnoId !== null)) {
+          throw new ErrorPago(409, "Ese presupuesto ya se usó para cobrar otro turno");
+        }
+        const pagado = p.pagos.reduce((s, x) => s + Number(x.monto), 0);
+        const falta = Math.round((Number(p.total) - pagado) * 100) / 100;
+        if (monto > falta + 0.001) {
+          throw new ErrorPago(400, falta > 0 ? `Del presupuesto falta pagar $ ${falta.toLocaleString("es-AR")}` : "El presupuesto ya está pagado");
+        }
+        clienteId = p.clienteId;
+        const deQuien = p.mascota ? `${p.titulo} · ${p.mascota.nombre}` : p.titulo;
+        if (!d.turnoId && !d.concepto) {
+          const tipo = pagado === 0 ? (monto >= falta ? "Pago total" : "Seña") : monto >= falta ? "Resto" : "A cuenta";
+          concepto = `${tipo} · ${deQuien}`;
+        }
+      }
       return tx.pago.create({
         data: {
           clinicaId,
           clienteId,
           turnoId: d.turnoId ?? null,
+          presupuestoId: d.presupuestoId ?? null,
           monto,
           medio: d.medio,
           concepto,

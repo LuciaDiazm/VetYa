@@ -116,6 +116,7 @@ model Clinica {
   formasPago       FormaPago[]
   planesSanitarios PlanSanitario[]
   pagos            Pago[]
+  presupuestos     Presupuesto[]
   archivos         Archivo[]
   auditoria        Auditoria[]
 
@@ -150,6 +151,8 @@ model Usuario {
   recordatoriosEnviados Recordatorio[]
   pagosRegistrados      Pago[]                @relation("PagoRegistradoPor")
   pagosAnulados         Pago[]                @relation("PagoAnuladoPor")
+  presupuestosHechos    Presupuesto[]         @relation("PresupuestoCreadoPor")
+  presupuestosAnulados  Presupuesto[]         @relation("PresupuestoAnuladoPor")
   consultasEditadas     Consulta[]            @relation("ConsultaEditadaPor")
   aplicacionesCargadas  AplicacionSanitaria[] @relation("AplicacionRegistradaPor")
   aplicacionesAnuladas  AplicacionSanitaria[] @relation("AplicacionAnuladaPor")
@@ -185,6 +188,7 @@ model Cliente {
   mascotas      Mascota[]
   recordatorios Recordatorio[]
   pagos         Pago[]
+  presupuestos  Presupuesto[]
 
   @@index([clinicaId, telefono])
   @@map("cliente")
@@ -216,6 +220,7 @@ model Mascota {
   consultas    Consulta[]
   aplicaciones AplicacionSanitaria[]
   adjuntos     Adjunto[]
+  presupuestos Presupuesto[]
 
   @@index([microchip])
   @@map("mascota")
@@ -233,9 +238,10 @@ model Servicio {
   activo           Boolean           @default(true)
   fotoUrl          String?           @map("foto_url")
 
-  clinica     Clinica     @relation(fields: [clinicaId], references: [id])
-  turnos      Turno[]
-  promociones Promocion[]
+  clinica      Clinica       @relation(fields: [clinicaId], references: [id])
+  turnos       Turno[]
+  promociones  Promocion[]
+  presupuestos Presupuesto[]
 
   @@map("servicio")
 }
@@ -304,6 +310,7 @@ model Pago {
   clinicaId       Int       @map("id_clinica")
   clienteId       Int?      @map("id_cliente") // vacío = venta en el mostrador a alguien sin ficha
   turnoId         Int?      @map("id_turno") // vacío = cobro sin turno (alimento, medicamento…)
+  presupuestoId   Int?      @map("id_presupuesto") // seña o pago a cuenta de un presupuesto
   monto           Decimal   @db.Decimal(10, 2)
   medio           MedioPago
   concepto        String
@@ -315,16 +322,72 @@ model Pago {
   anuladoPorId    Int?      @map("id_anulado_por")
   motivoAnulacion String?   @map("motivo_anulacion")
 
-  clinica       Clinica  @relation(fields: [clinicaId], references: [id])
-  cliente       Cliente? @relation(fields: [clienteId], references: [id])
-  turno         Turno?   @relation(fields: [turnoId], references: [id])
-  registradoPor Usuario  @relation("PagoRegistradoPor", fields: [registradoPorId], references: [id])
-  anuladoPor    Usuario? @relation("PagoAnuladoPor", fields: [anuladoPorId], references: [id])
+  clinica       Clinica      @relation(fields: [clinicaId], references: [id])
+  cliente       Cliente?     @relation(fields: [clienteId], references: [id])
+  turno         Turno?       @relation(fields: [turnoId], references: [id])
+  presupuesto   Presupuesto? @relation(fields: [presupuestoId], references: [id])
+  registradoPor Usuario      @relation("PagoRegistradoPor", fields: [registradoPorId], references: [id])
+  anuladoPor    Usuario?     @relation("PagoAnuladoPor", fields: [anuladoPorId], references: [id])
 
   @@index([clinicaId, fecha])
   @@index([clienteId])
   @@index([turnoId])
+  @@index([presupuestoId])
   @@map("pago")
+}
+
+enum EstadoPresupuesto {
+  VIGENTE
+  ANULADO
+}
+
+// Presupuesto para una cirugía, una limpieza dental o un tratamiento largo. Se le manda al dueño por WhatsApp;
+// si acepta, deja una seña (un pago con id_presupuesto) y el día del turno se cobra lo que falta.
+// "Pagado" y "falta" no se guardan: salen de sumar sus pagos no anulados.
+model Presupuesto {
+  id              Int               @id @default(autoincrement()) @map("id_presupuesto")
+  clinicaId       Int               @map("id_clinica")
+  clienteId       Int               @map("id_cliente")
+  mascotaId       Int?              @map("id_mascota")
+  servicioId      Int?              @map("id_servicio") // el turno de este servicio descuenta lo ya pagado
+  titulo          String            @db.VarChar(120)
+  total           Decimal           @db.Decimal(10, 2)
+  validoHasta     DateTime          @map("valido_hasta") @db.Date
+  nota            String?           @db.VarChar(500)
+  estado          EstadoPresupuesto @default(VIGENTE)
+  creadoEn        DateTime          @default(now()) @map("creado_en")
+  creadoPorId     Int               @map("id_creado_por")
+  anuladoEn       DateTime?         @map("anulado_en")
+  anuladoPorId    Int?              @map("id_anulado_por")
+  motivoAnulacion String?           @map("motivo_anulacion")
+
+  clinica    Clinica           @relation(fields: [clinicaId], references: [id])
+  cliente    Cliente           @relation(fields: [clienteId], references: [id])
+  mascota    Mascota?          @relation(fields: [mascotaId], references: [id])
+  servicio   Servicio?         @relation(fields: [servicioId], references: [id])
+  creadoPor  Usuario           @relation("PresupuestoCreadoPor", fields: [creadoPorId], references: [id])
+  anuladoPor Usuario?          @relation("PresupuestoAnuladoPor", fields: [anuladoPorId], references: [id])
+  items      PresupuestoItem[]
+  pagos      Pago[]
+
+  @@index([clinicaId, creadoEn])
+  @@index([clienteId])
+  @@index([mascotaId])
+  @@map("presupuesto")
+}
+
+// Cada renglón del presupuesto (cirugía, anestesia, análisis previos, medicación…).
+model PresupuestoItem {
+  id            Int     @id @default(autoincrement()) @map("id_item")
+  presupuestoId Int     @map("id_presupuesto")
+  descripcion   String  @db.VarChar(160)
+  monto         Decimal @db.Decimal(10, 2)
+  orden         Int
+
+  presupuesto Presupuesto @relation(fields: [presupuestoId], references: [id], onDelete: Cascade)
+
+  @@index([presupuestoId])
+  @@map("presupuesto_item")
 }
 
 model Consulta {
