@@ -384,6 +384,57 @@ async function mascotaDeLaClinica(id: number, clinicaId: number) {
   return prisma.mascota.findFirst({ where: { id, cliente: { clinicaId } } });
 }
 
+// Lista de pacientes (pantalla Mascotas): de a 10, buscando por nombre de la mascota, raza o dueño,
+// y con filtro por especie. Trae el dueño y la fecha de la última consulta.
+mascotasRouter.get("/", async (req, res) => {
+  const texto = String(req.query.q ?? "").trim();
+  const especie = z.enum(["PERRO", "GATO", "OTRO"]).safeParse(req.query.especie);
+  const pagina = Math.max(1, Math.floor(Number(req.query.pagina)) || 1);
+  const donde = {
+    activo: true,
+    cliente: { clinicaId: req.usuario!.clinicaId },
+    ...(especie.success ? { especie: especie.data } : {}),
+    ...(texto
+      ? {
+          OR: [
+            { nombre: { contains: texto } },
+            { raza: { contains: texto } },
+            { cliente: { nombre: { contains: texto } } },
+            { cliente: { apellido: { contains: texto } } },
+          ],
+        }
+      : {}),
+  };
+  const [total, mascotas] = await Promise.all([
+    prisma.mascota.count({ where: donde }),
+    prisma.mascota.findMany({
+      where: donde,
+      orderBy: [{ nombre: "asc" }, { id: "asc" }],
+      skip: (pagina - 1) * MASCOTAS_POR_PAGINA,
+      take: MASCOTAS_POR_PAGINA,
+      select: {
+        id: true,
+        nombre: true,
+        especie: true,
+        otraEspecie: true,
+        raza: true,
+        sexo: true,
+        fechaNacimiento: true,
+        cliente: { select: { id: true, nombre: true, apellido: true, telefono: true } },
+        consultas: { select: { fecha: true }, orderBy: { fecha: "desc" }, take: 1 },
+      },
+    }),
+  ]);
+  res.json({
+    mascotas: mascotas.map(({ consultas, ...m }) => ({ ...m, ultimaConsulta: consultas[0]?.fecha ?? null })),
+    total,
+    pagina,
+    porPagina: MASCOTAS_POR_PAGINA,
+  });
+});
+
+const MASCOTAS_POR_PAGINA = 10;
+
 // Ficha completa: datos, dueño, consultas, vacunas y desparasitaciones, y próximos turnos.
 mascotasRouter.get("/:id", async (req, res) => {
   const mascota = await prisma.mascota.findFirst({

@@ -2343,9 +2343,24 @@ html[data-turno-portada='visible'] .boton-turno {
 .panel-navegacion {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
   width: 100%;
-  margin-top: 28px;
+  margin-top: 24px;
+}
+
+/* Cada grupo del menú con su título chiquito */
+.panel-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.panel-grupo-titulo {
+  margin: 0;
+  padding: 0 14px 2px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 /* Cada sección: el ícono y su nombre escrito al lado, para no tener que adivinar */
@@ -3477,6 +3492,15 @@ html[data-turno-portada='visible'] .boton-turno {
     gap: 4px;
     margin-top: 0;
     overflow-x: auto;
+  }
+
+  /* En el celular el menú va en una fila: sin títulos de grupo */
+  .panel-grupo {
+    display: contents;
+  }
+
+  .panel-grupo-titulo {
+    display: none;
   }
 
   /* En pantallas táctiles no hay "pasar el mouse": el nombre va escrito debajo del ícono */
@@ -8701,12 +8725,107 @@ form.campo-en-linea {
   min-width: 0;
 }
 
+/* Barra blanca pegada arriba: buscador a la izquierda, campana y nombre a la derecha.
+   Queda fija al bajar la página. */
 .panel-barra {
+  position: sticky;
+  top: 0;
+  z-index: 15;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  padding: 12px 14px 0;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--panel-borde);
+  background: #ffffff;
+}
+
+.barra-buscador {
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  margin-right: auto;
+}
+
+.barra-buscador label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--panel-borde);
+  border-radius: 10px;
+  background: var(--panel-fondo);
+  color: var(--gris);
+}
+
+.barra-buscador label:focus-within {
+  border-color: var(--azul);
+  background: #ffffff;
+  outline: 2px solid var(--azul);
+  outline-offset: 0;
+}
+
+.barra-buscador input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  outline: none;
+}
+
+.barra-buscador .desplegable-panel {
+  right: auto;
+  left: 0;
+  width: min(440px, calc(100vw - 24px));
+}
+
+.barra-resultados-aviso {
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--gris);
+}
+
+.desplegable-panel .barra-resultado {
+  display: grid;
+  gap: 4px;
+  padding: 4px 0 8px;
+}
+
+.desplegable-panel .barra-resultado + .barra-resultado {
+  border-top: 1px solid var(--panel-borde);
+}
+
+.desplegable-panel .barra-resultado > a {
+  min-height: 40px;
+}
+
+.barra-resultado > a > span {
+  display: grid;
+}
+
+.barra-resultado small {
+  color: var(--gris);
+}
+
+.barra-resultado-mascotas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px;
+}
+
+.desplegable-panel .barra-resultado-mascotas a {
+  width: auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #eef1f7;
+  color: var(--azul);
+  font-weight: 600;
 }
 
 .desplegable {
@@ -8891,7 +9010,8 @@ form.campo-en-linea {
 
 @media (max-width: 860px) {
   .panel-barra {
-    padding: 10px 12px 0;
+    position: static;
+    padding: 8px 12px;
   }
 
   .barra-nombre {
@@ -8902,5 +9022,132 @@ form.campo-en-linea {
 @media print {
   .panel-barra {
     display: none !important;
+  }
+}
+
+/* ---------- Mascotas (lista de pacientes) ---------- */
+.mascotas-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.tabla-mascotas {
+  overflow: hidden;
+  padding: 0;
+}
+
+.tabla-mascotas-encabezado,
+.paciente-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 0.9fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-inline: 18px;
+}
+
+.tabla-mascotas-encabezado {
+  padding-block: 10px;
+  border-bottom: 1px solid var(--panel-borde);
+  background: #f7f8fb;
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.paciente-fila {
+  min-height: 64px;
+  padding-block: 8px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.paciente-fila-nombre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.paciente-fila-nombre > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+.paciente-fila-nombre strong {
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.paciente-fila-nombre small {
+  color: var(--gris);
+}
+
+.paciente-fila-icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eef1f7;
+  color: var(--azul);
+}
+
+.paciente-fila-etiqueta {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .paciente-fila:hover {
+    background: #f7f8fb;
+  }
+}
+
+.paciente-fila:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: -3px;
+}
+
+@media (max-width: 860px) {
+  .tabla-mascotas-encabezado {
+    display: none;
+  }
+
+  .paciente-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    padding-block: 12px;
+  }
+
+  .paciente-fila > :not(.cliente-fila-ver) {
+    grid-column: 1;
+  }
+
+  .paciente-fila .cliente-fila-ver {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+
+  .paciente-fila .paciente-fila-dato {
+    display: block;
+    padding-left: 48px;
+    color: var(--gris);
+    font-size: 0.9rem;
+  }
+
+  .paciente-fila-etiqueta {
+    display: inline;
+  }
+
+  /* En el celular alcanza con la flechita: así los datos entran en un renglón */
+  .paciente-fila-ver-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

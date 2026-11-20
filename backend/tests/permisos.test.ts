@@ -131,9 +131,10 @@ describe("Qué puede hacer cada perfil", () => {
     expect(r.status).toBe(403);
   });
 
-  it("la veterinaria o el veterinario no corrige consultas de otro ni de días anteriores", async () => {
+  it("la veterinaria o el veterinario no corrige consultas de días anteriores", async () => {
     const ajena = await prisma.consulta.findFirst({
-      where: { veterinario: { email: { not: "paula.ferreyra@vetya.test" } } },
+      // Una consulta de hace más de dos días: ya no se puede corregir aunque sea propia.
+      where: { fecha: { lt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) } },
     });
     expect(ajena).not.toBeNull();
     const r = await request(app)

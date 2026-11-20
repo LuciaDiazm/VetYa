@@ -1,7 +1,9 @@
 import { HandCoins } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { apiGet } from '../lib/api'
+import { puede } from '../lib/permisos'
 import { MEDIOS_PAGO, MEDIOS_PARA_COBRAR, pesos } from '../lib/pagos'
 import type { ResumenCaja } from '../types'
 
@@ -10,6 +12,7 @@ const CADA_CUANTO = 60_000
 // "Caja de hoy" en la pantalla Hoy: lo cobrado hoy y lo que falta cobrar.
 // Se actualiza sola cada minuto y cada vez que cambia algún turno del día (por ejemplo, al marcar "Vino").
 export function CajaDeHoy({ version }: { version: string }) {
+  const { usuario } = useAuth()
   const [caja, setCaja] = useState<ResumenCaja | null>(null)
 
   useEffect(() => {
@@ -49,7 +52,13 @@ export function CajaDeHoy({ version }: { version: string }) {
             ))}
           </ul>
         )}
-        {caja.porCobrar > 0 ? (
+        {caja.porCobrar > 0 && !puede(usuario, 'pagos.cobrar') ? (
+          // La veterinaria o el veterinario no cobra: ve lo que falta, sin el botón.
+          <p className="caja-de-hoy-nada">
+            Por cobrar: {caja.porCobrar} {caja.porCobrar === 1 ? 'turno' : 'turnos'}
+            {caja.montoPorCobrar > 0 && ` · ${pesos(caja.montoPorCobrar)}`}. Los cobra recepción.
+          </p>
+        ) : caja.porCobrar > 0 ? (
           <Link to="/panel/pagos" className="boton caja-de-hoy-boton">
             Cobrar {caja.porCobrar} {caja.porCobrar === 1 ? 'turno' : 'turnos'}
             {caja.montoPorCobrar > 0 && ` · ${pesos(caja.montoPorCobrar)}`}

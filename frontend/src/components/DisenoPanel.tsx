@@ -1,4 +1,4 @@
-import { BarChart3, CalendarDays, FileText, HandCoins, House, PawPrint, Settings } from 'lucide-react'
+import { BarChart3, CalendarDays, FileText, HandCoins, House, PawPrint, Settings, Stethoscope, Users } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { apiGet } from '../lib/api'
@@ -25,19 +25,47 @@ export function DisenoPanel() {
     })
   }
 
-  const secciones: { ruta: string; nombre: string; icono: typeof House; fin?: boolean }[] = [
-    { ruta: '/panel', nombre: 'Hoy', icono: House, fin: true },
-    { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
-    { ruta: '/panel/clientes', nombre: 'Clientes', icono: PawPrint },
-    { ruta: '/panel/pagos', nombre: 'Pagos', icono: HandCoins },
-    // Lo de la administración (números del negocio y ajustes) solo lo ve la administración.
-    ...(puede(usuario, 'estadisticas')
+  type Seccion = { ruta: string; nombre: string; icono: typeof House; fin?: boolean }
+  // El menú va en grupos con un título chiquito (como el de ZOA). Lo de la administración
+  // (números del negocio, servicios y ajustes) solo lo ve la administración.
+  const grupos: { titulo: string; secciones: Seccion[] }[] = [
+    {
+      titulo: 'Día a día',
+      secciones: [
+        { ruta: '/panel', nombre: 'Hoy', icono: House, fin: true },
+        { ruta: '/panel/agenda', nombre: 'Agenda', icono: CalendarDays },
+      ],
+    },
+    {
+      titulo: 'Atención',
+      secciones: [
+        { ruta: '/panel/clientes', nombre: 'Clientes', icono: Users },
+        { ruta: '/panel/mascotas', nombre: 'Mascotas', icono: PawPrint },
+      ],
+    },
+    {
+      titulo: 'Caja y números',
+      secciones: [
+        { ruta: '/panel/pagos', nombre: 'Pagos', icono: HandCoins },
+        ...(puede(usuario, 'estadisticas')
+          ? [
+              { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
+              { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
+            ]
+          : []),
+      ],
+    },
+    ...(puede(usuario, 'ajustes')
       ? [
-          { ruta: '/panel/estadisticas', nombre: 'Estadísticas', icono: BarChart3 },
-          { ruta: '/panel/informe', nombre: 'Informe', icono: FileText },
+          {
+            titulo: 'La clínica',
+            secciones: [
+              { ruta: '/panel/servicios', nombre: 'Servicios', icono: Stethoscope },
+              { ruta: '/panel/configuracion', nombre: 'Ajustes', icono: Settings },
+            ],
+          },
         ]
       : []),
-    ...(puede(usuario, 'ajustes') ? [{ ruta: '/panel/configuracion', nombre: 'Ajustes', icono: Settings }] : []),
   ]
 
   return (
@@ -47,11 +75,16 @@ export function DisenoPanel() {
           <Logo />
         </NavLink>
         <nav className="panel-navegacion" aria-label="Secciones del panel">
-          {secciones.map(({ ruta, nombre, icono: Icono, fin }) => (
-            <NavLink key={ruta} to={ruta} end={fin} className="panel-enlace">
-              <Icono size={24} aria-hidden="true" />
-              <span className="panel-enlace-nombre">{nombre}</span>
-            </NavLink>
+          {grupos.map((g) => (
+            <div key={g.titulo} className="panel-grupo">
+              <p className="panel-grupo-titulo">{g.titulo}</p>
+              {g.secciones.map(({ ruta, nombre, icono: Icono, fin }) => (
+                <NavLink key={ruta} to={ruta} end={fin} className="panel-enlace">
+                  <Icono size={24} aria-hidden="true" />
+                  <span className="panel-enlace-nombre">{nombre}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
       </aside>

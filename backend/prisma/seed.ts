@@ -5,8 +5,8 @@
 // Así se puede volver a correr cada vez que se agregan tablas nuevas.
 //
 // Usuarios de prueba (solo para desarrollo, no usar en producción):
-//   martin.rodriguez@vetya.test / vetya-vet-2026 (ADMIN: el veterinario a cargo; en pantalla, Administración)
-//   paula.ferreyra@vetya.test / vetya-veterinaria-2026 (VETERINARIO: atiende y carga la historia clínica)
+//   martin.rodriguez@vetya.test / vetya-vet-2026 (VETERINARIO: el veterinario de la clínica; atiende y carga la historia clínica)
+//   carla.benitez@vetya.test   / vetya-admin-2026   (ADMIN: administración; ve y cambia todo, también Ajustes)
 //   natalia.ojeda@vetya.test    / vetya-recepcion-2026   (RECEPCION: turnos, clientes y cobros; no ve lo clínico)
 //   duenio@vetya.test       / vetya-duenio-2026  (DUENIO: "Prueba Turnos", para probar Pedir turno y Mi cuenta)
 //
@@ -157,14 +157,14 @@ async function main() {
   });
   const martin = await prisma.usuario.upsert({
     where: { email: "martin.rodriguez@vetya.test" },
-    update: { rol: "ADMIN" },
+    update: { rol: "VETERINARIO" },
     create: {
       clinicaId,
       nombre: "Martín",
       apellido: "Rodríguez",
       email: "martin.rodriguez@vetya.test",
       passwordHash: await bcrypt.hash("vetya-vet-2026", 10),
-      rol: "ADMIN",
+      rol: "VETERINARIO",
       visibleEnWeb: true,
       matricula: "M.P. 0002",
       especialidad: "Clínica, cirugía y ecografías",
@@ -183,7 +183,8 @@ async function main() {
     },
   });
   const sobran = await prisma.usuario.findMany({
-    where: { email: { in: ["admin@vetya.test", "veterinario@vetya.test"] } },
+    // (20/11) También sale Paula Ferreyra: la clínica de ejemplo tiene un solo veterinario (Martín).
+    where: { email: { in: ["admin@vetya.test", "veterinario@vetya.test", "paula.ferreyra@vetya.test"] } },
     select: { id: true },
   });
   if (sobran.length > 0) {
@@ -194,14 +195,23 @@ async function main() {
       prisma.recordatorio.updateMany({ where: { usuarioId: { in: ids } }, data: { usuarioId: martin.id } }),
       prisma.pago.updateMany({ where: { registradoPorId: { in: ids } }, data: { registradoPorId: martin.id } }),
       prisma.pago.updateMany({ where: { anuladoPorId: { in: ids } }, data: { anuladoPorId: martin.id } }),
+      prisma.consulta.updateMany({ where: { editadaPorId: { in: ids } }, data: { editadaPorId: martin.id } }),
+      prisma.presupuesto.updateMany({ where: { creadoPorId: { in: ids } }, data: { creadoPorId: martin.id } }),
+      prisma.presupuesto.updateMany({ where: { anuladoPorId: { in: ids } }, data: { anuladoPorId: martin.id } }),
+      prisma.aplicacionSanitaria.updateMany({ where: { registradoPorId: { in: ids } }, data: { registradoPorId: martin.id } }),
+      prisma.aplicacionSanitaria.updateMany({ where: { anuladaPorId: { in: ids } }, data: { anuladaPorId: martin.id } }),
+      prisma.archivo.updateMany({ where: { subidoPorId: { in: ids } }, data: { subidoPorId: martin.id } }),
+      prisma.adjunto.updateMany({ where: { subidoPorId: { in: ids } }, data: { subidoPorId: martin.id } }),
+      prisma.adjunto.updateMany({ where: { quitadoPorId: { in: ids } }, data: { quitadoPorId: martin.id } }),
+      prisma.auditoria.updateMany({ where: { usuarioId: { in: ids } }, data: { usuarioId: martin.id } }),
       prisma.usuario.deleteMany({ where: { id: { in: ids } } }),
     ]);
   }
 
-  // (19/11) Los tres perfiles del personal: Martín (administración), una veterinaria y una recepcionista.
+  // (20/11) El personal de ejemplo: Martín (veterinario), Carla (administración) y Natalia (recepción).
   // Nombres inventados. No aparecen en la web hasta que la administración lo elija en Configuración.
   for (const p of [
-    { nombre: "Paula", apellido: "Ferreyra", email: "paula.ferreyra@vetya.test", clave: "vetya-veterinaria-2026", rol: "VETERINARIO" as const, matricula: "M.P. 0003" },
+    { nombre: "Carla", apellido: "Benítez", email: "carla.benitez@vetya.test", clave: "vetya-admin-2026", rol: "ADMIN" as const, matricula: null },
     { nombre: "Natalia", apellido: "Ojeda", email: "natalia.ojeda@vetya.test", clave: "vetya-recepcion-2026", rol: "RECEPCION" as const, matricula: null },
   ]) {
     await prisma.usuario.upsert({

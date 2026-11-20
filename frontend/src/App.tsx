@@ -24,6 +24,8 @@ import { Urgencias } from './pages/Urgencias'
 import { ClienteDetalle } from './pages/panel/ClienteDetalle'
 import { Clientes } from './pages/panel/Clientes'
 import { MascotaDetalle } from './pages/panel/MascotaDetalle'
+import { Mascotas } from './pages/panel/Mascotas'
+import { ServiciosClinica } from './pages/panel/ServiciosClinica'
 import { NuevoCliente } from './pages/panel/NuevoCliente'
 import { Agenda } from './pages/panel/Agenda'
 import { NuevoTurno } from './pages/panel/NuevoTurno'
@@ -84,7 +86,9 @@ function App() {
             <Route path="clientes" element={<Clientes />} />
             <Route path="clientes/nuevo" element={<RutaProtegida roles={['ADMIN', 'RECEPCION']}><NuevoCliente /></RutaProtegida>} />
             <Route path="clientes/:id" element={<ClienteDetalle />} />
+            <Route path="mascotas" element={<Mascotas />} />
             <Route path="mascotas/:id" element={<MascotaDetalle />} />
+            <Route path="servicios" element={<RutaProtegida roles={['ADMIN']}><ServiciosClinica /></RutaProtegida>} />
             <Route path="mascotas/:id/consulta" element={<RutaProtegida roles={['ADMIN', 'VETERINARIO']}><NuevaConsulta /></RutaProtegida>} />
             <Route path="recordatorios" element={<Recordatorios />} />
             <Route path="estadisticas" element={<RutaProtegida roles={['ADMIN']}><Estadisticas /></RutaProtegida>} />

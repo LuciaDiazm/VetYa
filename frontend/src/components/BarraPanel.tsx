@@ -1,8 +1,11 @@
-import { ArrowRight, Bell, CalendarDays, ChevronDown, HeartHandshake, KeyRound, LogOut, Syringe } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { ArrowRight, Bell, CalendarDays, ChevronDown, HeartHandshake, KeyRound, LogOut, Search, Syringe } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { apiGet } from '../lib/api'
+import { formatearTelefono } from '../lib/mascotas'
 import { NOMBRE_ROL } from '../lib/permisos'
-import type { ResumenRecordatorios, Rol } from '../types'
+import type { Cliente, ResumenRecordatorios, Rol } from '../types'
+import { IconoEspecie } from '../pages/panel/Clientes'
 
 // Se cierra al tocar afuera o con Escape (como el menú "Más" de los turnos).
 function useDesplegable() {
@@ -24,7 +27,105 @@ function useDesplegable() {
   return [abierto, setAbierto, caja] as const
 }
 
-// Barra de arriba del panel: la campana con los avisos para mandar y el menú con el nombre
+// Buscador de la barra de arriba: clientes y mascotas desde cualquier pantalla (el mismo buscador de
+// Clientes: nombre, apellido, DNI, teléfono o nombre de la mascota). Muestra los primeros resultados;
+// Enter o "Ver todos" lleva a Clientes con lo buscado.
+function BuscadorPanel() {
+  const navegar = useNavigate()
+  const [texto, setTexto] = useState('')
+  const [abierto, setAbierto, caja] = useDesplegable()
+  const [resultado, setResultado] = useState<{ q: string; clientes: Cliente[] } | null>(null)
+  const q = texto.trim()
+
+  useEffect(() => {
+    if (q.length < 2) return
+    let vigente = true
+    const espera = window.setTimeout(() => {
+      apiGet<Cliente[]>(`/clientes?q=${encodeURIComponent(q)}`)
+        .then((clientes) => vigente && setResultado({ q, clientes }))
+        .catch(() => vigente && setResultado({ q, clientes: [] }))
+    }, 250)
+    return () => {
+      vigente = false
+      window.clearTimeout(espera)
+    }
+  }, [q])
+
+  function cerrar() {
+    setAbierto(false)
+    setTexto('')
+    setResultado(null)
+  }
+
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    if (!q) return
+    navegar(`/panel/clientes?q=${encodeURIComponent(q)}`)
+    cerrar()
+  }
+
+  const vigente = resultado?.q === q ? resultado.clientes : null
+  const mostrar = abierto && q.length >= 2
+
+  return (
+    <div className="desplegable barra-buscador" ref={caja}>
+      <form role="search" onSubmit={enviar}>
+        <label>
+          <Search size={20} aria-hidden="true" />
+          <span className="solo-lectores">Buscar cliente o mascota</span>
+          <input
+            type="search"
+            value={texto}
+            placeholder="Buscar cliente o mascota"
+            onChange={(e) => {
+              setTexto(e.target.value)
+              setAbierto(true)
+            }}
+            onFocus={() => setAbierto(true)}
+          />
+        </label>
+      </form>
+      {mostrar && (
+        <div className="desplegable-panel barra-resultados">
+          {vigente === null ? (
+            <p className="barra-resultados-aviso">Buscando…</p>
+          ) : vigente.length === 0 ? (
+            <p className="barra-resultados-aviso">No encontramos a nadie con “{q}”.</p>
+          ) : (
+            <ul>
+              {vigente.slice(0, 6).map((c) => (
+                <li key={c.id} className="barra-resultado">
+                  <Link to={`/panel/clientes/${c.id}`} onClick={cerrar}>
+                    <span>
+                      <strong>
+                        {c.apellido}, {c.nombre}
+                      </strong>
+                      <small>{formatearTelefono(c.telefono)}</small>
+                    </span>
+                  </Link>
+                  {c.mascotas.length > 0 && (
+                    <span className="barra-resultado-mascotas">
+                      {c.mascotas.map((m) => (
+                        <Link key={m.id} to={`/panel/mascotas/${m.id}`} onClick={cerrar} className="chip-dato chip-mascota">
+                          <IconoEspecie especie={m.especie} size={16} /> {m.nombre}
+                        </Link>
+                      ))}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link to={`/panel/clientes?q=${encodeURIComponent(q)}`} className="desplegable-pie" onClick={cerrar}>
+            Ver todos en Clientes <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Barra de arriba del panel: el buscador, la campana con los avisos para mandar y el menú con el nombre
 // (cambiar contraseña y salir).
 export function BarraPanel({
   avisos,
@@ -47,6 +148,7 @@ export function BarraPanel({
 
   return (
     <div className="panel-barra">
+      <BuscadorPanel />
       <div className="desplegable" ref={cajaCampana}>
         <button
           type="button"

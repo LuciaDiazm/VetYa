@@ -4,13 +4,11 @@ import { DiasCerrados } from './DiasCerrados'
 import { Horarios } from './Horarios'
 import { PersonalClinica } from './PersonalClinica'
 import { RegistroCambios } from './RegistroCambios'
-import { Servicios } from './Servicios'
 
 const SECCIONES = [
   { clave: 'clinica', nombre: 'Clínica', componente: DatosClinica },
   { clave: 'horarios', nombre: 'Horarios', componente: Horarios },
   { clave: 'cerrado', nombre: 'Días cerrados', componente: DiasCerrados },
-  { clave: 'servicios', nombre: 'Servicios', componente: Servicios },
   { clave: 'personal', nombre: 'Personal', componente: PersonalClinica },
   { clave: 'cambios', nombre: 'Registro de cambios', componente: RegistroCambios },
 ] as const

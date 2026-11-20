@@ -166,7 +166,7 @@ export function Servicios() {
   return (
     <section className="tarjeta">
       <div className="bloque-ficha-titulo">
-        <h2>Servicios</h2>
+        <h2>Todos los servicios</h2>
         {editando !== 'nuevo' && (
           <button type="button" className="boton" onClick={() => setEditando('nuevo')}>
             <Plus size={18} aria-hidden="true" /> Nuevo servicio
