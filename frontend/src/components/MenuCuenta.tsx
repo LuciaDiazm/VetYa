@@ -1,4 +1,4 @@
-import { ChevronDown, House, LogOut, PawPrint, UserRound } from 'lucide-react'
+import { ChevronDown, House, KeyRound, LogOut, PawPrint, UserPen, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { rutaInicial } from '../context/AuthContext'
@@ -52,6 +52,18 @@ export function MenuCuenta({ usuario, onSalir }: { usuario: Usuario; onSalir: ()
             <IconoInicio size={20} aria-hidden="true" />
             {esDuenio ? 'Mi cuenta' : 'Panel'}
           </Link>
+          {esDuenio && (
+            <>
+              <Link to="/mi-cuenta/datos" className="menu-cuenta-opcion" onClick={() => setAbierto(false)}>
+                <UserPen size={20} aria-hidden="true" />
+                Mis datos
+              </Link>
+              <Link to="/mi-cuenta/datos#contrasena" className="menu-cuenta-opcion" onClick={() => setAbierto(false)}>
+                <KeyRound size={20} aria-hidden="true" />
+                Cambiar contraseña
+              </Link>
+            </>
+          )}
           <div className="menu-cuenta-separador" />
           <button type="button" className="menu-cuenta-opcion" onClick={onSalir}>
             <LogOut size={20} aria-hidden="true" />

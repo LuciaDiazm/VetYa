@@ -334,6 +334,9 @@ export type ClinicaConfig = Omit<Clinica, 'horarios'> & {
 export interface ServicioConfig extends Servicio {
   precioReferencia: string | null
   activo: boolean
+  horaDesde: string | null
+  horaHasta: string | null
+  diasSemana: string | null // "2,4" = martes y jueves
 }
 
 export interface Personal extends Omit<Usuario, 'rol'> {

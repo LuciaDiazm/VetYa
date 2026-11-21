@@ -20,9 +20,46 @@ interface Formulario {
   duracionMin: string
   precio: string
   reservableOnline: boolean
+  horarioPropio: boolean
+  horaDesde: string
+  horaHasta: string
+  dias: number[] // 0 = domingo … 6 = sábado; vacío = todos los días
 }
 
-const NUEVO: Formulario = { nombre: '', categoria: 'CLINICA', descripcion: '', duracionMin: '20', precio: '', reservableOnline: true }
+const NUEVO: Formulario = {
+  nombre: '',
+  categoria: 'CLINICA',
+  descripcion: '',
+  duracionMin: '20',
+  precio: '',
+  reservableOnline: true,
+  horarioPropio: false,
+  horaDesde: '09:00',
+  horaHasta: '12:00',
+  dias: [],
+}
+
+// Lunes primero, como en un almanaque de acá.
+const DIAS: [number, string, string][] = [
+  [1, 'Lu', 'lunes'],
+  [2, 'Ma', 'martes'],
+  [3, 'Mi', 'miércoles'],
+  [4, 'Ju', 'jueves'],
+  [5, 'Vi', 'viernes'],
+  [6, 'Sá', 'sábado'],
+  [0, 'Do', 'domingo'],
+]
+
+// "Martes y jueves de 09:00 a 12:00", para la lista.
+function textoHorario(s: ServicioConfig) {
+  if (!s.horaDesde && !s.diasSemana) return null
+  const dias = s.diasSemana
+    ? DIAS.filter(([n]) => s.diasSemana!.split(',').map(Number).includes(n)).map(([, , nombre]) => nombre)
+    : []
+  const textoDias = dias.length === 0 ? 'Todos los días' : dias.length === 1 ? dias[0] : `${dias.slice(0, -1).join(', ')} y ${dias.at(-1)}`
+  const texto = s.horaDesde ? `${textoDias} de ${s.horaDesde} a ${s.horaHasta}` : textoDias
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
 
 function FormularioServicio({
   inicial,
@@ -105,6 +142,65 @@ function FormularioServicio({
       <label className="casilla">
         <input
           type="checkbox"
+          checked={datos.horarioPropio}
+          onChange={(e) => setDatos({ ...datos, horarioPropio: e.target.checked })}
+        />
+        Tiene un horario propio (por ejemplo, peluquería solo de 9 a 12)
+      </label>
+      {datos.horarioPropio && (
+        <div className="horario-servicio">
+          <div className="fila-campos">
+            <label className="campo campo-corto">
+              Desde
+              <input
+                type="time"
+                step={300}
+                value={datos.horaDesde}
+                onChange={(e) => setDatos({ ...datos, horaDesde: e.target.value })}
+                required
+              />
+            </label>
+            <label className="campo campo-corto">
+              Hasta
+              <input
+                type="time"
+                step={300}
+                value={datos.horaHasta}
+                onChange={(e) => setDatos({ ...datos, horaHasta: e.target.value })}
+                required
+              />
+            </label>
+          </div>
+          <fieldset className="grupo-filtro">
+            <legend>Qué días (si no marcás ninguno, todos los que abre la clínica)</legend>
+            <div className="chips">
+              {DIAS.map(([n, corto, nombre]) => {
+                const marcado = datos.dias.includes(n)
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`chip${marcado ? ' chip-activo' : ''}`}
+                    aria-pressed={marcado}
+                    aria-label={nombre}
+                    onClick={() =>
+                      setDatos((d) => ({ ...d, dias: marcado ? d.dias.filter((x) => x !== n) : [...d.dias, n] }))
+                    }
+                  >
+                    {corto}
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
+          <span className="ayuda">
+            Siempre dentro del horario de la clínica: los turnos de este servicio solo se ofrecen en estos días y horas.
+          </span>
+        </div>
+      )}
+      <label className="casilla">
+        <input
+          type="checkbox"
           checked={datos.reservableOnline}
           onChange={(e) => setDatos({ ...datos, reservableOnline: e.target.checked })}
         />
@@ -141,8 +237,15 @@ export function Servicios() {
   useEffect(cargar, [cargar])
 
   async function guardar(id: number | 'nuevo', datos: Formulario) {
-    const { precio, ...resto } = datos
-    const cuerpo = { ...resto, duracionMin: Number(datos.duracionMin), precioReferencia: leerMonto(precio) }
+    const { precio, horarioPropio, horaDesde, horaHasta, dias, ...resto } = datos
+    const cuerpo = {
+      ...resto,
+      duracionMin: Number(datos.duracionMin),
+      precioReferencia: leerMonto(precio),
+      horaDesde: horarioPropio ? horaDesde : null,
+      horaHasta: horarioPropio ? horaHasta : null,
+      diasSemana: horarioPropio ? dias : null,
+    }
     if (id === 'nuevo') await apiPost('/configuracion/servicios', cuerpo)
     else await apiPut(`/configuracion/servicios/${id}`, cuerpo)
     olvidarSitio()
@@ -190,6 +293,10 @@ export function Servicios() {
                   duracionMin: String(s.duracionMin),
                   precio: montoParaEditar(s.precioReferencia === null ? null : Number(s.precioReferencia)),
                   reservableOnline: s.reservableOnline,
+                  horarioPropio: Boolean(s.horaDesde || s.diasSemana),
+                  horaDesde: s.horaDesde ?? '09:00',
+                  horaHasta: s.horaHasta ?? '12:00',
+                  dias: s.diasSemana ? s.diasSemana.split(',').map(Number) : [],
                 }}
                 alGuardar={(d) => guardar(s.id, d)}
                 alCancelar={() => setEditando(null)}
@@ -205,6 +312,7 @@ export function Servicios() {
                   {s.reservableOnline ? 'Se pide desde la web' : 'Solo por WhatsApp o en la clínica'}
                   {!s.activo && ' · No se ofrece'}
                 </span>
+                {textoHorario(s) && <span className="ayuda servicio-horario">Horario: {textoHorario(s)}</span>}
               </div>
               <div className="acciones-config">
                 {s.activo && (

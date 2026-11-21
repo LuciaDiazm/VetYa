@@ -62,6 +62,9 @@ export function BotonesCarnet({ mascota, cliente }: Props) {
       >
         <MessageCircle size={18} aria-hidden="true" /> Enviar carnet por WhatsApp
       </button>
+      <p className="ayuda botones-carnet-ayuda">
+        Para imprimirlo: hoja A4 apaisada, de los dos lados (girando por el borde corto), y doblada al medio.
+      </p>
     </div>
   )
 }

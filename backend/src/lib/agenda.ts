@@ -114,6 +114,7 @@ export async function grillaHorarios(
     }),
   ]);
 
+  const diasDelServicio = servicio.diasSemana ? servicio.diasSemana.split(",").map(Number) : null;
   const diasBloqueados = new Set(bloqueados.map((b) => b.fecha.toISOString().slice(0, 10)));
   const limite = new Date(Date.now() + (opciones.anticipacionMinutos ?? 0) * MINUTO);
   const resultado: Record<string, { hora: string; libre: boolean }[]> = {};
@@ -123,13 +124,18 @@ export async function grillaHorarios(
     resultado[fecha] = [];
     if (diasBloqueados.has(fecha)) continue;
 
+    // Si el servicio tiene días propios (por ejemplo, peluquería solo martes y jueves), los demás días no se ofrece.
+    if (diasDelServicio && !diasDelServicio.includes(diaDeLaSemana(fecha))) continue;
+
     const franjasDelDia = franjas
       .filter((f) => f.diaSemana === diaDeLaSemana(fecha))
       .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
 
     for (const franja of franjasDelDia) {
-      const fin = aMinutos(franja.horaFin);
-      for (let inicio = aMinutos(franja.horaInicio); inicio + servicio.duracionMin <= fin; inicio += INTERVALO_MINUTOS) {
+      // El horario propio del servicio recorta el de la clínica (nunca lo agranda).
+      const desde = Math.max(aMinutos(franja.horaInicio), servicio.horaDesde ? aMinutos(servicio.horaDesde) : 0);
+      const fin = Math.min(aMinutos(franja.horaFin), servicio.horaHasta ? aMinutos(servicio.horaHasta) : 24 * 60);
+      for (let inicio = desde; inicio + servicio.duracionMin <= fin; inicio += INTERVALO_MINUTOS) {
         const hora = deMinutos(inicio);
         const comienzo = aFechaUTC(fecha, hora);
         const final = new Date(comienzo.getTime() + servicio.duracionMin * MINUTO);

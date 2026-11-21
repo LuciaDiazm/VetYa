@@ -1,4 +1,3 @@
-import { CambiarClave } from '../components/CambiarClave'
 import { Ban, CalendarPlus, CircleCheck, Clock, FileDown, MessageCircle, Syringe, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
@@ -355,14 +354,6 @@ Ojo: ya cancelaste varios turnos en estos días. Si cancelás este, no vas a pod
             <Visitas visitas={visitas} />
           </>
         )}
-
-        {/* Contraseña: la cambia el mismo dueño (si se la olvidó, se la da la clínica) */}
-        <section className="cuenta-seccion" aria-labelledby="titulo-clave">
-          <h2 id="titulo-clave" className="cuenta-titulo">
-            Tu contraseña
-          </h2>
-          <CambiarClave cerrable />
-        </section>
 
         {/* Guía de vacunas del primer año (antes estaba en el inicio) */}
         {datos && sitio && (

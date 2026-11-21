@@ -452,7 +452,7 @@ function PedirTurno({ categoria }: { categoria: string | null }) {
 function textosMotivo(servicio: Servicio): { titulo: string; ejemplo: string } {
   const nombre = servicio.nombre.toLowerCase()
   if (servicio.categoria === 'ESTETICA') {
-    return { titulo: '¿Algo que tengamos que saber?', ejemplo: 'Ej.: corte cortito, es miedoso, tiene la piel sensible…' }
+    return { titulo: '¿Algo que tengamos que saber?', ejemplo: 'Ej.: dejarle las orejas largas, tiene una herida en la pata…' }
   }
   if (servicio.categoria === 'DIAGNOSTICO') {
     return { titulo: '¿Algo que quieras contarnos?', ejemplo: 'Ej.: me lo pidió el veterinario, viene en ayunas…' }
@@ -462,6 +462,17 @@ function textosMotivo(servicio: Servicio): { titulo: string; ejemplo: string } {
   }
   return { titulo: '¿Qué le pasa?', ejemplo: 'Ej.: se rasca mucho, no come, control anual…' }
 }
+
+// Para baño y peluquería: pedidos frecuentes que se marcan con un toque (se suman al detalle).
+const PEDIDOS_PELUQUERIA = [
+  'Corte bien cortito',
+  'Solo emprolijar, que no pierda largo',
+  'Con moñitos',
+  'Sin moñitos',
+  'Sin perfume',
+  'Es miedoso/a',
+  'Tiene la piel sensible',
+]
 
 function FormularioDatos({
   servicio,
@@ -485,6 +496,8 @@ function FormularioDatos({
   const [especie, setEspecie] = useState<EspecieMascota>('PERRO')
   const [otraEspecie, setOtraEspecie] = useState('')
   const [motivo, setMotivo] = useState('')
+  const [pedidos, setPedidos] = useState<string[]>([])
+  const esPeluqueria = servicio.categoria === 'ESTETICA'
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -518,7 +531,7 @@ function FormularioDatos({
           elegida === 'nueva'
             ? { nombre: mascota, especie, otraEspecie: especie === 'OTRO' ? otraEspecie : undefined }
             : { id: elegida },
-        motivo: motivo || undefined,
+        motivo: [...pedidos, motivo.trim()].filter(Boolean).join('. ') || undefined,
       })
       const nombreMascota = elegida === 'nueva' ? mascota : mascotas?.find((m) => m.id === elegida)?.nombre ?? ''
       alConfirmar({ dia, hora, servicio: servicio.nombre, mascota: nombreMascota })
@@ -605,13 +618,34 @@ function FormularioDatos({
           )}
         </div>
       )}
+      {esPeluqueria && (
+        <fieldset className="grupo-filtro">
+          <legend>¿Cómo lo querés? (tocá lo que corresponda)</legend>
+          <div className="chips">
+            {PEDIDOS_PELUQUERIA.map((p) => {
+              const marcado = pedidos.includes(p)
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  className={`chip${marcado ? ' chip-activo' : ''}`}
+                  aria-pressed={marcado}
+                  onClick={() => setPedidos((ps) => (marcado ? ps.filter((x) => x !== p) : [...ps, p]))}
+                >
+                  {p}
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+      )}
       <label className="campo">
-        {textosMotivo(servicio).titulo} (opcional)
+        {esPeluqueria ? 'Otro detalle' : textosMotivo(servicio).titulo} (opcional)
         <textarea
           value={motivo}
           onChange={(e) => setMotivo(e.target.value)}
           rows={2}
-          maxLength={500}
+          maxLength={esPeluqueria ? 300 : 500}
           placeholder={textosMotivo(servicio).ejemplo}
         />
       </label>

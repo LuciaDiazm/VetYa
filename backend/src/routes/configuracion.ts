@@ -238,6 +238,17 @@ const esquemaServicio = z.object({
     .refine((m) => m % 5 === 0, "La duración tiene que ser múltiplo de 5 minutos"),
   precioReferencia: z.number().min(0, "El precio no puede ser negativo").max(10_000_000).nullish(),
   reservableOnline: z.boolean(),
+  // Horario propio (opcional): desde y hasta van juntos; los días, de 0 (domingo) a 6 (sábado).
+  horaDesde: z.preprocess((v) => (v === "" ? null : v), hora.nullish()).transform((h) => h ?? null),
+  horaHasta: z.preprocess((v) => (v === "" ? null : v), hora.nullish()).transform((h) => h ?? null),
+  diasSemana: z
+    .array(z.number().int().min(0).max(6))
+    .nullish()
+    .transform((d) => (d && d.length > 0 && d.length < 7 ? [...new Set(d)].sort().join(",") : null)),
+}).refine((s) => (s.horaDesde === null) === (s.horaHasta === null), {
+  message: "Poné las dos horas (desde y hasta) o ninguna",
+}).refine((s) => !s.horaDesde || !s.horaHasta || s.horaDesde < s.horaHasta, {
+  message: "La hora de inicio tiene que ser antes que la de fin",
 });
 
 configuracionRouter.get("/servicios", async (req, res) => {

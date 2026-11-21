@@ -57,6 +57,16 @@ export function BarraNavegacion() {
       <Link to={rutaInicial(usuario)} className="barra-enlace" onClick={cerrarMenu}>
         {usuario.rol === 'DUENIO' ? 'Mi cuenta' : 'Panel'}
       </Link>
+      {usuario.rol === 'DUENIO' && (
+        <>
+          <Link to="/mi-cuenta/datos" className="barra-enlace" onClick={cerrarMenu}>
+            Mis datos
+          </Link>
+          <Link to="/mi-cuenta/datos#contrasena" className="barra-enlace" onClick={cerrarMenu}>
+            Cambiar contraseña
+          </Link>
+        </>
+      )}
       <button type="button" className="barra-enlace boton-texto menu-movil-salir" onClick={cerrarSesion}>
         <LogOut size={20} aria-hidden="true" />
         Salir

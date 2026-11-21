@@ -18,6 +18,7 @@ import { ImprimirPresupuesto } from './pages/panel/ImprimirPresupuesto'
 import { Ingresar } from './pages/Ingresar'
 import { Inicio } from './pages/Inicio'
 import { MiCuenta } from './pages/MiCuenta'
+import { MisDatos } from './pages/MisDatos'
 import { Panel } from './pages/Panel'
 import { Registro } from './pages/Registro'
 import { Urgencias } from './pages/Urgencias'
@@ -67,6 +68,14 @@ function App() {
               element={
                 <RutaProtegida roles={['DUENIO']}>
                   <MiCuenta />
+                </RutaProtegida>
+              }
+            />
+            <Route
+              path="/mi-cuenta/datos"
+              element={
+                <RutaProtegida roles={['DUENIO']}>
+                  <MisDatos />
                 </RutaProtegida>
               }
             />

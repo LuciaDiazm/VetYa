@@ -238,6 +238,10 @@ model Servicio {
   duracionMin      Int               @map("duracion_min")
   precioReferencia Decimal?          @map("precio_referencia") @db.Decimal(10, 2)
   reservableOnline Boolean           @default(true) @map("reservable_online")
+  // Horario propio (opcional), dentro del de la clínica: por ejemplo, peluquería solo de 9 a 12.
+  horaDesde        String?           @map("hora_desde") @db.VarChar(5) // "HH:MM"
+  horaHasta        String?           @map("hora_hasta") @db.VarChar(5)
+  diasSemana       String?           @map("dias_semana") @db.VarChar(20) // "2,4" = martes y jueves; vacío = todos
   activo           Boolean           @default(true)
   fotoUrl          String?           @map("foto_url")
 

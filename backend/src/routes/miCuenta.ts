@@ -1,10 +1,12 @@
 import { Router } from "express";
+import { z } from "zod";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { tokenDeCarnet } from "../lib/carnet";
 import { prisma } from "../lib/prisma";
 import { urlArchivo } from "../lib/subidas";
 import { cancelacionesWebRecientes, revisarAbuso, suspensionVigente } from "../lib/sanciones";
+import { normalizarTelefono } from "../lib/telefono";
 
 // "Mi cuenta" del dueño: sus mascotas, vacunas, consultas y turnos.
 export const miCuentaRouter = Router();
@@ -103,4 +105,64 @@ miCuentaRouter.patch("/turnos/:id/cancelar", async (req, res) => {
   // Si viene cancelando muchos seguidos, queda suspendido para la web y la clínica ve el aviso.
   const suspendidoHasta = await revisarAbuso(cliente!.id, turno.clinicaId);
   res.json({ ok: true, suspendidoHasta });
+});
+
+// ---------------------------------------------------------------------------
+// Mis datos: el dueño corrige su nombre, su teléfono y su dirección (salen en el carnet).
+// El email no se cambia acá porque es con el que entra a la cuenta.
+// ---------------------------------------------------------------------------
+
+const esquemaMisDatos = z.object({
+  nombre: z.string().trim().min(1, "Escribí tu nombre").max(60),
+  apellido: z.string().trim().min(1, "Escribí tu apellido").max(60),
+  telefono: z.string().trim().min(8, "Escribí un teléfono válido").max(30),
+  direccion: z.string().trim().max(150).optional(),
+});
+
+miCuentaRouter.get("/datos", async (req, res) => {
+  const cliente = await clienteDelUsuario(req.usuario!.id);
+  const usuario = await prisma.usuario.findUniqueOrThrow({ where: { id: req.usuario!.id }, select: { email: true } });
+  res.json({
+    email: usuario.email,
+    cliente: cliente
+      ? { nombre: cliente.nombre, apellido: cliente.apellido, telefono: cliente.telefono, direccion: cliente.direccion }
+      : null,
+  });
+});
+
+miCuentaRouter.put("/datos", async (req, res) => {
+  const resultado = esquemaMisDatos.safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: resultado.error.issues[0].message });
+    return;
+  }
+  const cliente = await clienteDelUsuario(req.usuario!.id);
+  if (!cliente) {
+    res.status(404).json({ error: "Tu cuenta todavía no tiene ficha en la clínica" });
+    return;
+  }
+  const datos = resultado.data;
+  const telefono = normalizarTelefono(datos.telefono);
+  // El teléfono identifica la ficha: si ya es de otro cliente, se arregla hablando con la clínica.
+  const otro = await prisma.cliente.findFirst({ where: { clinicaId: cliente.clinicaId, telefono, NOT: { id: cliente.id } } });
+  if (otro) {
+    res.status(409).json({ error: "Ese teléfono ya está en otra ficha de la clínica. Escribinos y lo acomodamos." });
+    return;
+  }
+  const [actualizado] = await prisma.$transaction([
+    prisma.cliente.update({
+      where: { id: cliente.id },
+      data: { nombre: datos.nombre, apellido: datos.apellido, telefono, direccion: datos.direccion || null },
+    }),
+    prisma.usuario.update({
+      where: { id: req.usuario!.id },
+      data: { nombre: datos.nombre, apellido: datos.apellido, telefono },
+    }),
+  ]);
+  res.json({
+    nombre: actualizado.nombre,
+    apellido: actualizado.apellido,
+    telefono: actualizado.telefono,
+    direccion: actualizado.direccion,
+  });
 });
