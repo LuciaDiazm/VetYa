@@ -244,12 +244,8 @@ export function Agenda() {
           <Cargando />
         ) : renglones.length === 0 ? (
           <div className="agenda-vacio">
+            {/* El botón "Dar turno" de arriba ya da el turno para este día: no se repite acá. */}
             <p>{dia < hoy ? 'Ese día no hubo turnos.' : 'No hay turnos para este día.'}</p>
-            {daTurnos && dia >= hoy && !cerradoHoy && (
-              <Link to={`/panel/agenda/nuevo?fecha=${dia}`} className="boton-fila">
-                <CalendarPlus size={18} aria-hidden="true" /> Dar un turno
-              </Link>
-            )}
           </div>
         ) : (
           <>

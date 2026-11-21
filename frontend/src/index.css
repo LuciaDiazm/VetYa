@@ -4169,6 +4169,63 @@ button.volver:hover {
   color: var(--gris);
 }
 
+.elegir-dueno {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.elegir-dueno-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.elegir-dueno-titulo h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.elegir-dueno .buscador {
+  margin: 0;
+}
+
+.elegir-dueno-lista {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.elegir-dueno-fila {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.elegir-dueno-fila span {
+  color: var(--gris);
+}
+
+.elegir-dueno-fila:focus-visible {
+  outline: 3px solid var(--amarillo);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .elegir-dueno-fila:hover {
+    background: var(--crema);
+  }
+}
+
 .cliente-fila-inactivo {
   display: inline-flex;
   align-items: center;

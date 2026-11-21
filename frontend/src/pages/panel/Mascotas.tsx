@@ -1,7 +1,10 @@
-import { ChevronRight, Search } from 'lucide-react'
+import { ChevronRight, Plus, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Cargando } from '../../components/Cargando'
+import { ElegirDueno } from '../../components/ElegirDueno'
+import { useAuth } from '../../context/AuthContext'
+import { puede } from '../../lib/permisos'
 import { Paginacion } from '../../components/Paginacion'
 import { apiGet } from '../../lib/api'
 import { edadTexto, nombreEspecie } from '../../lib/mascotas'
@@ -44,6 +47,8 @@ const FECHA_VISITA = new Intl.DateTimeFormat('es-AR', {
 // Todos los pacientes de la clínica: se busca por nombre, raza o dueño y se filtra por especie.
 // Cada fila abre la ficha de la mascota.
 export function Mascotas() {
+  const { usuario } = useAuth()
+  const [eligiendoDueno, setEligiendoDueno] = useState(false)
   const [parametros, setParametros] = useSearchParams()
   const [texto, setTexto] = useState(parametros.get('q') ?? '')
   const q = parametros.get('q') ?? ''
@@ -94,10 +99,19 @@ export function Mascotas() {
 
   return (
     <>
-      <div className="panel-encabezado">
-        <h1>Mascotas</h1>
-        <p>Todos los pacientes. Buscá por nombre, raza o dueño.</p>
+      <div className="panel-encabezado panel-encabezado-acciones">
+        <div>
+          <h1>Mascotas</h1>
+          <p>Todos los pacientes. Buscá por nombre, raza o dueño.</p>
+        </div>
+        {puede(usuario, 'clientes.editar') && !eligiendoDueno && (
+          <button type="button" className="boton boton-grande boton-secundario" onClick={() => setEligiendoDueno(true)}>
+            <Plus size={22} aria-hidden="true" /> Agregar mascota
+          </button>
+        )}
       </div>
+
+      {eligiendoDueno && <ElegirDueno cerrar={() => setEligiendoDueno(false)} />}
 
       <label className="buscador">
         <Search size={22} aria-hidden="true" />

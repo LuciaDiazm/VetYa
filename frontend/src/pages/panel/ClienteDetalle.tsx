@@ -1,7 +1,7 @@
 import { Ban, CalendarPlus, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CamposCliente } from '../../components/CamposCliente'
 import { CamposMascota } from '../../components/CamposMascota'
 import { datosDeCliente, MASCOTA_VACIA, type DatosCliente, type DatosMascota } from '../../lib/formularios'
@@ -31,7 +31,9 @@ export function ClienteDetalle() {
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
   const [datos, setDatos] = useState<DatosCliente | null>(null)
-  const [agregando, setAgregando] = useState(false)
+  // Desde Mascotas → "Agregar mascota" se llega con ?agregar=mascota y el formulario ya abierto.
+  const [parametros] = useSearchParams()
+  const [agregando, setAgregando] = useState(() => edita && parametros.get('agregar') === 'mascota')
   const [nuevaMascota, setNuevaMascota] = useState<DatosMascota>(MASCOTA_VACIA)
   const [guardando, setGuardando] = useState(false)
   const [cambiandoClave, setCambiandoClave] = useState(false)
