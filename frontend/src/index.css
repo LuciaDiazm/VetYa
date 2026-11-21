@@ -2320,23 +2320,26 @@ html[data-turno-portada='visible'] .boton-turno {
   color: #ffffff;
 }
 
-/* Logo en blanco: el dibujo arriba y el nombre abajo, chiquito */
+/* Logo en blanco: el perro y el gato arriba y el nombre abajo
+   (.logo pinta en azul; acá va blanco para que se vea sobre el fondo azul) */
 .panel-menu .enlace-logo {
   color: #ffffff;
 }
 
 .panel-menu .logo {
   flex-direction: column;
-  gap: 0;
+  gap: 2px;
+  color: #ffffff;
 }
 
 .panel-menu .logo-marca {
-  width: 52px;
-  height: 26px;
+  width: 72px;
+  height: 36px;
 }
 
 .panel-menu .logo-texto {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
+  line-height: 1.1;
   color: #ffffff;
 }
 
@@ -3483,6 +3486,16 @@ html[data-turno-portada='visible'] .boton-turno {
     gap: 10px;
     height: auto;
     padding: 10px 12px;
+  }
+
+  /* En el celular el logo va más chico para dejarle lugar al menú */
+  .panel-menu .logo-marca {
+    width: 50px;
+    height: 25px;
+  }
+
+  .panel-menu .logo-texto {
+    font-size: 0.9rem;
   }
 
   .panel-navegacion {
