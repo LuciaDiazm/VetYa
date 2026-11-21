@@ -297,7 +297,7 @@ export function PersonalClinica() {
   }
 
   async function cambiarActivo(p: Personal) {
-    if (p.activo && !window.confirm(`¿Desactivar a ${p.nombre}? No va a poder entrar al panel.`)) return
+    if (p.activo && !window.confirm(`¿Desactivar a ${p.nombre}? No va a poder entrar al panel, pero todo lo que hizo queda guardado. Se puede volver a activar.`)) return
     setError(null)
     try {
       await apiPatch(`/usuarios/${p.id}/activo`, { activo: !p.activo })
