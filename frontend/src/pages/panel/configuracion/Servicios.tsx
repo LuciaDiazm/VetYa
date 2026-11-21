@@ -6,11 +6,21 @@ import { olvidarSitio } from '../../../lib/sitio'
 import type { CategoriaServicio, ServicioConfig } from '../../../types'
 import { Cargando } from '../../../components/Cargando'
 
+// Grupo del servicio, con los mismos nombres que las tarjetas del inicio de la web.
 const CATEGORIAS: Record<CategoriaServicio, string> = {
-  CLINICA: 'Clínica',
-  DIAGNOSTICO: 'Diagnóstico',
-  CIRUGIA: 'Cirugía',
-  ESTETICA: 'Estética',
+  CLINICA: 'Consultas y vacunas',
+  DIAGNOSTICO: 'Análisis y ecografías',
+  CIRUGIA: 'Cirugías y limpieza dental',
+  ESTETICA: 'Baño y peluquería',
+}
+
+// Qué cambia según el grupo, en una línea debajo del desplegable.
+const EXPLICACION_CATEGORIA: Record<CategoriaServicio, string> = {
+  CLINICA: 'Se pide turno por la web desde la tarjeta "Consultas y vacunas".',
+  DIAGNOSTICO: 'Se pide turno por la web desde la tarjeta "Análisis y ecografías".',
+  CIRUGIA:
+    'No se reserva por la web: se coordina por teléfono. El aviso del día anterior incluye el ayuno y se le puede hacer presupuesto con seña.',
+  ESTETICA: 'Se pide turno por la web desde "Baño y peluquería", con botones para contar cómo lo quieren (corte, moñitos…).',
 }
 
 interface Formulario {
@@ -94,7 +104,7 @@ function FormularioServicio({
           <input value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} required />
         </label>
         <label className="campo">
-          Tipo
+          Aparece en la web dentro de
           <select
             value={datos.categoria}
             onChange={(e) => setDatos({ ...datos, categoria: e.target.value as CategoriaServicio })}
@@ -105,6 +115,7 @@ function FormularioServicio({
               </option>
             ))}
           </select>
+          <span className="ayuda">{EXPLICACION_CATEGORIA[datos.categoria]}</span>
         </label>
       </div>
       <label className="campo">
