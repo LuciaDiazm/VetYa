@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
+import { nombre } from "../lib/textos";
 import { requiereSesion } from "../lib/auth";
 import { registrarCambio } from "../lib/auditoria";
 import { PERSONAL, requierePermiso } from "../lib/permisos";
@@ -33,8 +34,8 @@ const NOMBRE_ROL = { ADMIN: "Administración", VETERINARIO: "Veterinaria/o", REC
 const nombreDe = (u: { nombre: string; apellido: string }) => `${u.nombre} ${u.apellido}`;
 
 const esquemaPersonal = z.object({
-  nombre: z.string().trim().min(1, "Ingresá el nombre"),
-  apellido: z.string().trim().min(1, "Ingresá el apellido"),
+  nombre: nombre("Ingresá el nombre"),
+  apellido: nombre("Ingresá el apellido"),
   email: z.email("Email inválido").trim().toLowerCase(),
   telefono: z.string().trim().optional(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
@@ -135,8 +136,8 @@ const opcional = (max: number) =>
     .transform((t) => t || null);
 
 const esquemaEdicion = z.object({
-  nombre: z.string().trim().min(1, "Ingresá el nombre"),
-  apellido: z.string().trim().min(1, "Ingresá el apellido"),
+  nombre: nombre("Ingresá el nombre"),
+  apellido: nombre("Ingresá el apellido"),
   email: z.email("Email inválido").trim().toLowerCase(),
   telefono: opcional(40),
   rol: z.enum(["ADMIN", "VETERINARIO", "RECEPCION"]),

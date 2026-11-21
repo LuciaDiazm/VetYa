@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
+import { nombre } from "../lib/textos";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { registrarCambio } from "../lib/auditoria";
@@ -29,8 +30,8 @@ const textoOpcional = z
   .transform((v) => (v ? v : null));
 
 const esquemaCliente = z.object({
-  nombre: z.string().trim().min(1, "Escribí el nombre del dueño"),
-  apellido: z.string().trim().min(1, "Escribí el apellido del dueño"),
+  nombre: nombre("Escribí el nombre del dueño"),
+  apellido: nombre("Escribí el apellido del dueño"),
   telefono: z.string().trim().min(8, "Escribí un teléfono válido"),
   dni: textoOpcional,
   email: z
@@ -43,7 +44,7 @@ const esquemaCliente = z.object({
 });
 
 const esquemaMascota = z.object({
-  nombre: z.string().trim().min(1, "Escribí el nombre de la mascota"),
+  nombre: nombre("Escribí el nombre de la mascota"),
   especie: z.enum(["PERRO", "GATO", "OTRO"]),
   // Solo si es "Otro": qué animal es. Para perro o gato se guarda vacío.
   otraEspecie: textoOpcional,

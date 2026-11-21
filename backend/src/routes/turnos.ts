@@ -1,5 +1,6 @@
 import { Router, type Response } from "express";
 import { z } from "zod";
+import { nombre } from "../lib/textos";
 import {
   aFechaUTC,
   diaArgentina,
@@ -84,7 +85,7 @@ const esquemaTurnoOnline = z.object({
     z.object({ id: z.number().int() }),
     z
       .object({
-        nombre: z.string().trim().min(1, "Escribí el nombre de tu mascota"),
+        nombre: nombre("Escribí el nombre de tu mascota"),
         especie: z.enum(["PERRO", "GATO", "OTRO"]),
         // Solo si es "Otro": qué animal es.
         otraEspecie: z.string().trim().max(60).optional(),

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { nombre } from "../lib/textos";
 import { aFechaUTC, diaArgentina } from "../lib/agenda";
 import { requiereRol, requiereSesion } from "../lib/auth";
 import { tokenDeCarnet } from "../lib/carnet";
@@ -113,8 +114,8 @@ miCuentaRouter.patch("/turnos/:id/cancelar", async (req, res) => {
 // ---------------------------------------------------------------------------
 
 const esquemaMisDatos = z.object({
-  nombre: z.string().trim().min(1, "Escribí tu nombre").max(60),
-  apellido: z.string().trim().min(1, "Escribí tu apellido").max(60),
+  nombre: nombre("Escribí tu nombre"),
+  apellido: nombre("Escribí tu apellido"),
   telefono: z.string().trim().min(8, "Escribí un teléfono válido").max(30),
   direccion: z.string().trim().max(150).optional(),
 });

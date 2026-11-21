@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { z } from "zod";
+import { nombre } from "../lib/textos";
 import { cerrarSesion, iniciarSesion, requiereSesion } from "../lib/auth";
 import { borrarIntentos, MINUTO, minutosBloqueado, sumarIntento } from "../lib/limites";
 import { prisma } from "../lib/prisma";
@@ -12,8 +13,8 @@ export const authRouter = Router();
 const CLINICA_ID = 1;
 
 const esquemaRegistro = z.object({
-  nombre: z.string().trim().min(1, "Ingresá tu nombre"),
-  apellido: z.string().trim().min(1, "Ingresá tu apellido"),
+  nombre: nombre("Ingresá tu nombre"),
+  apellido: nombre("Ingresá tu apellido"),
   email: z.string().trim().toLowerCase().pipe(z.email("Email inválido")),
   telefono: z.string().trim().min(8, "Teléfono inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
