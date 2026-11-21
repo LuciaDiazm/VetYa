@@ -1,4 +1,4 @@
-import { CalendarPlus, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
+import { Ban, CalendarPlus, Globe, KeyRound, MessageCircle, Pencil, Phone, Plus } from 'lucide-react'
 import { BotonVolver } from '../../components/BotonVolver'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -47,6 +47,21 @@ export function ClienteDetalle() {
       .catch(() => setError('No se encontró el cliente.'))
   }, [id])
   useEffect(cargar, [cargar])
+
+  // "Ya no viene": sale de los avisos de vacunas y de recuperar clientes. No se borra nada y se puede volver atrás.
+  async function cambiarActivo(activo: boolean) {
+    if (!cliente) return
+    const pregunta = activo
+      ? `¿Volver a marcar a ${cliente.nombre} como cliente activo?`
+      : `¿Marcar que ${cliente.nombre} ya no viene? (por ejemplo, si se mudó). Deja de aparecer en los avisos, pero sus mascotas, turnos y pagos quedan guardados. Si vuelve a sacar turno, se activa solo.`
+    if (!window.confirm(pregunta)) return
+    try {
+      await apiPatch(`/clientes/${id}/activo`, { activo })
+      cargar()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el cambio')
+    }
+  }
 
   async function guardarCliente(e: FormEvent) {
     e.preventDefault()
@@ -130,6 +145,11 @@ export function ClienteDetalle() {
           {cliente.usuario && (
             <p className="ficha-cliente-cuenta">
               <Globe size={16} aria-hidden="true" /> Tiene cuenta en la web
+            </p>
+          )}
+          {!cliente.activo && (
+            <p className="ficha-inactiva">
+              <Ban size={16} aria-hidden="true" /> Ya no viene: no aparece en los avisos
             </p>
           )}
 
@@ -280,6 +300,15 @@ export function ClienteDetalle() {
                 </p>
               )}
             </section>
+          )}
+          {edita && (
+            <button
+              type="button"
+              className={`boton-texto ficha-costado-extra ${cliente.activo ? 'texto-peligro' : ''}`}
+              onClick={() => cambiarActivo(!cliente.activo)}
+            >
+              {cliente.activo ? 'Marcar que ya no viene' : 'Volver a marcar como activo'}
+            </button>
           )}
         </aside>
 

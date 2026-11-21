@@ -4169,6 +4169,17 @@ button.volver:hover {
   color: var(--gris);
 }
 
+.cliente-fila-inactivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  color: var(--rojo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .ficha-inactiva {
   display: flex;
   align-items: center;

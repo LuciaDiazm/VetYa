@@ -108,7 +108,10 @@ clientesRouter.get("/", async (req, res) => {
   const consulta = {
     where: donde,
     include: { mascotas: { where: { activo: true }, orderBy: { nombre: "asc" as const } } },
-    orderBy: texto ? [{ apellido: "asc" as const }, { nombre: "asc" as const }] : { creadoEn: "desc" as const },
+    // Los que ya no vienen van al final (se siguen encontrando al buscarlos).
+    orderBy: texto
+      ? [{ activo: "desc" as const }, { apellido: "asc" as const }, { nombre: "asc" as const }]
+      : [{ activo: "desc" as const }, { creadoEn: "desc" as const }],
   };
 
   // Con "?pagina=N" responde por páginas (la pantalla Clientes). Sin ese dato, como antes:
@@ -269,6 +272,34 @@ clientesRouter.patch("/:id/suspension", requierePermiso("clientes.sanciones"), a
   }
   const actualizado = await prisma.cliente.update({ where: { id }, data: datos });
   res.json({ suspendidoHasta: suspensionVigente(actualizado), suspensionMotivo: actualizado.suspensionMotivo });
+});
+
+// "Ya no viene" (se mudó, dejó de venir): sale de los avisos, pero no se borra nada. Se puede volver atrás.
+clientesRouter.patch("/:id/activo", editar, async (req, res) => {
+  const resultado = z.object({ activo: z.boolean() }).safeParse(req.body);
+  if (!resultado.success) {
+    res.status(400).json({ error: "Dato inválido" });
+    return;
+  }
+  const id = Number(req.params.id);
+  const cliente = await prisma.cliente.findFirst({ where: { id, clinicaId: req.usuario!.clinicaId } });
+  if (!cliente) {
+    res.status(404).json({ error: "Cliente no encontrado" });
+    return;
+  }
+  const { activo } = resultado.data;
+  const actualizado = await prisma.cliente.update({ where: { id }, data: { activo } });
+  if (cliente.activo !== activo) {
+    await registrarCambio(req, {
+      accion: activo ? "cliente.activar" : "cliente.desactivar",
+      entidad: "cliente",
+      entidadId: id,
+      resumen: activo
+        ? `Volvió a marcar como activo a ${cliente.nombre} ${cliente.apellido}`
+        : `Marcó que ${cliente.nombre} ${cliente.apellido} ya no viene`,
+    });
+  }
+  res.json({ activo: actualizado.activo });
 });
 
 clientesRouter.put("/:id", editar, async (req, res) => {

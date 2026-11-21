@@ -154,6 +154,8 @@ export interface Cliente {
   email: string | null
   direccion: string | null
   creadoEn: string
+  // false = "ya no viene": no aparece en los avisos (no se borra)
+  activo: boolean
   mascotas: Mascota[]
   usuario?: { id: number; email: string } | null
 }

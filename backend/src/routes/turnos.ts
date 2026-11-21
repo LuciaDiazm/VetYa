@@ -178,6 +178,9 @@ turnosPublicoRouter.post("/", requiereSesion, requiereRol("DUENIO"), async (req,
           },
         }));
 
+      // Si estaba marcado como que ya no viene, vuelve a estar activo: pidió un turno.
+      await tx.cliente.updateMany({ where: { id: cliente.id, activo: false }, data: { activo: true } });
+
       const inicio = aFechaUTC(datos.fecha, datos.hora);
       return tx.turno.create({
         data: {
@@ -298,6 +301,9 @@ turnosRouter.post("/", requierePermiso("turnos.dar"), async (req, res) => {
         });
         if (problema) throw new ProblemaReserva(problema);
       }
+
+      // Si estaba marcado como que ya no viene, vuelve a estar activo: le dieron un turno.
+      await tx.cliente.updateMany({ where: { id: mascota.clienteId, activo: false }, data: { activo: true } });
 
       return tx.turno.create({
         data: {

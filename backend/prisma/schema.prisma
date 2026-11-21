@@ -185,6 +185,8 @@ model Cliente {
   suspensionRevisada Boolean   @default(true) @map("suspension_revisada")
   // Turnos web a la vez para este cliente (lo da el administrador). Vacío = el de la clínica.
   maxTurnosOnline    Int?      @map("max_turnos_online")
+  // "Ya no viene" (se mudó, dejó de venir): no aparece en los avisos. Nunca se borra; si vuelve a sacar turno, se activa solo.
+  activo             Boolean   @default(true)
 
   clinica       Clinica        @relation(fields: [clinicaId], references: [id])
   usuario       Usuario?       @relation(fields: [usuarioId], references: [id])

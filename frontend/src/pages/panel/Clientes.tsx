@@ -1,4 +1,4 @@
-import { Cat, ChevronRight, Dog, PawPrint, Plus, Search, Syringe } from 'lucide-react'
+import { Ban, Cat, ChevronRight, Dog, PawPrint, Plus, Search, Syringe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Cargando } from '../../components/Cargando'
@@ -150,6 +150,11 @@ export function Clientes() {
                   <Link to={`/panel/clientes/${c.id}`} className="cliente-fila">
                     <strong className="cliente-fila-nombre">
                       {c.apellido}, {c.nombre}
+                      {!c.activo && (
+                        <span className="cliente-fila-inactivo">
+                          <Ban size={14} aria-hidden="true" /> Ya no viene
+                        </span>
+                      )}
                     </strong>
                     <span className="cliente-fila-telefono">{formatearTelefono(c.telefono)}</span>
                     <span className="cliente-fila-mascotas">

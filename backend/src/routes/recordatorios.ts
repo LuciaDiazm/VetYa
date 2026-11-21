@@ -49,7 +49,7 @@ async function calcularPendientes(clinicaId: number) {
   // ---------- 2. Vacunas y desparasitaciones por vencer (o vencidas hace poco) ----------
   const candidatas = await prisma.aplicacionSanitaria.findMany({
     where: {
-      mascota: { activo: true, cliente: { clinicaId } },
+      mascota: { activo: true, cliente: { clinicaId, activo: true } }, // los clientes que ya no vienen no reciben avisos
       anulada: false, // las anuladas (cargadas por error) no avisan
       fechaProximaDosis: {
         gte: aFechaSinHora(sumarDias(hoy, -DIAS_VENCIDA_PARA_AVISAR)),
@@ -88,7 +88,7 @@ async function calcularPendientes(clinicaId: number) {
   // Las que ya están en la lista de dosis por vencer tampoco: sería avisarles dos veces lo mismo.
   const yaEnDosis = dosis.map((d) => d.mascotaId);
   const mascotas = await prisma.mascota.findMany({
-    where: { activo: true, cliente: { clinicaId }, id: { notIn: [...conTurno, ...yaEnDosis] } },
+    where: { activo: true, cliente: { clinicaId, activo: true }, id: { notIn: [...conTurno, ...yaEnDosis] } },
     select: {
       id: true,
       nombre: true,
