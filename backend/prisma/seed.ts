@@ -9,6 +9,7 @@
 //   carla.benitez@vetya.test   / vetya-admin-2026   (ADMIN: administración; ve y cambia todo, también Ajustes)
 //   natalia.ojeda@vetya.test    / vetya-recepcion-2026   (RECEPCION: turnos, clientes y cobros; no ve lo clínico)
 //   duenio@vetya.test       / vetya-duenio-2026  (DUENIO: "Prueba Turnos", para probar Pedir turno y Mi cuenta)
+//   juan.perez@vetya.test   / vetya-juan-2026    (DUENIO: Juan Pérez, el dueño de Firulais, para la demo)
 //
 // Todos los datos son ficticios: la clínica, el equipo, las opiniones y los teléfonos.
 // Las fotos están en frontend/public/fotos (ver CREDITOS.md).
@@ -350,7 +351,8 @@ async function main() {
   }
 
   // ---------- Cliente sin cuenta con una vacuna por vencer (para probar recordatorios) ----------
-  if ((await prisma.cliente.count({ where: { clinicaId } })) === 0) {
+  // (Antes se creaba solo con la base vacía; como "Prueba Turnos" se crea primero, en una base nueva quedaba sin Juan.)
+  if (!(await prisma.cliente.findFirst({ where: { clinicaId, nombre: "Juan", apellido: "Pérez" } }))) {
     const cliente = await prisma.cliente.create({
       data: {
         clinicaId,
@@ -388,6 +390,29 @@ async function main() {
         },
       },
     });
+  }
+
+  // ---------- Cuenta de dueño de Juan Pérez (el de Firulais), para la demo ----------
+  // Juan lo cargó la clínica; con esta cuenta entra a Mi cuenta y pide turno para Firulais.
+  if (!(await prisma.usuario.findUnique({ where: { email: "juan.perez@vetya.test" } }))) {
+    const juanPerez = await prisma.cliente.findFirst({ where: { clinicaId, nombre: "Juan", apellido: "Pérez", usuarioId: null } });
+    if (juanPerez) {
+      const cuentaJuan = await prisma.usuario.create({
+        data: {
+          clinicaId,
+          nombre: "Juan",
+          apellido: "Pérez",
+          email: "juan.perez@vetya.test",
+          telefono: juanPerez.telefono,
+          passwordHash: await bcrypt.hash("vetya-juan-2026", 10),
+          rol: "DUENIO",
+        },
+      });
+      await prisma.cliente.update({
+        where: { id: juanPerez.id },
+        data: { usuarioId: cuentaJuan.id, email: juanPerez.email ?? "juan.perez@vetya.test" },
+      });
+    }
   }
 
   // ---------- Más clientes ficticios, para probar la búsqueda ----------
